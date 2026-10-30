@@ -118,6 +118,20 @@ describe('renderer selection', () => {
  expect((p as FallbackPuppet).fellBack).toBe(true);
  });
 
+ it('FallbackPuppet does not build or init a fallback after destroy() during a failing primary init', async () => {
+ vi.stubGlobal('document', fakeDocument);
+ let reject!: (e: unknown) => void;
+ const primary: Puppet = { element: new FakeEl() as never, init: () => new Promise<void>((_, r) => { reject = r; }), render() {}, destroy() {} };
+ let made = 0;
+ const f = new FallbackPuppet(primary, () => { made++; return working(); });
+ const init = f.init();
+ f.destroy();
+ reject(new Error('late'));
+ await init;
+ expect(made).toBe(0);
+ expect(f.fellBack).toBe(false);
+ });
+
  it('explicit renderers pick the matching class', () => {
  vi.stubGlobal('document', fakeDocument);
  expect(createPuppet({ renderer: 'sprite', sprites: '/chars' }, false)).toBeInstanceOf(SpritePuppet);
