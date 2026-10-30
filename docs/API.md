@@ -34,6 +34,7 @@ Web component: <claude-chan model="" position="bottom-left" size="220" draggable
 - setMood(mood)
 - lookAt(x, y) viewport px; lookAt(null) releases the gaze
 - stop() clears the queue and returns to idle
+- lipSync(source) drives the mouth from an HTMLMediaElement or AnalyserNode; lipSync(null) returns to text-length lip-sync
 - on('ready' | 'motionstart' | 'motionend' | 'error', fn) returns an unsubscribe function
 - destroy()
 - ready promise

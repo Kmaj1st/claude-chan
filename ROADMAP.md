@@ -11,6 +11,7 @@
 - Live2D Cubism 4 loader (src/live2d.ts, lazy, self-hosted Core via coreUrl) and default motions map (src/model/motions.default.json)
 - SSR-safe import (no DOM needed to import; mount() throws a clear error on the server), tests/ssr.test.ts
 - docs/API.md: stable public contract; bridge and marker helpers exported from the package entry
+- Lip-sync from an audio/video element or AnalyserNode: controller.lipSync(source) (src/lipsync.ts), tests/lipsync.test.ts
 
 ## Next
 1. Test the Live2D loader against a redistributable sample model (none committed; Core file must be downloaded manually, see docs/LICENSES.md)

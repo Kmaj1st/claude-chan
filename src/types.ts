@@ -46,6 +46,8 @@ export interface ClaudeChanController {
  // x, y in viewport px (clientX/clientY); null releases the gaze.
  lookAt(x: number | null, y?: number): void;
  stop(): void;
+ // Drives the mouth from an audio/video element or AnalyserNode; null returns to text-length lip-sync.
+ lipSync(source: HTMLMediaElement | AnalyserNode | null): void;
  on<K extends EventName>(name: K, fn: (e: EventMap[K]) => void): Unsubscribe;
  destroy(): void;
  readonly ready: Promise<void>;
