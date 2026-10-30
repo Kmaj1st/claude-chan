@@ -44,6 +44,23 @@ describe('postMessage bridge', () => {
  expect(b.replies[0]).toMatchObject({ id: 3, ok: false, error: 'boom' });
  });
 
+ it('does not throw or double-reply when the source cannot be posted to', () => {
+ let handler: ((ev: unknown) => void) | null = null;
+ const target = {
+ location: { origin: 'http://a.test' },
+ addEventListener: (_t: string, h: (ev: unknown) => void) => { handler = h; },
+ removeEventListener: () => { handler = null; },
+ };
+ let posts = 0;
+ const source = { postMessage: () => { posts++; throw new Error('gone'); } };
+ const said: string[] = [];
+ installPostMessageBridge({ say: (t: string) => { said.push(t); } } as unknown as ClaudeChanController, { target: target as never });
+ const msg = { origin: 'http://a.test', data: { type: 'claude-chan', id: 1, tool: 'claude_chan_say', args: { text: 'hi' } }, source };
+ expect(() => handler?.(msg)).not.toThrow();
+ expect(said).toEqual(['hi']);
+ expect(posts).toBe(1);
+ });
+
  it('uninstalls', () => {
  const b = setup({});
  b.off();

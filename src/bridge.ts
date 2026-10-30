@@ -41,7 +41,11 @@ export function installPostMessageBridge(
  if (!d || d.type !== 'claude-chan') return;
  const id = typeof d.id === 'string' || typeof d.id === 'number' ? d.id : null;
  const reply = (body: Record<string, unknown>): void => {
+ try {
  (ev.source as Window | null)?.postMessage({ type: 'claude-chan-result', id, ...body }, ev.origin);
+ } catch {
+ // Source window gone or origin not addressable (e.g. 'null'): drop the reply.
+ }
  };
  const parsed = parseCommand(d.tool, d.args);
  if (!parsed.ok) return reply({ ok: false, error: parsed.error });
