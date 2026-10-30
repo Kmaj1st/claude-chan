@@ -1,0 +1,35 @@
+{
+ "version": 1,
+ "expressions": {
+  "neutral": "idle",
+  "smile": "beam",
+  "sad": "sad",
+  "angry": "pout",
+  "blush": "blush",
+  "surprised": "surprised"
+ },
+ "motions": {
+  "idle": {},
+  "wave": { "steps": [{ "at": 0, "pose": "wave" }, { "at": 0.9, "pose": "$expression" }] },
+  "nod": { "steps": [{ "at": 0, "pose": "$expression" }, { "at": 0.3, "pose": "blink", "ms": 90 }, { "at": 0.5, "pose": "$expression", "ms": 90 }] },
+  "shake_head": {
+   "steps": [
+    { "at": 0, "pose": "away", "transition": "slide" },
+    { "at": 0.3, "pose": "idle", "transition": "slide" },
+    { "at": 0.55, "pose": "away", "transition": "slide" },
+    { "at": 0.8, "pose": "idle", "transition": "slide" }
+   ]
+  },
+  "think": { "steps": [{ "at": 0, "pose": "ponder" }, { "at": 0.55, "pose": "think" }] },
+  "happy": { "steps": [{ "at": 0, "pose": "beam" }, { "at": 0.4, "pose": "happy" }, { "at": 0.75, "pose": "giggle" }] },
+  "surprised": { "steps": [{ "at": 0, "pose": "notice", "ms": 70 }, { "at": 0.15, "pose": "surprised", "ms": 90 }] },
+  "bow": { "steps": [{ "at": 0, "pose": "blink", "ms": 220 }, { "at": 0.85, "pose": "$expression", "ms": 220 }] },
+  "cheer": { "steps": [{ "at": 0, "pose": "cheer" }, { "at": 0.35, "pose": "cheer_wink", "ms": 90 }, { "at": 0.7, "pose": "cheer", "ms": 90 }] },
+  "sleepy": { "steps": [{ "at": 0, "pose": "$expression" }, { "at": 0.15, "pose": "sleepy", "ms": 500 }] },
+  "typing": { "steps": [{ "at": 0, "pose": "typing" }] },
+  "tea_serve": { "steps": [{ "at": 0, "pose": "explain", "transition": "slide" }, { "at": 0.85, "pose": "$expression" }] },
+  "pout": { "steps": [{ "at": 0, "pose": "pout" }] },
+  "wink": { "steps": [{ "at": 0, "pose": "wink", "ms": 90 }, { "at": 0.85, "pose": "$expression", "ms": 150 }] },
+  "point": { "steps": [{ "at": 0, "pose": "idea" }] }
+ }
+}
