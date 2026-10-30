@@ -25,7 +25,7 @@ New names may be added in minor versions; existing names are never renamed or re
  autoIdle: true,
  });
 
-Web component: <claude-chan model="" position="bottom-left" size="220" draggable="false"></claude-chan>.
+Web component: <claude-chan renderer="auto" sprites="/chars" model="" position="bottom-left" size="220" draggable="false"></claude-chan>.
 
 ## Controller
 

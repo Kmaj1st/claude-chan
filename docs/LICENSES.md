@@ -9,9 +9,49 @@ Private project. No public licence has been chosen yet.
 ## Character and art
 
 - The Claude-chan design (docs/CHARACTER.md) and the procedural puppet (src/puppet.ts, src/puppet-svg.ts) are original work in this repo.
-- The demo sprites in assets/chars come from the MIT-licensed repository Chaosnap/Claude_Overdose (copyright Yuki; the licence covers its AI-generated images, not the Claude trademark). Attribution is in assets/chars/NOTICE.md. SpritePuppet (src/sprite.ts) renders them.
+- The pose sprites in assets/chars come from the MIT-licensed repository Chaosnap/Claude_Overdose (copyright Yuki; commit ecae21b945a8164359de6d983b1b2a5aef71a8fd). Only the 21 images that are used are committed. Attribution and the list are in assets/chars/NOTICE.md. The sprite renderer (src/sprite/) draws them as flat images; they are not rigged.
 - The fan-art reference image is reference only. It is not in this repo and nothing is traced or reused from it.
 - No Live2D model is committed. Do not commit a model unless its licence allows redistribution.
+
+## Sprite art licence (Chaosnap/Claude_Overdose)
+
+Source: https://github.com/Chaosnap/Claude_Overdose, commit ecae21b945a8164359de6d983b1b2a5aef71a8fd.
+
+The upstream LICENSE reads:
+
+    MIT License
+
+    Copyright (c) 2026 Yuki
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+
+    This license covers the source code and the AI-generated images in this
+    repository. It does NOT cover the song "INTERNET OVERDOSE", its lyrics, the
+    game NEEDY GIRL OVERDOSE, or any trademark (e.g. "Claude", owned by Anthropic);
+    none of those are included here.
+
+What this means here:
+
+- The sprite images may be used, copied and modified under MIT, with the copyright and licence notice kept (done in assets/chars/NOTICE.md and this file).
+- The song, its lyrics, the game and the Claude trademark are not covered and are not included. The sprites are fan art, not endorsed by Anthropic.
+- The sprites are flat images, not a rigged model. A real Live2D model still needs layered parts from an artist (docs/ART-PIPELINE.md).
+- The owner confirmed in chat that using this repository is allowed. If the art is ever published, re-check the upstream repository for changes.
 
 ## Live2D runtime
 
