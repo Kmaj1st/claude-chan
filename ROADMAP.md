@@ -9,10 +9,11 @@
 - Docs: README embed guide, CHARACTER.md, MCP.md, ART-PIPELINE.md, LICENSES.md
 - Headless browser asserts (npm run test:e2e: mount, drag, clamp, persist)
 - Live2D Cubism 4 loader (src/live2d.ts, lazy, self-hosted Core via coreUrl) and default motions map (src/model/motions.default.json)
+- docs/API.md: stable public contract; bridge and marker helpers exported from the package entry
 
 ## Next
 1. Test the Live2D loader against a redistributable sample model (none committed; Core file must be downloaded manually, see docs/LICENSES.md)
-2. Tell hapi-chan: API contract stable
+2. Tell hapi-chan: API contract is stable and written in docs/API.md
 3. Real Claude-chan model from an artist (docs/ART-PIPELINE.md)
 
 ## Decisions
