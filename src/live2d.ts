@@ -31,6 +31,7 @@ export class Live2DPuppet implements Puppet {
  private app: import('pixi.js').Application | null = null;
  private pose: Pose | null = null;
  private lastExpression: Expression | null = null;
+ private destroyed = false;
  private model: import('pixi-live2d-display/cubism4').Live2DModel | null = null;
 
  constructor(private readonly opts: Live2DOptions) {
@@ -42,6 +43,7 @@ export class Live2DPuppet implements Puppet {
  const PIXI = await import('pixi.js');
  (window as unknown as { PIXI: unknown }).PIXI = PIXI;
  const { Live2DModel } = await import('pixi-live2d-display/cubism4');
+ if (this.destroyed) return;
  const canvas = document.createElement('canvas');
  canvas.style.cssText = 'width:100%;height:100%;display:block';
  this.element.appendChild(canvas);
@@ -49,6 +51,12 @@ export class Live2DPuppet implements Puppet {
  const h = this.element.clientHeight || 330;
  this.app = new PIXI.Application({ view: canvas, width: w, height: h, backgroundAlpha: 0, autoStart: true });
  const model = await Live2DModel.from(this.opts.model, { autoInteract: false });
+ if (this.destroyed) {
+ model.destroy();
+ this.app?.destroy(true, { children: true });
+ this.app = null;
+ return;
+ }
  model.scale.set(Math.min(w / model.width, h / model.height));
  model.x = (w - model.width) / 2;
  model.y = h - model.height;
@@ -74,6 +82,7 @@ export class Live2DPuppet implements Puppet {
  }
 
  destroy(): void {
+ this.destroyed = true;
  this.app?.destroy(true, { children: true });
  this.app = null;
  this.model = null;
