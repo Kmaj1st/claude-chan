@@ -79,11 +79,11 @@ Hair (front, side, back), headdress frill, tassels and the ahoge. Keep it subtle
 
 Maps our preset names to Live2D motion groups, expressions and parameter overrides. The artist fills it in with the engineer. Example shape:
 
-json
-{
- "motions": { "wave": { "group": "wave", "index": 0 } },
- "expressions": { "smile": "smile" }
-}
+
+ {
+  "motions": { "wave": { "group": "wave", "index": 0 } },
+  "expressions": { "smile": "smile" }
+ }
 
 
 The exact schema is defined by the loader and must be kept in sync with this file.
