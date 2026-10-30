@@ -1,5 +1,6 @@
 import { Engine } from './engine';
 import { createShell } from './host';
+import { createLevelReader, type LevelReader } from './lipsync';
 import { Live2DPuppet } from './live2d';
 import { ProceduralPuppet } from './puppet';
 import type { ClaudeChanController, MountOptions, Puppet } from './types';
@@ -38,6 +39,7 @@ export function mount(parent: HTMLElement, options: MountOptions = {}): ClaudeCh
 
  let raf = 0;
  let alive = true;
+ let reader: LevelReader | null = null;
  const loop = (t: number): void => {
  if (!alive) return;
  engine.tick(t);
@@ -65,9 +67,21 @@ export function mount(parent: HTMLElement, options: MountOptions = {}): ClaudeCh
  else engine.lookAt(x / window.innerWidth * 2 - 1, (y ?? 0) / window.innerHeight * 2 - 1);
  },
  stop: () => engine.stop(),
+ lipSync(source) {
+ reader?.dispose();
+ reader = null;
+ if (!source) {
+ engine.setAudioLevel(null);
+ return;
+ }
+ const r = createLevelReader(source);
+ reader = r;
+ engine.setAudioLevel(() => r.read());
+ },
  on: (name, fn) => engine.on(name, fn),
  destroy() {
  alive = false;
+ reader?.dispose();
  cancelAnimationFrame(raf);
  puppet.destroy();
  shell.destroy();
