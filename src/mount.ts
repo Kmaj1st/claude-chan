@@ -7,6 +7,9 @@ import type { ClaudeChanController, MountOptions, Puppet } from './types';
 // Vanilla entry point: builds shell + puppet + engine and runs the frame loop.
 
 export function mount(parent: HTMLElement, options: MountOptions = {}): ClaudeChanController {
+ if (typeof document === 'undefined') {
+ throw new Error('claude-chan: mount() needs a browser DOM; call it from onMounted/useEffect, not during SSR.');
+ }
  const o = {
  position: 'bottom-left' as const,
  size: 220,
