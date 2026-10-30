@@ -10,7 +10,7 @@ const POSITIONS: Position[] = ['bottom-left', 'bottom-right', 'top-left', 'top-r
 const BaseElement = (typeof HTMLElement !== 'undefined' ? HTMLElement : class {}) as typeof HTMLElement;
 
 export class ClaudeChanElement extends BaseElement {
- static observedAttributes = ['model', 'position', 'size', 'draggable', 'storage-key'];
+ static observedAttributes = ['model', 'sprites', 'position', 'size', 'draggable', 'storage-key'];
 
  controller: ClaudeChanController | null = null;
  private remountQueued = false;
@@ -22,6 +22,7 @@ export class ClaudeChanElement extends BaseElement {
  const size = Number(this.getAttribute('size'));
  this.controller = mount(this, {
  model: this.getAttribute('model') ?? undefined,
+ sprites: this.getAttribute('sprites') ?? undefined,
  position: pos && POSITIONS.includes(pos) ? pos : 'bottom-left',
  size: Number.isFinite(size) && size >= 60 && size <= 1000 ? size : 220,
  draggable: this.getAttribute('draggable') !== 'false',

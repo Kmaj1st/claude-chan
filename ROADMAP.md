@@ -1,6 +1,7 @@
 # Roadmap
 
 ## Done
+- Sprite renderer (src/sprite.ts, sprites option/attribute) with MIT-licensed expression sprites in assets/chars
 - Skeleton, types, validation, queue with priorities, motion engine
 - Procedural puppet, Web Component, vanilla mount API, postMessage bridge, text markers
 - WebSocket hub (loopback, token, origin check, rate limit, bounded sizes)

@@ -9,6 +9,7 @@ Private project. No public licence has been chosen yet.
 ## Character and art
 
 - The Claude-chan design (docs/CHARACTER.md) and the procedural puppet (src/puppet.ts, src/puppet-svg.ts) are original work in this repo.
+- The demo sprites in assets/chars come from the MIT-licensed repository Chaosnap/Claude_Overdose (copyright Yuki; the licence covers its AI-generated images, not the Claude trademark). Attribution is in assets/chars/NOTICE.md. SpritePuppet (src/sprite.ts) renders them.
 - The fan-art reference image is reference only. It is not in this repo and nothing is traced or reused from it.
 - No Live2D model is committed. Do not commit a model unless its licence allows redistribution.
 

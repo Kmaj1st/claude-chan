@@ -58,6 +58,8 @@ export interface MountOptions {
  model?: string;
  // URL of the self-hosted Cubism Core script (live2dcubismcore.min.js); only used with model.
  coreUrl?: string;
+ // URL of a sprite folder (neutral/smile/sad/angry/blush/surprised/blink.webp); used when no model is set.
+ sprites?: string;
  position?: Position;
  // Character height in px (default 220).
  size?: number;

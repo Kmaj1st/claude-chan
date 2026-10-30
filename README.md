@@ -1,6 +1,6 @@
 # claude-chan
 
-Claude-chan is an embeddable anime-style mascot (procedural 2D puppet now, Live2D model later). AI tool calls can drive it to play preset motions. It works in any web UI. No framework is required.
+Claude-chan is an embeddable anime-style mascot (procedural SVG puppet or expression sprites now, Live2D model later; set the sprites option or attribute to a folder such as /chars to use sprites). AI tool calls can drive it to play preset motions. It works in any web UI. No framework is required.
 
 ## 5-minute embed
 
