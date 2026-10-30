@@ -1,16 +1,18 @@
 import { mount } from './mount';
-import type { ClaudeChanController, Position } from './types';
+import type { ClaudeChanController, Position, RendererName } from './types';
 
 // <claude-chan model="" position="bottom-left" size="220" draggable="false"></claude-chan>
 // The element itself is display:contents; the fixed host lives under it.
 
+const RENDERERS: RendererName[] = ['auto', 'sprite', 'procedural', 'live2d'];
+const rendererAttr = (v: string | null): RendererName | undefined => RENDERERS.find((r) => r === v);
 const POSITIONS: Position[] = ['bottom-left', 'bottom-right', 'top-left', 'top-right'];
 
 // Safe to import during SSR (Node has no HTMLElement); the element only registers in a browser.
 const BaseElement = (typeof HTMLElement !== 'undefined' ? HTMLElement : class {}) as typeof HTMLElement;
 
 export class ClaudeChanElement extends BaseElement {
- static observedAttributes = ['model', 'sprites', 'position', 'size', 'draggable', 'storage-key'];
+ static observedAttributes = ['renderer', 'model', 'sprites', 'position', 'size', 'draggable', 'storage-key'];
 
  controller: ClaudeChanController | null = null;
  private remountQueued = false;
@@ -21,6 +23,7 @@ export class ClaudeChanElement extends BaseElement {
  const pos = this.getAttribute('position') as Position | null;
  const size = Number(this.getAttribute('size'));
  this.controller = mount(this, {
+ renderer: rendererAttr(this.getAttribute('renderer')),
  model: this.getAttribute('model') ?? undefined,
  sprites: this.getAttribute('sprites') ?? undefined,
  position: pos && POSITIONS.includes(pos) ? pos : 'bottom-left',

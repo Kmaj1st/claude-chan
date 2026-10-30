@@ -53,12 +53,17 @@ export interface ClaudeChanController {
  readonly ready: Promise<void>;
 }
 
+// Which renderer draws the character. 'auto' = Live2D when model is set, else sprites when the
+// pose set loads, else the procedural puppet.
+export type RendererName = 'auto' | 'sprite' | 'procedural' | 'live2d';
+
 export interface MountOptions {
- // URL of a model folder/model3.json; omit for the built-in procedural puppet.
+ renderer?: RendererName;
+ // URL of a model folder/model3.json (Live2D renderer).
  model?: string;
  // URL of the self-hosted Cubism Core script (live2dcubismcore.min.js); only used with model.
  coreUrl?: string;
- // URL of a sprite folder (neutral/smile/sad/angry/blush/surprised/blink.webp); used when no model is set.
+ // URL of a sprite pose folder (poses.json, motions.json and the webp files). Default: the assets/chars folder shipped with the package.
  sprites?: string;
  position?: Position;
  // Character height in px (default 220).
@@ -92,6 +97,9 @@ export function neutralPose(): Pose {
 export interface Puppet {
  readonly element: HTMLElement;
  init(): Promise<void>;
- render(pose: Pose, expression: Expression): void;
+ // nowMs is the engine clock (same value as tick(nowMs)).
+ render(pose: Pose, expression: Expression, nowMs?: number): void;
+ // Optional: the engine reports the running motion (null when none) so pose-based renderers can pick images.
+ setMotion?(motion: Motion | null, durationMs: number): void;
  destroy(): void;
 }

@@ -77,6 +77,7 @@ export class Engine {
 
  private begin(item: QueueItem): void {
  this.motionStart = this.now;
+ this.puppet.setMotion?.(item.motion, item.durationMs);
  this.emit('motionstart', { motion: item.motion });
  }
 
@@ -102,6 +103,7 @@ export class Engine {
 
  stop(): void {
  const was = this.queue.clear();
+ if (was) this.puppet.setMotion?.(null, 0);
  if (was) this.emit('motionend', { motion: was.motion, interrupted: true });
  this.speakingUntil = 0;
  this.opts.onSay?.('', 0);
@@ -127,6 +129,7 @@ export class Engine {
  this.emit('motionend', { motion: cur.motion });
  const next = this.queue.finish();
  if (next) this.begin(next);
+ else this.puppet.setMotion?.(null, 0);
  } else {
  motionPose = MOTION_DEFS[cur.motion].pose(t);
  }
@@ -134,7 +137,7 @@ export class Engine {
  if (this.opts.autoIdle !== false) this.idleBehaviour(nowMs);
  const pose = this.compose(nowMs, motionPose);
  if (nowMs > this.expressionUntil) this.expression = MOOD_EXPRESSION[this.mood];
- this.puppet.render(pose, this.expression);
+ this.puppet.render(pose, this.expression, nowMs);
  return pose;
  }
 

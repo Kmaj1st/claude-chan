@@ -1,0 +1,301 @@
+{
+ "version": 1,
+ "ref": {
+  "w": 400,
+  "h": 600,
+  "faceH": 144,
+  "faceY": 137,
+  "zoom": 0.85
+ },
+ "poses": {
+  "idle": {
+   "file": "idle.webp",
+   "w": 536,
+   "h": 623,
+   "anchor": [
+    263,
+    159
+   ],
+   "tags": [
+    "neutral",
+    "idle",
+    "calm"
+   ],
+   "blink": "blink",
+   "talk": "explain",
+   "source": "seq_a_smile"
+  },
+  "blink": {
+   "file": "blink.webp",
+   "w": 537,
+   "h": 623,
+   "anchor": [
+    264,
+    159
+   ],
+   "tags": [
+    "blink",
+    "eyes-closed"
+   ],
+   "source": "seq_a_blink"
+  },
+  "beam": {
+   "file": "beam.webp",
+   "w": 536,
+   "h": 622,
+   "anchor": [
+    263,
+    159
+   ],
+   "tags": [
+    "smile",
+    "happy",
+    "blush"
+   ],
+   "source": "seq_a_beam"
+  },
+  "happy": {
+   "file": "happy.webp",
+   "w": 585,
+   "h": 686,
+   "anchor": [
+    293,
+    161
+   ],
+   "tags": [
+    "happy",
+    "eyes-closed"
+   ],
+   "source": "char_close_e"
+  },
+  "giggle": {
+   "file": "giggle.webp",
+   "w": 639,
+   "h": 596,
+   "anchor": [
+    312,
+    133
+   ],
+   "tags": [
+    "happy",
+    "laugh"
+   ],
+   "source": "seq_d_giggle"
+  },
+  "wave": {
+   "file": "wave.webp",
+   "w": 525,
+   "h": 594,
+   "anchor": [
+    252,
+    131
+   ],
+   "tags": [
+    "wave",
+    "greeting"
+   ],
+   "source": "seq_f_wave"
+  },
+  "ponder": {
+   "file": "ponder.webp",
+   "w": 615,
+   "h": 623,
+   "anchor": [
+    300,
+    159
+   ],
+   "tags": [
+    "think"
+   ],
+   "source": "seq_e_ponder"
+  },
+  "think": {
+   "file": "think.webp",
+   "w": 644,
+   "h": 654,
+   "anchor": [
+    313,
+    137
+   ],
+   "tags": [
+    "think"
+   ],
+   "source": "char_close_think"
+  },
+  "notice": {
+   "file": "notice.webp",
+   "w": 574,
+   "h": 623,
+   "anchor": [
+    284,
+    159
+   ],
+   "tags": [
+    "surprised",
+    "blush"
+   ],
+   "source": "seq_f_notice"
+  },
+  "surprised": {
+   "file": "surprised.webp",
+   "w": 529,
+   "h": 595,
+   "anchor": [
+    253,
+    131
+   ],
+   "tags": [
+    "surprised"
+   ],
+   "source": "char_close_surprised"
+  },
+  "cheer": {
+   "file": "cheer.webp",
+   "w": 513,
+   "h": 654,
+   "anchor": [
+    252,
+    190
+   ],
+   "tags": [
+    "cheer"
+   ],
+   "source": "char_close_a"
+  },
+  "cheer_wink": {
+   "file": "cheer_wink.webp",
+   "w": 539,
+   "h": 654,
+   "anchor": [
+    264,
+    190
+   ],
+   "tags": [
+    "cheer",
+    "wink"
+   ],
+   "source": "char_close_b"
+  },
+  "sleepy": {
+   "file": "sleepy.webp",
+   "w": 515,
+   "h": 595,
+   "anchor": [
+    252,
+    131
+   ],
+   "tags": [
+    "sleepy"
+   ],
+   "source": "char_close_sleepy"
+  },
+  "typing": {
+   "file": "typing.webp",
+   "w": 517,
+   "h": 598,
+   "anchor": [
+    253,
+    135
+   ],
+   "tags": [
+    "typing"
+   ],
+   "source": "char_close_phone"
+  },
+  "explain": {
+   "file": "explain.webp",
+   "w": 614,
+   "h": 622,
+   "anchor": [
+    299,
+    159
+   ],
+   "tags": [
+    "talk",
+    "serve"
+   ],
+   "source": "seq_e_explain"
+  },
+  "pout": {
+   "file": "pout.webp",
+   "w": 517,
+   "h": 598,
+   "anchor": [
+    254,
+    135
+   ],
+   "tags": [
+    "pout",
+    "angry"
+   ],
+   "source": "char_close_pout"
+  },
+  "idea": {
+   "file": "idea.webp",
+   "w": 614,
+   "h": 623,
+   "anchor": [
+    299,
+    159
+   ],
+   "tags": [
+    "point",
+    "idea"
+   ],
+   "source": "seq_e_idea"
+  },
+  "sad": {
+   "file": "sad.webp",
+   "w": 639,
+   "h": 623,
+   "anchor": [
+    315,
+    159
+   ],
+   "tags": [
+    "sad"
+   ],
+   "source": "seq_b_down"
+  },
+  "blush": {
+   "file": "blush.webp",
+   "w": 521,
+   "h": 594,
+   "anchor": [
+    256,
+    131
+   ],
+   "tags": [
+    "blush",
+    "shy"
+   ],
+   "source": "char_close_chin"
+  },
+  "wink": {
+   "file": "wink.webp",
+   "w": 533,
+   "h": 596,
+   "anchor": [
+    263,
+    133
+   ],
+   "tags": [
+    "wink"
+   ],
+   "source": "char_close_fingerheart"
+  },
+  "away": {
+   "file": "away.webp",
+   "w": 560,
+   "h": 626,
+   "anchor": [
+    279,
+    162
+   ],
+   "tags": [
+    "look-away"
+   ],
+   "source": "seq_f_away"
+  }
+ }
+}
