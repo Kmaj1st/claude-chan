@@ -21,6 +21,7 @@
   "schema",
  "assets",
   "server/dist",
+ "src/model/motions.default.json",
   "docs"
  ],
  "bin": {
