@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Claude-chan demo</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+ body{font:15px/1.5 system-ui,sans-serif;background:#FFF9F0;color:#4A2C1A;margin:0;padding:24px 24px 24px 300px}
+ h1{margin-top:0}
+ .row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+ button{padding:6px 12px;border:2px solid #4A2C1A;border-radius:10px;background:#fff;color:#4A2C1A;cursor:pointer}
+ button:hover{background:#F28C28;color:#fff}
+ input{padding:6px;border:2px solid #4A2C1A;border-radius:10px;min-width:260px}
+ pre{background:#4A2C1A;color:#FFE9CC;padding:12px;border-radius:10px;height:180px;overflow:auto}
+</style>
+</head>
+<body>
+<h1>Claude-chan</h1>
+<h3>Motions</h3>
+<div class="row" id="motions"></div>
+<h3>Expressions</h3>
+<div class="row" id="expressions"></div>
+<h3>Say</h3>
+<div class="row"><input id="text" value="Welcome back, master!"><button id="say">say</button><button id="stop">stop</button></div>
+<h3>Tool-call console</h3>
+<div class="row"><input id="call" size="60" value='{"motion":"wave","expression":"smile","say":"Hello!"}'><button id="run">claude_chan_act</button></div>
+<pre id="log"></pre>
+<claude-chan id="cc" position="bottom-left" size="260"></claude-chan>
+<script type="module" src="./main.ts"></script>
+</body>
+</html>
