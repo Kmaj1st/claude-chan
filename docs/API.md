@@ -1,0 +1,57 @@
+# Public API contract
+
+Stable under semver. hapi-chan and other hosts may rely on everything below. Source of truth: src/types.ts, src/tools.ts.
+
+## Names
+
+- Motions: idle, wave, nod, shake_head, think, happy, surprised, bow, cheer, sleepy, typing, tea_serve, pout, wink, point
+- Expressions: neutral, smile, sad, angry, blush, surprised
+- Moods: neutral, happy, sad, angry, shy, sleepy, thinking
+- Priorities: low, normal, high, urgent (higher interrupts lower)
+
+New names may be added in minor versions; existing names are never renamed or removed before a major version.
+
+## Mounting
+
+ import { ClaudeChan } from 'claude-chan';
+ const cc = ClaudeChan.mount(document.body, {
+ model: undefined, // model3.json URL; omit for the procedural puppet
+ coreUrl: '/live2dcubismcore.min.js', // only with model
+ position: 'bottom-left', // bottom-left | bottom-right | top-left | top-right
+ size: 220, // character height in px
+ draggable: true,
+ storageKey: 'claude-chan:pos', // false disables persistence
+ zIndex: 2147483000,
+ autoIdle: true,
+ });
+
+Web component: <claude-chan model="" position="bottom-left" size="220" draggable="false"></claude-chan>.
+
+## Controller
+
+- act({ motion, expression, say, duration, priority })
+- say(text) plain text only (rendered with textContent)
+- setMood(mood)
+- lookAt(x, y) viewport px; lookAt(null) releases the gaze
+- stop() clears the queue and returns to idle
+- on('ready' | 'motionstart' | 'motionend' | 'error', fn) returns an unsubscribe function
+- destroy()
+- ready promise
+
+## Tool-call surface
+
+Exported from the package entry:
+
+- TOOLS, actInputSchema, listCapabilities(), MAX_SAY_LENGTH (280), MAX_DURATION_MS (60000)
+- parseCommand(tool, args) returns { ok: true, command } | { ok: false, error }
+- runCommand(controller, command) applies a validated command
+- installPostMessageBridge(controller, { allowedOrigins?, target? }) returns an uninstall function
+- parseMarkers(text) and createMarkerStream(onAct, onMood?)
+
+Tool names: claude_chan_act, claude_chan_say, claude_chan_set_mood, claude_chan_list_motions. JSON schema file: claude-chan/schema.
+
+### postMessage bridge
+
+Request (from a parent or iframe, origin must be allowed; default is the page's own origin, * is never accepted):
+
+ { "type": "claude-chan
