@@ -45,6 +45,10 @@ useEffect(() => {
 
 Call ClaudeChan.mount in onMounted and destroy() in onBeforeUnmount. The same code works with the <claude-chan> element if you register it with app.config.compilerOptions.isCustomElement.
 
+### SSR (Next.js, Nuxt)
+
+Importing claude-chan is safe on the server. mount() throws on the server, so call it only in useEffect or onMounted. The <claude-chan> element registers in the browser only.
+
 ## Motions and expressions
 
 Motions (stable names): idle, wave, nod, shake_head, think, happy, surprised, bow, cheer, sleepy, typing, tea_serve, pout, wink, point.
