@@ -1,0 +1,7 @@
+{
+ "S1": {"cols":3,"rows":2,"dir":"base","items":["eyes_closed","eyes_half","eyes_happy","eyes_wide","eyes_sideL","eyes_sideR"]},
+ "S2": {"cols":3,"rows":2,"dir":"base","items":["mouth_a","mouth_i","mouth_u","mouth_e","mouth_o","mouth_closed"]},
+ "S3": {"cols":3,"rows":2,"dir":"base","items":["mood_smile","mood_sad","mood_angry","mood_blush","mood_surprised","mood_neutral"]},
+ "S4": {"cols":3,"rows":1,"dir":"base","items":["layer_backhair","layer_body_nohead","layer_head_only"]},
+ "S5": {"cols":3,"rows":2,"dir":"full","items":["pose_nod","pose_bow","pose_think","pose_cheer","pose_point","pose_tea"]}
+}
