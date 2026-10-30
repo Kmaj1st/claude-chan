@@ -35,6 +35,21 @@ describe('Engine', () => {
  expect(engine.currentMotion).toBeNull();
  });
 
+ it('anchors timings at the first tick when act() runs before any tick', () => {
+ const { engine, frames } = make();
+ const log: string[] = [];
+ engine.on('motionend', (e) => log.push('end:' + e.motion));
+ engine.act({ motion: 'nod', expression: 'smile' });
+ engine.tick(60000);
+ engine.tick(60100);
+ expect(log).toEqual([]);
+ expect(engine.currentMotion).toBe('nod');
+ expect(frames[frames.length - 1]!.expression).toBe('smile');
+ engine.tick(70000);
+ expect(log).toEqual(['end:nod']);
+ expect(frames[frames.length - 1]!.expression).toBe('neutral');
+ });
+
  it('higher priority interrupts and reports it', () => {
  const { engine } = make();
  const log: string[] = [];
