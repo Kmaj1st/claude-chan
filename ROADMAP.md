@@ -13,6 +13,8 @@
 - docs/API.md: stable public contract; bridge and marker helpers exported from the package entry
 - Lip-sync from an audio/video element or AnalyserNode: controller.lipSync(source) (src/lipsync.ts), tests/lipsync.test.ts
 
+- Unit tests for the bridge (error replies, wildcard origin rejected), prefers-reduced-motion, and host clamping/corner vars
+
 ## Next
 1. Test the Live2D loader against a redistributable sample model (none committed; Core file must be downloaded manually, see docs/LICENSES.md)
 2. Tell hapi-chan: API contract is stable and written in docs/API.md
