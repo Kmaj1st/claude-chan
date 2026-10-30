@@ -7,11 +7,13 @@
 - MCP server (stdio + streamable HTTP), CLI (server/dist/cli.js)
 - Generated JSON schema schema/claude_chan_act.json
 - Docs: README embed guide, CHARACTER.md, MCP.md, ART-PIPELINE.md, LICENSES.md
+- Headless browser asserts (npm run test:e2e: mount, drag, clamp, persist)
+- Live2D Cubism 4 loader (src/live2d.ts, lazy, self-hosted Core via coreUrl) and default motions map (src/model/motions.default.json)
 
 ## Next
-1. Headless browser asserts (mount, drag, clamp)
-2. Live2D Cubism 4 loader + motions.json mapping (self-hosted runtime, no CDN; Core file is not committed, see docs/LICENSES.md)
-3. Notify hapi-chan lead: API contract stable (needs the lead session id from the hub lead)
+1. Test the Live2D loader against a redistributable sample model (none committed; Core file must be downloaded manually, see docs/LICENSES.md)
+2. Notify hapi-chan lead: API contract stable (needs the lead session id from the hub lead)
+3. Real Claude-chan model from an artist (docs/ART-PIPELINE.md)
 
 ## Decisions
 - Server is bundled with esbuild into server/dist/ (gitignored); build with npm run build:server.
