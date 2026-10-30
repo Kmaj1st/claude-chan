@@ -114,6 +114,42 @@ try {
  const sideWide = await side(1200);
  check('bubble flips left when no room on the right', sideNarrow === 'left' && sideWide === 'right', JSON.stringify([sideNarrow, sideWide]));
 
+ // Sprite renderer: every motion and expression shows a loaded image, lazily, without moving the stage.
+ await page.setViewport({ width: 900, height: 700 });
+ await page.reload({ waitUntil: 'networkidle0' });
+ await page.waitForSelector('claude-chan-host');
+ const sprite = await page.evaluate(async () => {
+ const el = document.getElementById('cc');
+ const stage = () => document.querySelector('claude-chan-host').shadowRoot.querySelector('.stage');
+ const imgs = () => Array.from(stage().querySelectorAll('img'));
+ const box = () => { const r = stage().getBoundingClientRect(); return [r.left, r.top, r.width, r.height].join(','); };
+ const before = { count: imgs().length, box: box() };
+ const names = ['idle', 'wave', 'nod', 'shake_head', 'think', 'happy', 'surprised', 'bow', 'cheer', 'sleepy', 'typing', 'tea_serve', 'pout', 'wink', 'point'];
+ const exprs = ['neutral', 'smile', 'sad', 'angry', 'blush', 'surprised'];
+ const failed = [];
+ const boxes = new Set([before.box]);
+ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+ for (const m of names) {
+ el.controller.act({ motion: m, priority: 'urgent' });
+ await wait(450);
+ const shown = imgs().filter((i) => Number(i.style.opacity) > 0.5 && i.naturalWidth > 0);
+ if (shown.length < 1) failed.push('motion ' + m);
+ boxes.add(box());
+ }
+ for (const x of exprs) {
+ el.controller.stop();
+ el.controller.act({ expression: x, duration: 5000 });
+ await wait(450);
+ const shown = imgs().filter((i) => Number(i.style.opacity) > 0.5 && i.naturalWidth > 0);
+ if (shown.length < 1) failed.push('expression ' + x);
+ boxes.add(box());
+ }
+ return { before, after: imgs().length, broken: imgs().filter((i) => i.naturalWidth === 0).length, failed, boxes: boxes.size };
+ });
+ check('sprite renderer is active and loads poses lazily', sprite.before.count >= 1 && sprite.before.count <= 3 && sprite.after > sprite.before.count, JSON.stringify(sprite));
+ check('every motion and expression shows a loaded sprite', sprite.failed.length === 0 && sprite.broken === 0, JSON.stringify(sprite));
+ check('sprite poses never change the stage box (no layout shift)', sprite.boxes === 1, JSON.stringify(sprite));
+
  check('no page errors', errors.length === 0, errors.join(' | '));
 } finally {
  await browser.close();
