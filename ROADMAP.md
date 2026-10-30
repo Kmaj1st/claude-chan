@@ -9,6 +9,7 @@
 - Docs: README embed guide, CHARACTER.md, MCP.md, ART-PIPELINE.md, LICENSES.md
 - Headless browser asserts (npm run test:e2e: mount, drag, clamp, persist)
 - Live2D Cubism 4 loader (src/live2d.ts, lazy, self-hosted Core via coreUrl) and default motions map (src/model/motions.default.json)
+- SSR-safe import (no DOM needed to import; mount() throws a clear error on the server), tests/ssr.test.ts
 - docs/API.md: stable public contract; bridge and marker helpers exported from the package entry
 
 ## Next

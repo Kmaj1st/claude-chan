@@ -6,7 +6,10 @@ import type { ClaudeChanController, Position } from './types';
 
 const POSITIONS: Position[] = ['bottom-left', 'bottom-right', 'top-left', 'top-right'];
 
-export class ClaudeChanElement extends HTMLElement {
+// Safe to import during SSR (Node has no HTMLElement); the element only registers in a browser.
+const BaseElement = (typeof HTMLElement !== 'undefined' ? HTMLElement : class {}) as typeof HTMLElement;
+
+export class ClaudeChanElement extends BaseElement {
  controller: ClaudeChanController | null = null;
 
  connectedCallback(): void {
