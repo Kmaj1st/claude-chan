@@ -10,6 +10,7 @@
  .row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
  button{padding:6px 12px;border:2px solid #4A2C1A;border-radius:10px;background:#fff;color:#4A2C1A;cursor:pointer}
  button:hover{background:#F28C28;color:#fff}
+ select{padding:6px;border:2px solid #4A2C1A;border-radius:10px;background:#fff;color:#4A2C1A}
  input{padding:6px;border:2px solid #4A2C1A;border-radius:10px;min-width:260px}
  pre{background:#4A2C1A;color:#FFE9CC;padding:12px;border-radius:10px;height:180px;overflow:auto}
 </style>
@@ -20,12 +21,14 @@
 <div class="row" id="motions"></div>
 <h3>Expressions</h3>
 <div class="row" id="expressions"></div>
+<h3>Renderer</h3>
+<div class="row"><select id="renderer"><option value="auto">auto (sprite, else procedural)</option><option value="sprite">sprite</option><option value="procedural">procedural</option></select></div>
 <h3>Say</h3>
 <div class="row"><input id="text" value="Welcome back, master!"><button id="say">say</button><button id="stop">stop</button></div>
 <h3>Tool-call console</h3>
 <div class="row"><input id="call" size="60" value='{"motion":"wave","expression":"smile","say":"Hello!"}'><button id="run">claude_chan_act</button></div>
 <pre id="log"></pre>
-<claude-chan id="cc" sprites="/chars" position="bottom-left" size="260"></claude-chan>
+<claude-chan id="cc" renderer="auto" sprites="/chars" position="bottom-left" size="260"></claude-chan>
 <script type="module" src="./main.ts"></script>
 </body>
 </html>
