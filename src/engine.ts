@@ -41,6 +41,7 @@ export class Engine {
  private nextGlance = 4000;
  private glance = { x: 0, y: 0 };
  private rnd: () => number;
+ private ticked = false;
 
  constructor(private puppet: Puppet, private opts: EngineOptions = {}) {
  this.rnd = opts.random ?? Math.random;
@@ -110,6 +111,13 @@ export class Engine {
 
  // Advance to absolute time nowMs (ms) and push a frame to the puppet.
  tick(nowMs: number): Pose {
+ if (!this.ticked) {
+ // act()/say() before the first frame were timed from now=0; re-anchor them to this clock.
+ this.ticked = true;
+ if (this.expressionUntil > 0) this.expressionUntil += nowMs;
+ if (this.speakingUntil > 0) this.speakingUntil += nowMs;
+ this.motionStart = nowMs;
+ }
  this.now = nowMs;
  const cur = this.queue.current;
  let motionPose: Partial<Pose> = {};
