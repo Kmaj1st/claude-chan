@@ -65,4 +65,22 @@ describe('http mcp endpoint', () => {
  const res = await post(port, { authorization: 'Bearer ' + TOKEN }, big).catch(() => undefined);
  expect(res === undefined || res.status >= 400).toBe(true);
  });
+
+ it('returns 404 for another path', async () => {
+ const port = await start();
+ const res = await fetch('http://127.0.0.1:' + port + '/other', { method: 'POST', headers: { authorization: 'Bearer ' + TOKEN }, body: '{}' });
+ expect(res.status).toBe(404);
+ });
+
+ it('returns 405 for GET', async () => {
+ const port = await start();
+ const res = await fetch('http://127.0.0.1:' + port + '/mcp', { headers: { authorization: 'Bearer ' + TOKEN } });
+ expect(res.status).toBe(405);
+ });
+
+ it('returns 400 for invalid JSON', async () => {
+ const port = await start();
+ const res = await fetch('http://127.0.0.1:' + port + '/mcp', { method: 'POST', headers: { authorization: 'Bearer ' + TOKEN, 'content-type': 'application/json' }, body: '{nope' });
+ expect(res.status).toBe(400);
+ });
 });
