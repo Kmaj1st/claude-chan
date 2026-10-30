@@ -14,12 +14,14 @@ Private project. No public licence has been chosen yet.
 
 ## Live2D runtime
 
-The Live2D Cubism renderer is not bundled yet. The planned loader needs two parts:
+The Live2D renderer (src/live2d.ts) is loaded lazily, only when a model URL is set. It needs two parts:
 
 | Part | Licence | Note |
 | --- | --- | --- |
 | Cubism Core (live2dcubismcore.min.js) | Live2D Proprietary Software License Agreement | Download from live2d.com. Do not edit it. Self-host the file, no runtime CDN. |
-| Cubism Web framework or pixi-live2d-display | Live2D Open Software License / MIT (check the exact version) | Verify the licence file of the version you install. |
+| pixi-live2d-display 0.4.0 (with pixi.js 6.5.10) | MIT (verify the licence file of the installed version) | Imported dynamically by src/live2d.ts, so the procedural puppet bundle stays small. |
+
+The host page supplies the Core file through the coreUrl option (default ./live2dcubismcore.min.js). The loader never fetches it from a CDN.
 
 Points to verify on the official Live2D site before publishing an app that includes the runtime:
 
@@ -33,4 +35,4 @@ I could not check these pages in this session, so the table above reflects gener
 
 ## npm dependencies
 
-Run npm ls and check each package licence before a public release. Current direct dependencies are the MCP SDK, a WebSocket library, esbuild, vite, vitest and typescript. All are expected to be permissive, but this has not been audited.
+Run npm ls and check each package licence before a public release. Current direct dependencies are the MCP SDK, a WebSocket library, esbuild, vite, vitest, typescript, puppeteer-core (e2e only), pixi.js and pixi-live2d-display. All are expected to be permissive, but this has not been audited.

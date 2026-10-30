@@ -1,0 +1,29 @@
+{
+ "version": 1,
+ "params": {},
+ "expressions": {
+ "neutral": "neutral",
+ "smile": "smile",
+ "sad": "sad",
+ "angry": "angry",
+ "blush": "blush",
+ "surprised": "surprised"
+ },
+ "motions": {
+ "idle": { "group": "idle", "index": 0 },
+ "wave": { "group": "wave", "index": 0 },
+ "nod": { "group": "nod", "index": 0 },
+ "shake_head": { "group": "shake_head", "index": 0 },
+ "think": { "group": "think", "index": 0 },
+ "happy": { "group": "happy", "index": 0 },
+ "surprised": { "group": "surprised", "index": 0 },
+ "bow": { "group": "bow", "index": 0 },
+ "cheer": { "group": "cheer", "index": 0 },
+ "sleepy": { "group": "sleepy", "index": 0 },
+ "typing": { "group": "typing", "index": 0 },
+ "tea_serve": { "group": "tea_serve", "index": 0 },
+ "pout": { "group": "pout", "index": 0 },
+ "wink": { "group": "wink", "index": 0 },
+ "point": { "group": "point", "index": 0 }
+ }
+}
