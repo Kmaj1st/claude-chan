@@ -23,6 +23,7 @@ export const HOST_CSS =
  'background:#FFF4E3;color:#4A2C1A;border:2px solid #4A2C1A;border-radius:14px;font:14px/1.4 system-ui,sans-serif;' +
  'white-space:pre-wrap;overflow-wrap:anywhere;pointer-events:none;opacity:0;transition:opacity .2s}' +
  '.bubble[data-show=true]{opacity:1}' +
+ '.bubble[data-side=left]{left:auto;right:100%}' +
  '@media (prefers-reduced-motion:reduce){.bubble{transition:none}}';
 
 // Default corner offsets are set through CSS variables so pages can override them.
@@ -127,6 +128,8 @@ export function createShell(parent: HTMLElement, o: ShellOptions): Shell {
  setBubble(text, ms) {
  clearTimeout(timer);
  bubble.textContent = text;
+ // Flip to the left when the right side lacks room for the bubble.
+ bubble.dataset.side = stage.getBoundingClientRect().right + 250 > window.innerWidth ? 'left' : 'right';
  bubble.dataset.show = String(text.length > 0);
  if (text) timer = setTimeout(() => { bubble.dataset.show = 'false'; }, ms);
  },
