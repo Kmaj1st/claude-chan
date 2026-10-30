@@ -19,6 +19,7 @@
  "files": [
   "dist",
   "schema",
+ "assets",
   "server/dist",
   "docs"
  ],
