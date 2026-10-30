@@ -92,6 +92,17 @@ try {
  const r5 = await rect(page);
  check('resize keeps it inside', r5.x + r5.w <= 300.5 && r5.y + r5.h <= 300.5, JSON.stringify(r5));
 
+ const remount = await page.evaluate(async () => {
+ document.getElementById('cc').setAttribute('size', '100');
+ await new Promise((r) => setTimeout(r, 300));
+ return {
+ hosts: document.querySelectorAll('claude-chan-host').length,
+ hasController: !!document.getElementById('cc').controller,
+ };
+ });
+ const r6 = await rect(page);
+ check('size attribute change remounts once', remount.hosts === 1 && remount.hasController && Math.abs(r6.h - 100) < 2, JSON.stringify([remount, r6]));
+
  check('no page errors', errors.length === 0, errors.join(' | '));
 } finally {
  await browser.close();

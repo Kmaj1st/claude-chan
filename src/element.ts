@@ -10,7 +10,10 @@ const POSITIONS: Position[] = ['bottom-left', 'bottom-right', 'top-left', 'top-r
 const BaseElement = (typeof HTMLElement !== 'undefined' ? HTMLElement : class {}) as typeof HTMLElement;
 
 export class ClaudeChanElement extends BaseElement {
+ static observedAttributes = ['model', 'position', 'size', 'draggable', 'storage-key'];
+
  controller: ClaudeChanController | null = null;
+ private remountQueued = false;
 
  connectedCallback(): void {
  if (this.controller) return;
@@ -27,6 +30,18 @@ export class ClaudeChanElement extends BaseElement {
  for (const name of ['ready', 'motionstart', 'motionend', 'error'] as const) {
  this.controller.on(name, (detail) => this.dispatchEvent(new CustomEvent(name, { detail })));
  }
+ }
+
+ // Attributes are read once at mount, so a change remounts. Batched per microtask.
+ attributeChangedCallback(): void {
+ if (!this.controller || this.remountQueued) return;
+ this.remountQueued = true;
+ queueMicrotask(() => {
+ this.remountQueued = false;
+ if (!this.isConnected) return;
+ this.disconnectedCallback();
+ this.connectedCallback();
+ });
  }
 
  disconnectedCallback(): void {
