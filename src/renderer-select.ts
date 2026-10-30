@@ -21,6 +21,7 @@ export class FallbackPuppet implements Puppet {
  readonly element: HTMLElement;
  private active: Puppet;
  private usedFallback = false;
+ private destroyed = false;
 
  constructor(private primary: Puppet, private makeFallback: () => Puppet, private onFallback?: (cause: unknown) => void) {
  this.element = document.createElement('div');
@@ -35,6 +36,7 @@ export class FallbackPuppet implements Puppet {
  try {
  await this.primary.init();
  } catch (cause) {
+ if (this.destroyed) return;
  this.primary.destroy();
  this.element.replaceChildren();
  this.active = this.makeFallback();
@@ -47,7 +49,7 @@ export class FallbackPuppet implements Puppet {
 
  setMotion(motion: Motion | null, durationMs: number): void { this.active.setMotion?.(motion, durationMs); }
  render(pose: Pose, expression: Expression, nowMs?: number): void { this.active.render(pose, expression, nowMs); }
- destroy(): void { this.active.destroy(); this.element.replaceChildren(); }
+ destroy(): void { this.destroyed = true; this.active.destroy(); this.element.replaceChildren(); }
 }
 
 export function createPuppet(o: MountOptions, reducedMotion: boolean): Puppet {
