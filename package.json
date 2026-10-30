@@ -31,7 +31,8 @@
   "build:server": "esbuild server/cli.ts --bundle --platform=node --format=esm --target=node20 --packages=external --outfile=server/dist/cli.js",
   "typecheck": "tsc --noEmit",
   "test": "vitest run",
-  "test:e2e": "node tests/e2e/run.mjs"
+  "test:e2e": "node tests/e2e/run.mjs",
+ "check:model": "esbuild server/check-model.ts --bundle --platform=node --format=esm --target=node20 --packages=external --outfile=server/dist/check-model.js && node server/dist/check-model.js"
  },
  "devDependencies": {
   "@types/node": "^22.0.0",
