@@ -15,6 +15,31 @@ async function setup() {
 }
 
 describe('mcp server', () => {
+ it('returns isError for an unknown tool without broadcasting', async () => {
+ const { client, sent } = await setup();
+ const r = await client.callTool({ name: 'claude_chan_nope', arguments: {} });
+ expect(r.isError).toBe(true);
+ expect(sent).toHaveLength(0);
+ });
+
+ it('handles a call with no arguments object', async () => {
+ const { client, sent } = await setup();
+ const bad = await client.callTool({ name: 'claude_chan_say' });
+ expect(bad.isError).toBe(true);
+ const ok = await client.callTool({ name: 'claude_chan_list_motions' });
+ expect(ok.isError).toBe(false);
+ expect(sent).toHaveLength(0);
+ });
+
+ it('returns JSON text content for list_motions', async () => {
+ const { client } = await setup();
+ const r = await client.callTool({ name: 'claude_chan_list_motions', arguments: {} });
+ const content = r.content as Array<{ type: string; text: string }>;
+ const first = content[0]!;
+ expect(first.type).toBe('text');
+ expect(() => JSON.parse(first.text)).not.toThrow();
+ });
+
  it('lists the four tools', async () => {
  const { client } = await setup();
  const { tools } = await client.listTools();
