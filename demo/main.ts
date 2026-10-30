@@ -34,3 +34,9 @@ document.getElementById('run')?.addEventListener('click', () => {
  write('! invalid JSON: ' + String(e));
  }
 });
+
+// Switching the renderer remounts the element (attributes are read once at mount).
+document.getElementById('renderer')?.addEventListener('change', (e) => {
+ el.setAttribute('renderer', (e.target as HTMLSelectElement).value);
+ write('renderer = ' + (e.target as HTMLSelectElement).value);
+});
