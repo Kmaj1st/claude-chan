@@ -103,6 +103,17 @@ try {
  const r6 = await rect(page);
  check('size attribute change remounts once', remount.hosts === 1 && remount.hasController && Math.abs(r6.h - 100) < 2, JSON.stringify([remount, r6]));
 
+ const side = (vw) => page.evaluate(async (w) => {
+ document.getElementById('cc').controller.say('hello');
+ await new Promise((r) => setTimeout(r, 100));
+ return document.querySelector('claude-chan-host').shadowRoot.querySelector('.bubble').dataset.side;
+ }, vw);
+ const sideNarrow = await side(300);
+ await page.setViewport({ width: 1200, height: 700 });
+ await new Promise((r) => setTimeout(r, 200));
+ const sideWide = await side(1200);
+ check('bubble flips left when no room on the right', sideNarrow === 'left' && sideWide === 'right', JSON.stringify([sideNarrow, sideWide]));
+
  check('no page errors', errors.length === 0, errors.join(' | '));
 } finally {
  await browser.close();
