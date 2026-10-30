@@ -1,0 +1,64 @@
+{
+  "name": "claude_chan_act",
+  "description": "Make the Claude-chan mascot play a motion, show an expression and/or say a short line. Use sparingly.",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "motion": {
+        "type": "string",
+        "enum": [
+          "idle",
+          "wave",
+          "nod",
+          "shake_head",
+          "think",
+          "happy",
+          "surprised",
+          "bow",
+          "cheer",
+          "sleepy",
+          "typing",
+          "tea_serve",
+          "pout",
+          "wink",
+          "point"
+        ],
+        "description": "Preset motion to play."
+      },
+      "expression": {
+        "type": "string",
+        "enum": [
+          "neutral",
+          "smile",
+          "sad",
+          "angry",
+          "blush",
+          "surprised"
+        ],
+        "description": "Facial expression."
+      },
+      "say": {
+        "type": "string",
+        "maxLength": 280,
+        "description": "Short speech bubble text (plain text)."
+      },
+      "duration": {
+        "type": "integer",
+        "minimum": 100,
+        "maximum": 60000,
+        "description": "Milliseconds the expression/bubble stays."
+      },
+      "priority": {
+        "type": "string",
+        "enum": [
+          "low",
+          "normal",
+          "high",
+          "urgent"
+        ],
+        "description": "Queue priority; higher interrupts lower. Default normal."
+      }
+    },
+    "additionalProperties": false
+  }
+}
