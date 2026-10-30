@@ -34,7 +34,7 @@ export function installPostMessageBridge(
  opts: PostMessageBridgeOptions = {},
 ): () => void {
  const target = opts.target ?? window;
- const allowed = new Set(opts.allowedOrigins ?? [target.location.origin]);
+ const allowed = new Set((opts.allowedOrigins ?? [target.location.origin]).filter((o) => o !== '*'));
  const handler = (ev: MessageEvent): void => {
  if (!allowed.has(ev.origin)) return;
  const d = ev.data as { type?: unknown; id?: unknown; tool?: unknown; args?: unknown } | null;
@@ -45,7 +45,11 @@ export function installPostMessageBridge(
  };
  const parsed = parseCommand(d.tool, d.args);
  if (!parsed.ok) return reply({ ok: false, error: parsed.error });
+ try {
  reply({ ok: true, result: runCommand(ctrl, parsed.command) });
+ } catch (e) {
+ reply({ ok: false, error: e instanceof Error ? e.message : String(e) });
+ }
  };
  target.addEventListener('message', handler);
  return () => target.removeEventListener('message', handler);
