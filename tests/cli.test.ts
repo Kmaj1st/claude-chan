@@ -13,7 +13,7 @@ interface Run {
  stderr: string;
 }
 
-// Runs the bundled CLI; resolves on exit, or kills it once until appears on stderr.
+// Runs the bundled CLI; resolves on exit, or kills it at the expected log.
 function run(args: string[], env: Record<string, string>, until?: RegExp): Promise<Run> {
  return new Promise((resolve) => {
  const child = spawn(process.execPath, [OUT, ...args], {
@@ -33,7 +33,7 @@ function run(args: string[], env: Record<string, string>, until?: RegExp): Promi
  });
 }
 
-describe('cli', () => {
+ describe('cli', () => {
  beforeAll(async () => {
  mkdirSync(DIR, { recursive: true });
  await build({
@@ -54,10 +54,22 @@ describe('cli', () => {
  expect(r.stderr).toContain('invalid CLAUDE_CHAN_PORT');
  });
 
- it('exits 1 when --http-only has no CLAUDE_CHAN_HTTP_PORT', async () => {
- const r = await run(['--http-only'], { CLAUDE_CHAN_PORT: '0', CLAUDE_CHAN_TOKEN: TOKEN });
+ it('rejects missing HTTP-only configuration before starting the hub', async () => {
+ const r = await run(['--http-only'], { CLAUDE_CHAN_PORT: '0' });
  expect(r.code).toBe(1);
- expect(r.stderr).toContain('--http-only needs CLAUDE_CHAN_HTTP_PORT');
+ expect(r.stderr.trim()).toBe('--http-only needs CLAUDE_CHAN_HTTP_PORT');
+ });
+
+ it.each(['99999', '-1', '1.5', 'not-a-port'])('rejects HTTP port %s before starting the hub or logging a token', async (port) => {
+ const r = await run(['--http-only'], { CLAUDE_CHAN_PORT: '0', CLAUDE_CHAN_HTTP_PORT: port });
+ expect(r.code).toBe(1);
+ expect(r.stderr.trim()).toBe('invalid CLAUDE_CHAN_HTTP_PORT');
+ });
+
+ it('validates HTTP configuration in stdio mode too', async () => {
+ const r = await run([], { CLAUDE_CHAN_PORT: '0', CLAUDE_CHAN_HTTP_PORT: 'invalid' });
+ expect(r.code).toBe(1);
+ expect(r.stderr.trim()).toBe('invalid CLAUDE_CHAN_HTTP_PORT');
  });
 
  it('exits 1 on an invalid CLAUDE_CHAN_HTTP_PORT', async () => {
