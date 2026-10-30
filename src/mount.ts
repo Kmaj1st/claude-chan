@@ -1,5 +1,6 @@
 import { Engine } from './engine';
 import { createShell } from './host';
+import { Live2DPuppet } from './live2d';
 import { ProceduralPuppet } from './puppet';
 import type { ClaudeChanController, MountOptions, Puppet } from './types';
 
@@ -22,7 +23,9 @@ export function mount(parent: HTMLElement, options: MountOptions = {}): ClaudeCh
  storageKey: o.storageKey,
  zIndex: o.zIndex,
  });
- const puppet: Puppet = new ProceduralPuppet();
+ const puppet: Puppet = o.model
+ ? new Live2DPuppet({ model: o.model, coreUrl: o.coreUrl })
+ : new ProceduralPuppet();
  shell.stage.appendChild(puppet.element);
  const engine = new Engine(puppet, {
  autoIdle: o.autoIdle,
