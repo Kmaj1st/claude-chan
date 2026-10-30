@@ -41,6 +41,11 @@ describe('http mcp endpoint', () => {
  expect((await post(port, {})).status).toBe(401);
  });
 
+ it('rejects a token without the Bearer prefix', async () => {
+ const port = await start();
+ expect((await post(port, { authorization: TOKEN })).status).toBe(401);
+ });
+
  it('rejects a foreign origin', async () => {
  const port = await start();
  const res = await post(port, { authorization: 'Bearer ' + TOKEN, origin: 'https://evil.example' });

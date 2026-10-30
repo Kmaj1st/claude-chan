@@ -26,7 +26,9 @@ function hostnameOf(value: string): string {
 }
 
 function tokenOk(header: string | undefined, expected: string): boolean {
- const given = Buffer.from((header ?? '').replace('Bearer ', ''));
+ const value = header ?? '';
+ if (!value.startsWith('Bearer ')) return false;
+ const given = Buffer.from(value.slice(7));
  const want = Buffer.from(expected);
  return given.length === want.length && timingSafeEqual(given, want);
 }
