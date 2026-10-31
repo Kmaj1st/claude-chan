@@ -58,4 +58,13 @@ Tool names: claude_chan_act, claude_chan_say, claude_chan_set_mood, claude_chan_
 
 Request (from a parent or iframe, origin must be allowed; default is the page's own origin, * is never accepted):
 
- { "type": "claude-chan
+ { type: 'claude-chan', id: 1, tool: 'claude_chan_say', args: { text: 'hello' } }
+
+id is optional (string or number; otherwise null in the reply). Messages from other origins or with another type are ignored silently.
+
+Response (posted back to the sender's window, targeted at its origin):
+
+ { type: 'claude-chan-result', id: 1, ok: true, result: { ok: true } }
+ { type: 'claude-chan-result', id: 1, ok: false, error: 'message' }
+
+claude_chan_list_motions returns the capabilities object as result. An invalid tool or args gives ok false with the validation error.
