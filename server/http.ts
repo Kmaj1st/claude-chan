@@ -58,6 +58,7 @@ function readBody(req: IncomingMessage): Promise<unknown> {
 }
 
 export function createHttpServer(dispatch: Dispatch, opts: HttpOptions): HttpServer {
+ if (!opts.token) throw new Error('http token must be a non-empty string');
  return createServer((req, res) => {
  const fail = (code: number, msg: string): void => {
  res.writeHead(code, { 'content-type': 'text/plain' }).end(msg);
