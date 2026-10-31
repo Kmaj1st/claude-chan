@@ -159,6 +159,24 @@ describe('renderer selection', () => {
  expect(createPuppet({ model: '/m/model3.json', renderer: 'live2d' }, false).constructor.name).toBe('Live2DPuppet');
  });
 
+ it('FallbackPuppet forwards setMotion and destroy to the active puppet, before and after a swap', async () => {
+ vi.stubGlobal('document', fakeDocument);
+ const calls: string[] = [];
+ const spy = (name: string, fail = false): Puppet => ({
+ element: new FakeEl() as never,
+ init: async () => { if (fail) throw new Error('x'); },
+ setMotion(m) { calls.push(name + ':' + String(m)); },
+ render() {},
+ destroy() { calls.push(name + ':destroy'); },
+ });
+ const f = new FallbackPuppet(spy('primary', true), () => spy('fallback'));
+ f.setMotion('wave', 100);
+ await f.init();
+ f.setMotion('nod', 100);
+ f.destroy();
+ expect(calls).toEqual(['primary:wave', 'primary:destroy', 'fallback:nod', 'fallback:destroy']);
+ });
+
  it('has a default sprite folder next to the package', () => {
  expect(defaultSpriteBase()).toMatch(/assets\/chars\/$/);
  });
