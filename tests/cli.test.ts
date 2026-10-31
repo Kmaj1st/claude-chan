@@ -60,6 +60,17 @@ describe('cli', () => {
  expect(r.stderr).toContain('--http-only needs CLAUDE_CHAN_HTTP_PORT');
  });
 
+ it('exits 1 on an invalid CLAUDE_CHAN_HTTP_PORT', async () => {
+ const r = await run([], { CLAUDE_CHAN_PORT: '0', CLAUDE_CHAN_HTTP_PORT: '99999', CLAUDE_CHAN_TOKEN: TOKEN });
+ expect(r.code).toBe(1);
+ expect(r.stderr).toContain('invalid CLAUDE_CHAN_HTTP_PORT');
+ });
+
+ it('generates and prints a random token when none is supplied', async () => {
+ const r = await run(['--http-only'], { CLAUDE_CHAN_PORT: '0', CLAUDE_CHAN_HTTP_PORT: '0' }, /mcp http: /);
+ expect(r.stderr).toMatch(/claude-chan token: [0-9a-f]{32}/);
+ }, 15000);
+
  it('starts hub and http endpoint without logging a supplied token', async () => {
  const r = await run(['--http-only'], { CLAUDE_CHAN_PORT: '0', CLAUDE_CHAN_HTTP_PORT: '0', CLAUDE_CHAN_TOKEN: TOKEN }, /mcp http: /);
  expect(r.stderr).toContain('claude-chan hub: ws://127.0.0.1:');
