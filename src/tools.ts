@@ -11,7 +11,7 @@ export const actInputSchema = {
  properties: {
  motion: { type: 'string', enum: [...MOTIONS], description: 'Preset motion to play.' },
  expression: { type: 'string', enum: [...EXPRESSIONS], description: 'Facial expression.' },
- say: { type: 'string', maxLength: MAX_SAY_LENGTH, description: 'Short speech bubble text (plain text).' },
+ say: { type: 'string', minLength: 1, maxLength: MAX_SAY_LENGTH, description: 'Short speech bubble text (plain text).' },
  duration: { type: 'integer', minimum: 100, maximum: MAX_DURATION_MS, description: 'Milliseconds the expression/bubble stays.' },
  priority: { type: 'string', enum: [...PRIORITIES], description: 'Queue priority; higher interrupts lower. Default normal.' },
  },
