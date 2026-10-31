@@ -89,6 +89,7 @@ export function mount(parent: HTMLElement, options: MountOptions = {}): ClaudeCh
  },
  on: (name, fn) => engine.on(name, fn),
  destroy() {
+ if (!alive) return;
  alive = false;
  reader?.dispose();
  cancelAnimationFrame(raf);
