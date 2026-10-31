@@ -66,13 +66,13 @@ export function mount(parent: HTMLElement, options: MountOptions = {}): ClaudeCh
  setMood: (mood) => engine.setMood(mood),
  lookAt(x, y) {
  if (x === null) engine.lookAt(null);
- else engine.lookAt(x / window.innerWidth * 2 - 1, (y ?? 0) / window.innerHeight * 2 - 1);
+ else engine.lookAt(x / window.innerWidth * 2 - 1, (y ?? window.innerHeight / 2) / window.innerHeight * 2 - 1);
  },
  stop: () => engine.stop(),
  lipSync(source) {
  reader?.dispose();
  reader = null;
- if (!source) {
+ if (!source || !alive) {
  engine.setAudioLevel(null);
  return;
  }
