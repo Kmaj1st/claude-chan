@@ -31,8 +31,14 @@ export function mount(parent: HTMLElement, options: MountOptions = {}): ClaudeCh
  storageKey: o.storageKey,
  zIndex: o.zIndex,
  });
- const puppet: Puppet = createPuppet(o, reduced);
+ let puppet: Puppet;
+ try {
+ puppet = createPuppet(o, reduced);
  shell.stage.appendChild(puppet.element);
+ } catch (err) {
+ shell.destroy();
+ throw err;
+ }
  const engine = new Engine(puppet, {
  autoIdle: o.autoIdle,
  reducedMotion: reduced,
