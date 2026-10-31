@@ -2,8 +2,6 @@ Claude-chan is an embeddable anime-style mascot. By default it shows real anime 
 
 The renderer option (or renderer attribute) is auto, sprite, procedural or live2d. The sprites option points to a folder with poses.json and motions.json, so another pose set can be dropped in (docs/ART-PIPELINE.md).
 
-Claude-chan is an embeddable anime-style mascot (procedural SVG puppet or expression sprites now, Live2D model later; set the sprites option or attribute to a folder such as /chars to use sprites). AI tool calls can drive it to play preset motions. It works in any web UI. No framework is required.
-
 ## 5-minute embed
 
 ### 1. Plain HTML (web component)
