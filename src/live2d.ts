@@ -62,7 +62,15 @@ export class Live2DPuppet implements Puppet {
  const w = this.element.clientWidth || 220;
  const h = this.element.clientHeight || 330;
  this.app = new PIXI.Application({ view: canvas, width: w, height: h, backgroundAlpha: 0, autoStart: true });
- const model = await Live2DModel.from(this.opts.model, { autoInteract: false });
+ let model: Awaited<ReturnType<typeof Live2DModel.from>>;
+ try {
+ model = await Live2DModel.from(this.opts.model, { autoInteract: false });
+ } catch (e) {
+ // Do not leak the renderer and canvas when the model cannot be loaded.
+ this.app?.destroy(true, { children: true });
+ this.app = null;
+ throw e;
+ }
  if (this.destroyed) {
  model.destroy();
  this.app?.destroy(true, { children: true });
