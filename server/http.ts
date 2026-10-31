@@ -25,6 +25,15 @@ function hostnameOf(value: string): string {
  }
 }
 
+// Pathname of a request target; '' when it cannot be parsed (for example '//').
+function pathnameOf(target: string | undefined): string {
+ try {
+ return new URL(target ?? '', 'http://localhost').pathname;
+ } catch {
+ return '';
+ }
+}
+
 function tokenOk(header: string | undefined, expected: string): boolean {
  const value = header ?? '';
  if (!value.startsWith('Bearer ')) return false;
@@ -68,7 +77,7 @@ export function createHttpServer(dispatch: Dispatch, opts: HttpOptions): HttpSer
  const origin = req.headers.origin;
  if (origin && !LOCAL_HOSTS.has(hostnameOf(origin))) return fail(403, 'bad origin');
  if (!tokenOk(req.headers.authorization, opts.token)) return fail(401, 'unauthorized');
- if (!req.url || new URL(req.url, 'http://localhost').pathname !== '/mcp') return fail(404, 'not found');
+ if (pathnameOf(req.url) !== '/mcp') return fail(404, 'not found');
  if (req.method !== 'POST') return fail(405, 'POST only');
  readBody(req).then(async (body) => {
  const server = createMcpServer(dispatch);

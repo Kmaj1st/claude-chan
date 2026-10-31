@@ -10,9 +10,9 @@ afterEach(async () => {
  server = undefined;
 });
 
-function rawPost(port: number, headers: Record<string, string>): Promise<number> {
+function rawPost(port: number, headers: Record<string, string>, path = '/mcp'): Promise<number> {
  return new Promise((resolve, reject) => {
- const req = request({ host: '127.0.0.1', port, path: '/mcp', method: 'POST', headers }, (res) => {
+ const req = request({ host: '127.0.0.1', port, path, method: 'POST', headers }, (res) => {
  res.resume();
  resolve(res.statusCode ?? 0);
  });
@@ -22,6 +22,15 @@ function rawPost(port: number, headers: Record<string, string>): Promise<number>
 }
 
 describe('http endpoint edge cases', () => {
+ it('answers 404 instead of crashing on an unparsable request target', async () => {
+ server = createHttpServer((async () => ({})) as never, { port: 0, token: TOKEN });
+ const port = await listenHttp(server, { port: 0, token: TOKEN });
+ const headers = { authorization: 'Bearer ' + TOKEN, 'content-type': 'application/json' };
+ expect(await rawPost(port, headers, '//')).toBe(404);
+ // Server is still alive afterwards.
+ expect(await rawPost(port, headers, '/other')).toBe(404);
+ });
+
  it('refuses to start with an empty token', () => {
  expect(() => createHttpServer((async () => ({})) as never, { port: 0, token: '' })).toThrow();
  });
