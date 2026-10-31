@@ -19,6 +19,15 @@ function readJson(file: string, res: CheckResult): any {
 // Validates an artist-delivered model folder against docs/ART-PIPELINE.md.
 export function checkModel(dir: string): CheckResult {
  const res: CheckResult = { errors: [], warnings: [] };
+ try {
+ runChecks(dir, res);
+ } catch (e) {
+ res.errors.push('malformed model folder: ' + (e instanceof Error ? e.message : String(e)));
+ }
+ return res;
+}
+
+function runChecks(dir: string, res: CheckResult): CheckResult {
  if (!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) {
  res.errors.push('not a directory: ' + dir);
  return res;
