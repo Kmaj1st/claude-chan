@@ -55,3 +55,61 @@ describe('createLevelReader media element failure', () => {
  }
  });
 });
+
+describe('createLevelReader media element graph', () => {
+ function setup(state: string) {
+ class FakeMedia {}
+ const resume = vi.fn(() => Promise.resolve());
+ const ctors = vi.fn();
+ const analyser = {
+ fftSize: 0,
+ connect: vi.fn(),
+ getByteTimeDomainData(buf: Uint8Array) {
+ buf.fill(192);
+ },
+ };
+ class FakeCtx {
+ state = state;
+ destination = {};
+ constructor() {
+ ctors();
+ }
+ createMediaElementSource() {
+ return { connect: vi.fn() };
+ }
+ createAnalyser() {
+ return analyser;
+ }
+ resume = resume;
+ close = vi.fn(() => Promise.resolve());
+ }
+ vi.stubGlobal('HTMLMediaElement', FakeMedia);
+ vi.stubGlobal('AudioContext', FakeCtx);
+ return { FakeMedia, resume, ctors, analyser };
+ }
+
+ it('reuses the cached graph for the same element and reads a level', () => {
+ const { FakeMedia, ctors, analyser } = setup('running');
+ try {
+ const el = new FakeMedia() as unknown as HTMLMediaElement;
+ const a = createLevelReader(el);
+ const b = createLevelReader(el);
+ expect(ctors).toHaveBeenCalledTimes(1);
+ expect(analyser.fftSize).toBe(512);
+ expect(a.read()).toBeGreaterThan(0);
+ expect(b.read()).toBeGreaterThan(0);
+ } finally {
+ vi.unstubAllGlobals();
+ }
+ });
+
+ it('resumes a suspended AudioContext', () => {
+ const { FakeMedia, resume } = setup('suspended');
+ try {
+ createLevelReader(new FakeMedia() as unknown as HTMLMediaElement);
+ expect(resume).toHaveBeenCalledTimes(1);
+ } finally {
+ vi.unstubAllGlobals();
+ }
+ });
+});
