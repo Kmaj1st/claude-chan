@@ -85,7 +85,7 @@ function status(manifest) {
 async function main() {
  const manifest = loadManifest();
  if (!process.argv.includes('--status') && fs.existsSync(INBOX)) {
- const files = fs.readdirSync(INBOX).filter((f) => /.$/i.test(f)).sort();
+ const files = fs.readdirSync(INBOX).filter((f) => /\.(png|jpe?g|webp)$/i.test(f)).sort();
  for (const f of files) {
  const full = path.join(INBOX, f);
  const sheet = Object.keys(items).find((id) => f.toUpperCase().startsWith(id + '-') || f.toUpperCase().startsWith(id + '.') || f.toUpperCase().startsWith(id + '_'));
