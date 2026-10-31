@@ -39,6 +39,7 @@
       },
       "say": {
         "type": "string",
+        "minLength": 1,
         "maxLength": 280,
         "description": "Short speech bubble text (plain text)."
       },
