@@ -107,6 +107,7 @@ export class Engine {
  if (was) this.puppet.setMotion?.(null, 0);
  if (was) this.emit('motionend', { motion: was.motion, interrupted: true });
  this.speakingUntil = 0;
+ this.expressionUntil = 0;
  this.opts.onSay?.('', 0);
  }
 
