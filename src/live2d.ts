@@ -71,7 +71,7 @@ export class Live2DPuppet implements Puppet {
  if (expression !== this.lastExpression) {
  this.lastExpression = expression;
  const id = this.opts.map?.expressions?.[expression] ?? expression;
- void this.model?.expression(id);
+ if (this.model) Promise.resolve(this.model.expression(id)).catch(() => { /* unknown expression id: keep current face */ });
  }
  }
 
