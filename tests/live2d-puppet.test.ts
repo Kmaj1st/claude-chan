@@ -15,6 +15,7 @@ const h = vi.hoisted(() => {
  appDestroyed: 0,
  fromCalled: false,
  gate: null as null | Promise<void>,
+ fail: false,
  };
  return state;
 });
@@ -30,6 +31,7 @@ vi.mock('pixi-live2d-display/cubism4', () => ({
  Live2DModel: {
  from: async () => {
  h.fromCalled = true;
+ if (h.fail) throw new Error('model load failed');
  if (h.gate) await h.gate;
  const m = {
  width: 100, height: 200, x: 0, y: 0,
@@ -60,7 +62,7 @@ function fakeEl(): Record<string, unknown> {
 }
 
 beforeEach(() => {
- h.model = null; h.appDestroyed = 0; h.gate = null; h.fromCalled = false;
+ h.model = null; h.appDestroyed = 0; h.gate = null; h.fromCalled = false; h.fail = false;
  vi.stubGlobal('window', { Live2DCubismCore: {} });
  vi.stubGlobal('document', { createElement: fakeEl, head: { appendChild: () => {} } });
 });
@@ -76,6 +78,13 @@ describe('Live2DPuppet', () => {
  expect(h.model!.expressions).toEqual(['f01']);
  p.render(neutralPose(), 'sad');
  expect(h.model!.expressions).toEqual(['f01', 'sad']);
+ });
+
+ it('destroys the PIXI app and rethrows when the model fails to load', async () => {
+ h.fail = true;
+ const p = new Live2DPuppet({ model: '/bad.model3.json' });
+ await expect(p.init()).rejects.toThrow('model load failed');
+ expect(h.appDestroyed).toBe(1);
  });
 
  it('writes the pose into the core model before each update', async () => {
