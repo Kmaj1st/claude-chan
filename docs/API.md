@@ -15,7 +15,10 @@ New names may be added in minor versions; existing names are never renamed or re
 
  import { ClaudeChan } from 'claude-chan';
  const cc = ClaudeChan.mount(document.body, {
- model: undefined, // model3.json URL; omit for the procedural puppet
+ renderer: 'auto', // auto | sprite | procedural | live2d; auto = live2d if model is set, else sprites, else procedural
+ sprites: undefined, // URL of a sprite pose folder (poses.json, motions.json, webp); default is the bundled assets/chars
+ model: undefined, // model3.json URL (live2d renderer)
+ expressions: undefined, // maps preset expression names to the model's own expression ids
  coreUrl: '/live2dcubismcore.min.js', // only with model
  position: 'bottom-left', // bottom-left | bottom-right | top-left | top-right
  size: 220, // character height in px
