@@ -96,6 +96,17 @@ describe('Engine', () => {
  expect(engine.queue.pending.length).toBe(0);
  });
 
+ it('stop drops a pending expression back to the mood expression', () => {
+ const { engine, frames } = make();
+ engine.tick(0);
+ engine.act({ expression: 'angry', duration: 5000 });
+ engine.tick(100);
+ expect(frames[frames.length - 1]!.expression).toBe('angry');
+ engine.stop();
+ engine.tick(200);
+ expect(frames[frames.length - 1]!.expression).toBe('neutral');
+ });
+
  it('blinks when autoIdle is on', () => {
  const f = fakePuppet();
  const engine = new Engine(f.puppet, { random: () => 0 });
