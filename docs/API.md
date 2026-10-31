@@ -23,7 +23,7 @@ New names may be added in minor versions; existing names are never renamed or re
  position: 'bottom-left', // bottom-left | bottom-right | top-left | top-right
  size: 220, // character height in px
  draggable: true,
- storageKey: 'claude-chan:pos', // false disables persistence
+ storageKey: 'claude-chan:position', // false disables persistence
  zIndex: 2147483000,
  autoIdle: true,
  });
