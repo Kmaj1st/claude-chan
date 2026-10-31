@@ -65,6 +65,24 @@ describe('SpritePuppet', () => {
  const p = new SpritePuppet({ baseUrl: '/x', fetchJson, loadImage: async () => { throw new Error('404'); } });
  await expect(p.init()).rejects.toThrow('404');
  });
+
+ it('does not re-request a failed lazy pose on every frame', async () => {
+ vi.stubGlobal('document', fakeDocument);
+ const calls: string[] = [];
+ const loadImage = async (u: string): Promise<HTMLImageElement> => {
+ calls.push(u);
+ if (!u.endsWith('idle.webp') && !u.endsWith('blink.webp')) throw new Error('404');
+ return mkImg();
+ };
+ const p = new SpritePuppet({ baseUrl: '/chars/', fetchJson, loadImage });
+ await p.init();
+ p.setMotion('wave', 200);
+ await flush();
+ for (let i = 0; i < 20; i++) { p.render(neutralPose(), 'neutral', 16 * i); await flush(); }
+ const counts = new Map<string, number>();
+ for (const u of calls) counts.set(u, (counts.get(u) ?? 0) + 1);
+ expect(Math.max(...counts.values())).toBeLessThanOrEqual(2);
+ });
 });
 
 describe('sheetTransform', () => {
