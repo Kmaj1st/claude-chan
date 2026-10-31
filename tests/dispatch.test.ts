@@ -29,6 +29,22 @@ describe('dispatcher', () => {
  expect(d('claude_chan_say', { text: 'x' }).ok).toBe(true);
  });
 
+ it('broadcasts the validated, normalized args', () => {
+ const { d, sent } = make();
+ d('claude_chan_act', { duration: 150.6, motion: 'wave' });
+ d('claude_chan_set_mood', { mood: 'shy' });
+ expect(sent[0].args).toEqual({ motion: 'wave', duration: 151 });
+ expect(sent[1].args).toEqual({ mood: 'shy' });
+ });
+
+ it('broadcasts the validated, normalized args', () => {
+ const { d, sent } = make();
+ d('claude_chan_act', { duration: 150.6, motion: 'wave' });
+ d('claude_chan_set_mood', { mood: 'shy' });
+ expect(sent[0].args).toEqual({ motion: 'wave', duration: 151 });
+ expect(sent[1].args).toEqual({ mood: 'shy' });
+ });
+
  it('rejects unknown tools and invalid args', () => {
  const { d, sent } = make();
  expect(d('nope', {}).ok).toBe(false);
