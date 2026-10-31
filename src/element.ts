@@ -25,8 +25,8 @@ export class ClaudeChanElement extends BaseElement {
  const size = Number(this.getAttribute('size'));
  this.controller = this.safeMount({
  renderer: rendererAttr(this.getAttribute('renderer')),
- model: this.getAttribute('model') ?? undefined,
- sprites: this.getAttribute('sprites') ?? undefined,
+ model: this.getAttribute('model') || undefined,
+ sprites: this.getAttribute('sprites') || undefined,
  position: pos && POSITIONS.includes(pos) ? pos : 'bottom-left',
  size: Number.isFinite(size) && size >= 60 && size <= 1000 ? size : 220,
  draggable: this.getAttribute('draggable') !== 'false',
