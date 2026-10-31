@@ -24,11 +24,17 @@ export function createLevelReader(source: HTMLMediaElement | AnalyserNode): Leve
  let g = graphs.get(source);
  if (!g) {
  const ctx = new AudioContext();
+ let a: AnalyserNode;
+ try {
  const node = ctx.createMediaElementSource(source);
- const a = ctx.createAnalyser();
+ a = ctx.createAnalyser();
  a.fftSize = 512;
  node.connect(a);
  a.connect(ctx.destination);
+ } catch (err) {
+ void ctx.close();
+ throw err;
+ }
  g = { ctx, analyser: a };
  graphs.set(source, g);
  }
