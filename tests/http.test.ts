@@ -66,6 +66,12 @@ describe('http mcp endpoint', () => {
  expect(res === undefined || res.status >= 400).toBe(true);
  });
 
+ it('answers 413 when content-length exceeds the limit', async () => {
+ const port = await start();
+ const res = await fetch('http://127.0.0.1:' + port + '/mcp', { method: 'POST', headers: { authorization: 'Bearer ' + TOKEN, 'content-type': 'application/json' }, body: JSON.stringify({ pad: 'x'.repeat(70000) }) });
+ expect(res.status).toBe(413);
+ });
+
  it('returns 404 for another path', async () => {
  const port = await start();
  const res = await fetch('http://127.0.0.1:' + port + '/other', { method: 'POST', headers: { authorization: 'Bearer ' + TOKEN }, body: '{}' });
