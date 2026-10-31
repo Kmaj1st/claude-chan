@@ -18,6 +18,9 @@ export interface SpriteOptions {
 
 const clamp = (v: number, lo: number, hi: number): number => Math.min(hi, Math.max(lo, v));
 
+// Minimum wait before a pose image that failed to load is requested again.
+const RETRY_AFTER_MS = 5000;
+
 async function defaultFetchJson(url: string): Promise<unknown> {
  const res = await fetch(url);
  if (!res.ok) throw new Error('HTTP ' + res.status + ' for ' + url);
@@ -56,6 +59,7 @@ export class SpritePuppet implements Puppet {
  private images = new Map<string, HTMLImageElement>();
  private loading = new Map<string, Promise<void>>();
  private ready = new Set<string>();
+ private failedAt = new Map<string, number>();
  private applied = new Map<string, string>();
  private destroyed = false;
  private reduced: boolean;
@@ -91,10 +95,12 @@ export class SpritePuppet implements Puppet {
 
  private map!: MotionMap;
 
- // Starts loading a pose image once; resolves when it can be shown.
+ // Starts loading a pose image once; resolves when it can be shown. A failed load is retried at most every RETRY_AFTER_MS.
  private ensure(id: string): Promise<void> {
  const have = this.loading.get(id);
  if (have) return have;
+ const failed = this.failedAt.get(id);
+ if (failed !== undefined && performance.now() - failed < RETRY_AFTER_MS) return Promise.reject(new Error('claude-chan: pose load failed recently ' + id));
  const def = this.set.poses[id];
  if (!def) return Promise.reject(new Error('claude-chan: unknown pose ' + id));
  const load = this.opts.loadImage ?? defaultLoadImage;
@@ -109,7 +115,10 @@ export class SpritePuppet implements Puppet {
  this.ready.add(id);
  });
  // A failed lazy load must not stay cached forever, so a later request can retry.
- p.catch(() => this.loading.delete(id));
+ p.catch(() => {
+ this.loading.delete(id);
+ this.failedAt.set(id, performance.now());
+ });
  this.loading.set(id, p);
  return p;
  }
