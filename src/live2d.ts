@@ -13,15 +13,27 @@ export interface Live2DOptions {
 
 const DEFAULT_CORE = './live2dcubismcore.min.js';
 
-function loadScript(src: string): Promise<void> {
- return new Promise((resolve, reject) => {
- if ((window as unknown as { Live2DCubismCore?: unknown }).Live2DCubismCore) return resolve();
+// One in-flight load per URL, so several puppets do not add duplicate script tags.
+const pendingScripts = new Map<string, Promise<void>>();
+
+export function loadScript(src: string): Promise<void> {
+ if ((window as unknown as { Live2DCubismCore?: unknown }).Live2DCubismCore) return Promise.resolve();
+ const existing = pendingScripts.get(src);
+ if (existing) return existing;
+ const p = new Promise<void>((resolve, reject) => {
  const s = document.createElement('script');
  s.src = src;
  s.onload = () => resolve();
- s.onerror = () => reject(new Error('Cannot load Cubism Core from ' + src));
+ s.onerror = () => {
+ s.remove();
+ reject(new Error('Cannot load Cubism Core from ' + src));
+ };
  document.head.appendChild(s);
  });
+ // A failed load is not cached, so a later retry can succeed.
+ p.catch(() => pendingScripts.delete(src));
+ pendingScripts.set(src, p);
+ return p;
 }
 
 type CoreModel = { setParameterValueById(id: string, v: number): void };
