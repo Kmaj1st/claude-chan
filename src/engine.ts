@@ -96,6 +96,7 @@ export class Engine {
  }
 
  lookAt(x: number | null, y = 0): void {
+ if (x !== null && (!Number.isFinite(x) || !Number.isFinite(y))) return;
  this.gaze = x === null ? null : { x: Math.max(-1, Math.min(1, x)), y: Math.max(-1, Math.min(1, y)) };
  }
 
@@ -178,7 +179,8 @@ export class Engine {
  p.ParamEyeROpen = Math.min(p.ParamEyeROpen, open);
  }
  for (const id of ['ParamEyeLOpen', 'ParamEyeROpen'] as const) p[id] = Math.max(0, Math.min(1, p[id]));
- const level = this.audioLevel ? this.audioLevel() : now < this.speakingUntil ? 0.35 + 0.35 * Math.abs(Math.sin(now / 90)) : 0;
+ const raw = this.audioLevel ? this.audioLevel() : now < this.speakingUntil ? 0.35 + 0.35 * Math.abs(Math.sin(now / 90)) : 0;
+ const level = Number.isFinite(raw) ? raw : 0;
  p.ParamMouthOpenY = Math.max(p.ParamMouthOpenY, Math.min(1, level));
  return p;
  }
