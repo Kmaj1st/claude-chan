@@ -1,5 +1,5 @@
 import { mount } from './mount';
-import type { ActRequest, ClaudeChanController, Mood, Position, RendererName } from './types';
+import type { ActRequest, ClaudeChanController, MountOptions, Mood, Position, RendererName } from './types';
 
 // <claude-chan model="" position="bottom-left" size="220" draggable="false"></claude-chan>
 // The element itself is display:contents; the fixed host lives under it.
@@ -16,13 +16,14 @@ export class ClaudeChanElement extends BaseElement {
 
  controller: ClaudeChanController | null = null;
  private remountQueued = false;
+ private mountFailed = false;
 
  connectedCallback(): void {
  if (this.controller) return;
  this.style.display = 'contents';
  const pos = this.getAttribute('position') as Position | null;
  const size = Number(this.getAttribute('size'));
- this.controller = mount(this, {
+ this.controller = this.safeMount({
  renderer: rendererAttr(this.getAttribute('renderer')),
  model: this.getAttribute('model') ?? undefined,
  sprites: this.getAttribute('sprites') ?? undefined,
@@ -31,14 +32,27 @@ export class ClaudeChanElement extends BaseElement {
  draggable: this.getAttribute('draggable') !== 'false',
  storageKey: this.getAttribute('storage-key') ?? 'claude-chan:position',
  });
+ if (!this.controller) return;
  for (const name of ['ready', 'motionstart', 'motionend', 'error'] as const) {
  this.controller.on(name, (detail) => this.dispatchEvent(new CustomEvent(name, { detail })));
  }
  }
 
+ // A failed mount (e.g. renderer="live2d" without a model) is reported as an 'error' event, not thrown.
+ private safeMount(options: MountOptions): ClaudeChanController | null {
+ this.mountFailed = false;
+ try {
+ return mount(this, options);
+ } catch (cause) {
+ this.mountFailed = true;
+ this.dispatchEvent(new CustomEvent('error', { detail: { message: 'mount failed', cause } }));
+ return null;
+ }
+ }
+
  // Attributes are read once at mount, so a change remounts. Batched per microtask.
  attributeChangedCallback(): void {
- if (!this.controller || this.remountQueued) return;
+ if ((!this.controller && !this.mountFailed) || this.remountQueued) return;
  this.remountQueued = true;
  queueMicrotask(() => {
  this.remountQueued = false;
