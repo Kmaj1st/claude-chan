@@ -76,7 +76,14 @@ export function mount(parent: HTMLElement, options: MountOptions = {}): ClaudeCh
  engine.setAudioLevel(null);
  return;
  }
- const r = createLevelReader(source);
+ let r: LevelReader;
+ try {
+ r = createLevelReader(source);
+ } catch (err) {
+ console.warn('claude-chan: lipSync unavailable', err);
+ engine.setAudioLevel(null);
+ return;
+ }
  reader = r;
  engine.setAudioLevel(() => r.read());
  },
