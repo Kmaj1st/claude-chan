@@ -1,0 +1,106 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { Live2DPuppet } from '../src/live2d';
+import { neutralPose } from '../src/types';
+
+const h = vi.hoisted(() => {
+ const state = {
+ model: null as null | {
+ expression: (id: string) => Promise<void>;
+ destroy: () => void;
+ handlers: Record<string, () => void>;
+ set: Array<[string, number]>;
+ expressions: string[];
+ destroyed: boolean;
+ },
+ appDestroyed: 0,
+ fromCalled: false,
+ gate: null as null | Promise<void>,
+ };
+ return state;
+});
+
+vi.mock('pixi.js', () => ({
+ Application: class {
+ stage = { addChild: () => {} };
+ destroy() { h.appDestroyed++; }
+ },
+}));
+
+vi.mock('pixi-live2d-display/cubism4', () => ({
+ Live2DModel: {
+ from: async () => {
+ h.fromCalled = true;
+ if (h.gate) await h.gate;
+ const m = {
+ width: 100, height: 200, x: 0, y: 0,
+ scale: { set: () => {} },
+ handlers: {} as Record<string, () => void>,
+ set: [] as Array<[string, number]>,
+ expressions: [] as string[],
+ destroyed: false,
+ expression: async (id: string) => { m.expressions.push(id); },
+ destroy: () => { m.destroyed = true; },
+ internalModel: {
+ on: (name: string, fn: () => void) => { m.handlers[name] = fn; },
+ coreModel: { setParameterValueById: (id: string, v: number) => { m.set.push([id, v]); } },
+ },
+ };
+ h.model = m;
+ return m;
+ },
+ },
+}));
+
+function fakeEl(): Record<string, unknown> {
+ const el: Record<string, unknown> = {
+ style: {}, clientWidth: 0, clientHeight: 0,
+ appendChild: () => {}, remove: () => {}, replaceChildren: () => {},
+ };
+ return el;
+}
+
+beforeEach(() => {
+ h.model = null; h.appDestroyed = 0; h.gate = null; h.fromCalled = false;
+ vi.stubGlobal('window', { Live2DCubismCore: {} });
+ vi.stubGlobal('document', { createElement: fakeEl, head: { appendChild: () => {} } });
+});
+afterEach(() => { vi.unstubAllGlobals(); });
+
+describe('Live2DPuppet', () => {
+ it('applies an expression rendered before the model loaded, through the map', async () => {
+ const p = new Live2DPuppet({ model: '/m.model3.json', map: { expressions: { smile: 'f01' } } });
+ p.render(neutralPose(), 'smile');
+ await p.init();
+ expect(h.model!.expressions).toEqual(['f01']);
+ p.render(neutralPose(), 'smile');
+ expect(h.model!.expressions).toEqual(['f01']);
+ p.render(neutralPose(), 'sad');
+ expect(h.model!.expressions).toEqual(['f01', 'sad']);
+ });
+
+ it('writes the pose into the core model before each update', async () => {
+ const p = new Live2DPuppet({ model: '/m.model3.json' });
+ await p.init();
+ h.model!.handlers['beforeModelUpdate']!();
+ expect(h.model!.set).toHaveLength(0);
+ const pose = neutralPose();
+ p.render(pose, 'neutral');
+ h.model!.handlers['beforeModelUpdate']!();
+ expect(h.model!.set.length).toBeGreaterThan(0);
+ });
+
+ it('cleans up when destroyed while the model is still loading', async () => {
+ let open!: () => void;
+ h.gate = new Promise<void>((r) => { open = r; });
+ const p = new Live2DPuppet({ model: '/m.model3.json' });
+ const init = p.init();
+ await vi.waitFor(() => expect(h.fromCalled).toBe(true));
+ p.destroy();
+ open();
+ await init;
+ expect(h.model).not.toBeNull();
+ expect(h.model!.destroyed).toBe(true);
+ expect(h.appDestroyed).toBeGreaterThanOrEqual(1);
+ expect(Object.keys(h.model!.handlers)).toHaveLength(0);
+ });
+});
