@@ -79,6 +79,7 @@ export function createHttpServer(dispatch: Dispatch, opts: HttpOptions): HttpSer
  if (!tokenOk(req.headers.authorization, opts.token)) return fail(401, 'unauthorized');
  if (pathnameOf(req.url) !== '/mcp') return fail(404, 'not found');
  if (req.method !== 'POST') return fail(405, 'POST only');
+ if (Number(req.headers['content-length'] ?? 0) > MAX_HTTP_BODY) return fail(413, 'body too large');
  readBody(req).then(async (body) => {
  const server = createMcpServer(dispatch);
  const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined });
