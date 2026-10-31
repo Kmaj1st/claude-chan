@@ -42,6 +42,15 @@ describe('checkModel', () => {
  it('passes a complete folder', () => {
  expect(checkModel(build()).errors).toEqual([]);
  });
+ it('reports malformed model3.json structure instead of throwing', () => {
+ const dir = build((m) => {
+ m.FileReferences.Motions = { wave: 'nope' };
+ m.FileReferences.Expressions = [null];
+ });
+ const r = checkModel(dir);
+ expect(r.errors.length).toBeGreaterThan(0);
+ expect(r.errors.join()).toContain('malformed');
+ });
  it('reports a missing moc file', () => {
  const dir = build();
  fs.rmSync(path.join(dir, 'claude-chan.moc3'));
