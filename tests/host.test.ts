@@ -29,3 +29,10 @@ describe('cornerVars', () => {
  expect(v['--claude-chan-left']).toBe('auto');
  });
 });
+
+describe('clampPosition non-finite input', () => {
+ it('treats NaN and Infinity as the origin instead of propagating NaN', () => {
+ expect(clampPosition(NaN, NaN, 200, 300, 1000, 800)).toEqual({ x: 0, y: 0 });
+ expect(clampPosition(Infinity, -Infinity, 200, 300, 1000, 800)).toEqual({ x: 0, y: 0 });
+ });
+});
