@@ -63,6 +63,8 @@ export interface MountOptions {
  model?: string;
  // URL of the self-hosted Cubism Core script (live2dcubismcore.min.js); only used with model.
  coreUrl?: string;
+ // Maps preset expression names to the model's own expression ids (Live2D renderer); unmapped names are used as-is.
+ expressions?: Partial<Record<Expression, string>>;
  // URL of a sprite pose folder (poses.json, motions.json and the webp files). Default: the assets/chars folder shipped with the package.
  sprites?: string;
  position?: Position;
