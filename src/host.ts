@@ -8,8 +8,8 @@ export interface Box { x: number; y: number }
 // Keep a wh box fully inside a vwvh viewport.
 export function clampPosition(x: number, y: number, w: number, h: number, vw: number, vh: number): Box {
  return {
- x: Math.max(0, Math.min(x, Math.max(0, vw - w))),
- y: Math.max(0, Math.min(y, Math.max(0, vh - h))),
+ x: Math.max(0, Math.min(Number.isFinite(x) ? x : 0, Math.max(0, vw - w))),
+ y: Math.max(0, Math.min(Number.isFinite(y) ? y : 0, Math.max(0, vh - h))),
  };
 }
 
@@ -102,7 +102,7 @@ export function createShell(parent: HTMLElement, o: ShellOptions): Shell {
  if (!o.draggable || e.button !== 0) return;
  const r = stage.getBoundingClientRect();
  drag = { dx: e.clientX - r.left, dy: e.clientY - r.top, id: e.pointerId };
- stage.setPointerCapture(e.pointerId);
+ try { stage.setPointerCapture(e.pointerId); } catch { void 0; }
  stage.classList.add('dragging');
  };
  const move = (e: PointerEvent): void => {
