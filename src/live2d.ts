@@ -64,6 +64,11 @@ export class Live2DPuppet implements Puppet {
  // Apply the shared pose right before each model update so it wins over built-in idle motions.
  model.internalModel.on('beforeModelUpdate', () => this.apply());
  this.model = model;
+ // render() may have run before the model loaded: apply the pending expression now.
+ if (this.lastExpression) {
+ const pending = this.opts.map?.expressions?.[this.lastExpression] ?? this.lastExpression;
+ Promise.resolve(model.expression(pending)).catch(() => { /* unknown id */ });
+ }
  }
 
  render(pose: Pose, expression: Expression): void {
