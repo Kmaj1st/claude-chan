@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it } from 'vitest';
+import { connect as netConnect } from 'node:net';
 import WebSocket from 'ws';
 import { Hub, MAX_MESSAGE_BYTES } from '../server/hub';
 
@@ -27,7 +28,32 @@ async function until(cond: () => boolean): Promise<void> {
  for (let i = 0; i < 100 && !cond(); i++) await new Promise((r) => setTimeout(r, 20));
 }
 
+const CRLF = String.fromCharCode(13, 10);
+
+function rawUpgrade(port: number, target: string): Promise<string> {
+ return new Promise((resolve) => {
+ const sock = netConnect(port, '127.0.0.1');
+ let data = '';
+ sock.on('connect', () => {
+ sock.write(['GET ' + target + ' HTTP/1.1', 'Host: 127.0.0.1', 'Connection: Upgrade', 'Upgrade: websocket', 'Sec-WebSocket-Version: 13', 'Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==', '', ''].join(CRLF));
+ });
+ sock.on('data', (d) => (data += d.toString()));
+ sock.on('close', () => resolve(data));
+ sock.on('error', () => resolve(data));
+ });
+}
+
 describe('hub edge cases', () => {
+ it('answers 400 instead of crashing on an unparsable request target', async () => {
+ hub = new Hub({ token: TOKEN });
+ const port = await hub.listen();
+ const reply = await rawUpgrade(port, '//');
+ expect(reply.startsWith('HTTP/1.1 400')).toBe(true);
+ const ws = await connect(port);
+ expect(typeof ws).not.toBe('string');
+ (ws as WebSocket).close();
+ });
+
  it('allows connections without an Origin header', async () => {
  hub = new Hub({ token: TOKEN });
  const ws = await connect(await hub.listen());
