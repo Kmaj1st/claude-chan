@@ -6,6 +6,11 @@ import type { ClaudeChanController, MountOptions, Puppet } from './types';
 
 // Vanilla entry point: builds shell + puppet + engine and runs the frame loop.
 
+// Drops undefined values so mount(el, { size: props.size }) keeps the defaults.
+export function definedOnly<T extends object>(o: T): Partial<T> {
+ return Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined)) as Partial<T>;
+}
+
 export function mount(parent: HTMLElement, options: MountOptions = {}): ClaudeChanController {
  if (typeof document === 'undefined') {
  throw new Error('claude-chan: mount() needs a browser DOM; call it from onMounted/useEffect, not during SSR.');
@@ -16,7 +21,7 @@ export function mount(parent: HTMLElement, options: MountOptions = {}): ClaudeCh
  draggable: true,
  storageKey: 'claude-chan:position' as string | false,
  autoIdle: true,
- ...options,
+ ...definedOnly(options),
  };
  const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
  const shell = createShell(parent, {
