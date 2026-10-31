@@ -1,5 +1,5 @@
 import { mount } from './mount';
-import type { ClaudeChanController, Position, RendererName } from './types';
+import type { ActRequest, ClaudeChanController, Mood, Position, RendererName } from './types';
 
 // <claude-chan model="" position="bottom-left" size="220" draggable="false"></claude-chan>
 // The element itself is display:contents; the fixed host lives under it.
@@ -52,6 +52,14 @@ export class ClaudeChanElement extends BaseElement {
  this.controller?.destroy();
  this.controller = null;
  }
+
+ // Controller methods forwarded so el.say('hi') works; no-ops while disconnected.
+ act(req: ActRequest): void { this.controller?.act(req); }
+ say(text: string): void { this.controller?.say(text); }
+ setMood(mood: Mood): void { this.controller?.setMood(mood); }
+ lookAt(x: number | null, y?: number): void { this.controller?.lookAt(x, y); }
+ stop(): void { this.controller?.stop(); }
+ lipSync(source: HTMLMediaElement | AnalyserNode | null): void { this.controller?.lipSync(source); }
 }
 
 export function defineClaudeChan(tag = 'claude-chan'): void {
