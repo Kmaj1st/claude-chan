@@ -56,7 +56,14 @@ export function createPuppet(o: MountOptions, reducedMotion: boolean): Puppet {
  const renderer = o.renderer ?? 'auto';
  if (renderer === 'live2d' || (renderer === 'auto' && o.model)) {
  if (!o.model) throw new Error('claude-chan: renderer "live2d" needs the model option.');
- return new Live2DPuppet({ model: o.model, coreUrl: o.coreUrl });
+ const live = new Live2DPuppet({ model: o.model, coreUrl: o.coreUrl, map: o.expressions ? { expressions: o.expressions } : undefined });
+ if (renderer === 'live2d') return live;
+ // auto: a failing model (missing Cubism Core, bad URL) falls back to the sprite/procedural chain.
+ return new FallbackPuppet(
+ live,
+ () => createPuppet({ ...o, model: undefined, renderer: 'auto' }, reducedMotion),
+ (cause) => console.warn('claude-chan: Live2D model failed to load, using the fallback renderer.', cause),
+ );
  }
  if (renderer === 'procedural') return new ProceduralPuppet();
  const baseUrl = o.sprites ?? defaultSpriteBase();

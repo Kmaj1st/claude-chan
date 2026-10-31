@@ -137,7 +137,8 @@ describe('renderer selection', () => {
  expect(createPuppet({ renderer: 'sprite', sprites: '/chars' }, false)).toBeInstanceOf(SpritePuppet);
  expect(createPuppet({ renderer: 'procedural' }, false).constructor.name).toBe('ProceduralPuppet');
  expect(() => createPuppet({ renderer: 'live2d' }, false)).toThrow(/model/);
- expect(createPuppet({ model: '/m/model3.json' }, false).constructor.name).toBe('Live2DPuppet');
+ expect(createPuppet({ model: '/m/model3.json' }, false).constructor.name).toBe('FallbackPuppet');
+ expect(createPuppet({ model: '/m/model3.json', renderer: 'live2d' }, false).constructor.name).toBe('Live2DPuppet');
  });
 
  it('has a default sprite folder next to the package', () => {
