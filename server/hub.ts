@@ -37,7 +37,12 @@ export class Hub {
  });
  this.wss = new WebSocketServer({ noServer: true, maxPayload: MAX_MESSAGE_BYTES });
  this.http.on('upgrade', (req, socket, head) => {
- const url = new URL(req.url ?? '/', 'http://localhost');
+ let url: URL | null = null;
+ try {
+ url = new URL(req.url ?? '/', 'http://localhost');
+ } catch {
+ url = null;
+ }
  const origin = req.headers.origin;
  const originOk =
  origin === undefined || (o.allowedOrigins ? o.allowedOrigins.includes(origin) : LOOPBACK.test(origin));
@@ -45,6 +50,7 @@ export class Hub {
  socket.write('HTTP/1.1 ' + code + ' Rejected' + CRLF + 'Connection: close' + CRLF + CRLF);
  socket.destroy();
  };
+ if (url === null) return reject(400);
  if (!originOk) return reject(403);
  if (!tokenOk(url.searchParams.get('token'), o.token)) return reject(401);
  if (this.clients.size >= (o.maxClients ?? 16)) return reject(503);
