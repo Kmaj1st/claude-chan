@@ -50,3 +50,29 @@ describe('<claude-chan> mount failure', () => {
  expect(el.controller).toBe(controller);
  });
 });
+
+describe('<claude-chan> empty attributes', () => {
+ afterEach(() => {
+ mount.mockReset();
+ });
+
+ it('treats empty model/sprites attributes as unset', () => {
+ const el = make();
+ el.getAttribute = (n: string) => (n === 'model' || n === 'sprites' ? '' : null);
+ mount.mockReturnValueOnce({ on: vi.fn(), destroy: vi.fn() });
+ el.connectedCallback();
+ const opts = (mount.mock.calls[0] as any[])[1];
+ expect(opts.model).toBeUndefined();
+ expect(opts.sprites).toBeUndefined();
+ });
+
+ it('passes non-empty model/sprites attributes through', () => {
+ const el = make();
+ el.getAttribute = (n: string) => (n === 'model' ? 'm.json' : n === 'sprites' ? '/s' : null);
+ mount.mockReturnValueOnce({ on: vi.fn(), destroy: vi.fn() });
+ el.connectedCallback();
+ const opts = (mount.mock.calls[0] as any[])[1];
+ expect(opts.model).toBe('m.json');
+ expect(opts.sprites).toBe('/s');
+ });
+});
