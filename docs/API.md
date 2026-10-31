@@ -25,7 +25,7 @@ New names may be added in minor versions; existing names are never renamed or re
  autoIdle: true,
  });
 
-Web component: <claude-chan renderer="auto" sprites="/chars" model="" position="bottom-left" size="220" draggable="false"></claude-chan>.
+Web component: <claude-chan renderer="auto" sprites="/chars" model="" position="bottom-left" size="220" draggable="false"></claude-chan>. The element forwards act, say, setMood, lookAt, stop and lipSync to its controller (el.say('hi')); they do nothing while it is disconnected. ready, motionstart, motionend and error are re-dispatched as CustomEvents.
 
 ## Controller
 
