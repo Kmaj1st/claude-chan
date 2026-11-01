@@ -77,7 +77,9 @@ export class Live2DPuppet implements Puppet {
  this.app = null;
  return;
  }
- model.scale.set(Math.min(w / model.width, h / model.height));
+ // A model that reports no size (not laid out yet) would give an infinite scale: keep 1.
+ const fit = model.width > 0 && model.height > 0 ? Math.min(w / model.width, h / model.height) : 1;
+ model.scale.set(fit);
  model.x = (w - model.width) / 2;
  model.y = h - model.height;
  this.app.stage.addChild(model as never);
