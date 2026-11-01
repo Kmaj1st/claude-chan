@@ -50,6 +50,12 @@ describe('<claude-chan> attribute parsing', () => {
  expect(ClaudeChanElement.observedAttributes).toContain('core-url');
  });
 
+ it('storage-key="false" disables persistence', () => {
+ mount.mockReturnValueOnce(ctrl());
+ make({ 'storage-key': 'false' }).connectedCallback();
+ expect(optsOf().storageKey).toBe(false);
+ });
+
  it('keeps an empty storage-key (disables persistence key) instead of the default', () => {
  mount.mockReturnValueOnce(ctrl());
  make({ 'storage-key': '' }).connectedCallback();
