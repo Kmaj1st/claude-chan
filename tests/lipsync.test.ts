@@ -113,3 +113,39 @@ describe('createLevelReader media element graph', () => {
  }
  });
 });
+
+describe('createLevelReader resume rejection', () => {
+ it('swallows a rejected resume() instead of leaking an unhandled rejection', async () => {
+ class FakeMedia {}
+ const resume = vi.fn(() => Promise.reject(new Error('autoplay blocked')));
+ const analyser = {
+ fftSize: 0,
+ connect: vi.fn(),
+ getByteTimeDomainData(buf: Uint8Array) {
+ buf.fill(128);
+ },
+ };
+ class FakeCtx {
+ state = 'suspended';
+ destination = {};
+ createMediaElementSource() {
+ return { connect: vi.fn() };
+ }
+ createAnalyser() {
+ return analyser;
+ }
+ resume = resume;
+ close = vi.fn(() => Promise.resolve());
+ }
+ vi.stubGlobal('HTMLMediaElement', FakeMedia);
+ vi.stubGlobal('AudioContext', FakeCtx);
+ try {
+ const r = createLevelReader(new FakeMedia() as unknown as HTMLMediaElement);
+ await new Promise((res) => setTimeout(res, 0));
+ expect(resume).toHaveBeenCalledTimes(1);
+ expect(r.read()).toBe(0);
+ } finally {
+ vi.unstubAllGlobals();
+ }
+ });
+});
