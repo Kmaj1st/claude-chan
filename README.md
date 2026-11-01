@@ -71,7 +71,7 @@ Set model to a .model3.json URL and core-url to your self-hosted live2dcubismcor
 
  <claude-chan model="/model/claude.model3.json" core-url="/live2dcubismcore.min.js"></claude-chan>
 
-The demo page accepts ?model=...&core=... for a quick try. Map preset expressions to the model's own ids with the expressions option, or on the element with expressions='{"smile":"f01"}' (JSON). Validate a model folder with npm run check:model -- <folder>; run the opt-in headless test with LIVE2D_MODEL_DIR and LIVE2D_CORE set, then npm run test:live2d.
+The demo page accepts ?model=...&core=...&expressions=... for a quick try. Map preset expressions to the model's own ids with the expressions option, or on the element with expressions='{"smile":"f01"}' (JSON). Validate a model folder with npm run check:model -- <folder>; run the opt-in headless test with LIVE2D_MODEL_DIR and LIVE2D_CORE set, then npm run test:live2d.
 
 ## Driving it from an AI
 
