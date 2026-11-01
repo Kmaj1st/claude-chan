@@ -55,6 +55,15 @@ Motions (stable names): idle, wave, nod, shake_head, think, happy, surprised, bo
 
 Expressions: neutral, smile, sad, angry, blush, surprised.
 
+## Agent states
+
+Report what the agent is doing and Claude-chan picks motion, expression and mood. States: idle, listening, thinking, working, waiting, speaking, success, error, sleeping.
+
+ import { applyState } from 'claude-chan';
+ applyState(cc, 'thinking'); // vanilla controller
+ el.setState('thinking'); // <claude-chan> element
+
+Over MCP or postMessage use the claude_chan_set_state tool (docs/API.md).
 ## Driving it from an AI
 
 | Way | Use when | Docs |
