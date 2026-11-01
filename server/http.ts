@@ -42,6 +42,12 @@ function tokenOk(header: string | undefined, expected: string): boolean {
  return given.length === want.length && timingSafeEqual(given, want);
 }
 
+class HttpError extends Error {
+ constructor(readonly status: number, message: string) {
+ super(message);
+ }
+}
+
 function readBody(req: IncomingMessage): Promise<unknown> {
  return new Promise((resolve, reject) => {
  let size = 0;
@@ -49,8 +55,8 @@ function readBody(req: IncomingMessage): Promise<unknown> {
  req.on('data', (c: Buffer) => {
  size += c.length;
  if (size > MAX_HTTP_BODY) {
- reject(new Error('body too large'));
- req.destroy();
+ chunks.length = 0;
+ reject(new HttpError(413, 'body too large'));
  return;
  }
  chunks.push(c);
@@ -59,7 +65,7 @@ function readBody(req: IncomingMessage): Promise<unknown> {
  try {
  resolve(JSON.parse(Buffer.concat(chunks).toString('utf8')));
  } catch {
- reject(new Error('invalid json'));
+ reject(new HttpError(400, 'invalid json'));
  }
  });
  req.on('error', reject);
@@ -90,7 +96,13 @@ export function createHttpServer(dispatch: Dispatch, opts: HttpOptions): HttpSer
  await server.connect(transport);
  await transport.handleRequest(req, res, body);
  }).catch((e: Error) => {
- if (!res.headersSent) fail(400, e.message);
+ if (res.headersSent) return;
+ const status = e instanceof HttpError ? e.status : 400;
+ if (status === 413) {
+ res.once('finish', () => req.destroy());
+ res.setHeader('connection', 'close');
+ }
+ fail(status, e.message);
  });
  });
 }
