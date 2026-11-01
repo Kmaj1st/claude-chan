@@ -53,3 +53,25 @@ describe('createMarkerStream edge cases', () => {
  expect(onAct).toHaveBeenCalledWith({ motion: 'wave' });
  });
 });
+
+describe('createMarkerStream priority carry', () => {
+ it('applies a leading priority from an earlier chunk to the next act', () => {
+ const onAct = vi.fn();
+ const s = createMarkerStream(onAct);
+ const out = s.push('a [priority:high]') + s.push(' b [motion:bow]') + s.flush();
+ expect(out).toBe('a ' + ' b ');
+ expect(onAct).toHaveBeenCalledTimes(1);
+ expect(onAct).toHaveBeenCalledWith({ priority: 'high', motion: 'bow' });
+ });
+
+ it('does not leak a carried priority into a later act', () => {
+ const onAct = vi.fn();
+ const s = createMarkerStream(onAct);
+ s.push('[priority:high]');
+ s.push('[motion:bow]');
+ s.push('[motion:nod]');
+ s.flush();
+ expect(onAct).toHaveBeenNthCalledWith(1, { priority: 'high', motion: 'bow' });
+ expect(onAct).toHaveBeenNthCalledWith(2, { motion: 'nod' });
+ });
+});
