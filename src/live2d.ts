@@ -1,4 +1,4 @@
-import { PARAMS, type Expression, type Pose, type Puppet } from './types';
+import { PARAMS, type Expression, type Motion, type Pose, type Puppet } from './types';
 
 // Live2D Cubism 4 renderer (pixi-live2d-display). Loaded lazily by mount() only when a model URL is set.
 // The proprietary Cubism Core is NOT bundled: the host self-hosts live2dcubismcore.min.js (see docs/LICENSES.md).
@@ -8,7 +8,7 @@ export interface Live2DOptions {
  // URL of the self-hosted Cubism Core script.
  coreUrl?: string;
  // Parsed motions.json; expressions map preset name -> model expression id.
- map?: { expressions?: Record<string, string> };
+ map?: { expressions?: Record<string, string>; motions?: Record<string, { group: string; index: number }> };
 }
 
 const DEFAULT_CORE = './live2dcubismcore.min.js';
@@ -92,11 +92,35 @@ export class Live2DPuppet implements Puppet {
  // Apply the shared pose right before each model update so it wins over built-in idle motions.
  model.internalModel.on('beforeModelUpdate', () => this.apply());
  this.model = model;
+ await this.loadMotionMap();
  // render() may have run before the model loaded: apply the pending expression now.
  if (this.lastExpression) {
  const pending = this.opts.map?.expressions?.[this.lastExpression] ?? this.lastExpression;
  this.callExpression(model, pending).catch(() => { /* unknown id */ });
  }
+ }
+
+ // Optional motions.json next to the model3.json (docs/ART-PIPELINE.md section 7). Without it no preset motions play.
+ private motionMap: Record<string, { group: string; index: number }> | undefined;
+
+ private async loadMotionMap(): Promise<void> {
+ if (this.opts.map?.motions || typeof fetch !== 'function') return;
+ try {
+ const res = await fetch(new URL('motions.json', new URL(this.opts.model, typeof window !== 'undefined' && window.location ? window.location.href : undefined)).href);
+ if (!res.ok) return;
+ const raw = (await res.json()) as { motions?: Record<string, { group: string; index: number }> };
+ if (raw && typeof raw.motions === 'object') this.motionMap = raw.motions;
+ } catch { return; }
+ }
+
+ // Plays the model motion that motions.json assigns to the preset; presets without an entry only get the procedural pose.
+ setMotion(motion: Motion | null): void {
+ if (!motion || !this.model) return;
+ const ent = (this.opts.map?.motions ?? this.motionMap)?.[motion];
+ if (!ent) return;
+ try {
+ Promise.resolve(this.model.motion(ent.group, ent.index)).catch(() => undefined);
+ } catch { return; }
  }
 
  render(pose: Pose, expression: Expression): void {

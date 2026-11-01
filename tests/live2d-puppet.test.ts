@@ -43,6 +43,7 @@ vi.mock('pixi-live2d-display/cubism4', () => ({
  expressions: [] as string[],
  destroyed: false,
  expression: async (id: string) => { m.expressions.push(id); },
+ motion: async (group: string, index: number) => { (h as unknown as { motions: Array<[string, number]> }).motions.push([group, index]); },
  destroy: () => { m.destroyed = true; },
  internalModel: {
  on: (name: string, fn: () => void) => { m.handlers[name] = fn; },
@@ -113,6 +114,36 @@ describe('Live2DPuppet', () => {
  p.render(pose, 'neutral');
  h.model!.handlers['beforeModelUpdate']!();
  expect(h.model!.set.length).toBeGreaterThan(0);
+ });
+
+ it('plays the model motion that the motion map assigns to a preset', async () => {
+ const hh = h as unknown as { motions: Array<[string, number]> };
+ hh.motions = [];
+ const p = new Live2DPuppet({ model: '/m.model3.json', map: { motions: { wave: { group: 'wave', index: 2 } } } });
+ await p.init();
+ p.setMotion('wave');
+ p.setMotion('nod');
+ p.setMotion(null);
+ expect(hh.motions).toEqual([['wave', 2]]);
+ });
+
+ it('reads motions.json next to the model when no map is given', async () => {
+ const hh = h as unknown as { motions: Array<[string, number]> };
+ hh.motions = [];
+ const seen: string[] = [];
+ vi.stubGlobal('fetch', async (url: string) => {
+ seen.push(url);
+ return { ok: true, json: async () => ({ motions: { nod: { group: 'nod', index: 0 } } }) };
+ });
+ try {
+ const p = new Live2DPuppet({ model: 'http://x.test/model/c.model3.json' });
+ await p.init();
+ p.setMotion('nod');
+ expect(seen).toEqual(['http://x.test/model/motions.json']);
+ expect(hh.motions).toEqual([['nod', 0]]);
+ } finally {
+ vi.unstubAllGlobals();
+ }
  });
 
  it('cleans up when destroyed while the model is still loading', async () => {
