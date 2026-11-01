@@ -23,9 +23,15 @@ const VALID: Record<string, readonly string[]> = {
 
 // One-shot parse of a complete string.
 export function parseMarkers(input: string): MarkerResult {
+ const { text, acts, moods } = scan(input);
+ return { text, acts, moods };
+}
+
+// Like parseMarkers, but a priority seen before any act is carried in and out (for streaming).
+function scan(input: string, carry?: ActRequest['priority']): MarkerResult & { carry?: ActRequest['priority'] } {
  const acts: ActRequest[] = [];
  const moods: Mood[] = [];
- let pending: ActRequest = {};
+ let pending: ActRequest = carry ? { priority: carry } : {};
  const text = input.replace(TAG, (whole, key: string, value: string) => {
  if (!VALID[key]?.includes(value)) return whole;
  if (key === 'mood') {
@@ -43,7 +49,7 @@ export function parseMarkers(input: string): MarkerResult {
  // A trailing priority tag applies to the last act.
  const last = acts[acts.length - 1];
  if (pending.priority && last) last.priority = pending.priority;
- return { text, acts, moods };
+ return { text, acts, moods, carry: last ? undefined : pending.priority };
 }
 
 export interface MarkerStream {
@@ -59,7 +65,9 @@ export function createMarkerStream(
  onMood?: (mood: Mood) => void,
 ): MarkerStream {
  let held = '';
- const emit = (r: MarkerResult): string => {
+ let carry: ActRequest['priority'];
+ const emit = (r: MarkerResult & { carry?: ActRequest['priority'] }): string => {
+ carry = r.carry;
  r.acts.forEach((a) => onAct(a));
  r.moods.forEach((m) => onMood?.(m));
  return r.text;
@@ -71,12 +79,12 @@ export function createMarkerStream(
  let cut = buf.length;
  if (open >= 0 && buf.length - open < MAX_TAG && buf.indexOf(']', open) < 0) cut = open;
  held = buf.slice(cut);
- return emit(parseMarkers(buf.slice(0, cut)));
+ return emit(scan(buf.slice(0, cut), carry));
  },
  flush() {
  const rest = held;
  held = '';
- return emit(parseMarkers(rest));
+ return emit(scan(rest, carry));
  },
  };
 }
