@@ -6,6 +6,7 @@ import type { ActRequest, ClaudeChanController, MountOptions, Mood, Position, Re
 
 const RENDERERS: RendererName[] = ['auto', 'sprite', 'procedural', 'live2d'];
 const rendererAttr = (v: string | null): RendererName | undefined => RENDERERS.find((r) => r === v);
+const storageKeyAttr = (v: string | null): string | false => (v === null ? 'claude-chan:position' : v === 'false' ? false : v);
 const POSITIONS: Position[] = ['bottom-left', 'bottom-right', 'top-left', 'top-right'];
 
 // Safe to import during SSR (Node has no HTMLElement); the element only registers in a browser.
@@ -31,7 +32,7 @@ export class ClaudeChanElement extends BaseElement {
  position: pos && POSITIONS.includes(pos) ? pos : 'bottom-left',
  size: Number.isFinite(size) && size >= 60 && size <= 1000 ? size : 220,
  draggable: this.getAttribute('draggable') !== 'false',
- storageKey: this.getAttribute('storage-key') ?? 'claude-chan:position',
+ storageKey: storageKeyAttr(this.getAttribute('storage-key')),
  });
  if (!this.controller) return;
  for (const name of ['ready', 'motionstart', 'motionend', 'error'] as const) {
