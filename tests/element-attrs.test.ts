@@ -50,6 +50,19 @@ describe('<claude-chan> attribute parsing', () => {
  expect(ClaudeChanElement.observedAttributes).toContain('core-url');
  });
 
+ it('parses the expressions attribute as a JSON map and ignores bad input', () => {
+ mount.mockReturnValue(ctrl());
+ make({ expressions: '{"smile":"f01","sad":3,"angry":""}' }).connectedCallback();
+ expect(optsOf(0).expressions).toEqual({ smile: 'f01' });
+ make({ expressions: 'not json' }).connectedCallback();
+ expect(optsOf(1).expressions).toBeUndefined();
+ make({ expressions: '["a"]' }).connectedCallback();
+ expect(optsOf(2).expressions).toBeUndefined();
+ make().connectedCallback();
+ expect(optsOf(3).expressions).toBeUndefined();
+ expect(ClaudeChanElement.observedAttributes).toContain('expressions');
+ });
+
  it('storage-key="false" disables persistence', () => {
  mount.mockReturnValueOnce(ctrl());
  make({ 'storage-key': 'false' }).connectedCallback();
