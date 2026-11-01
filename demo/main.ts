@@ -85,3 +85,13 @@ document.getElementById('renderer')?.addEventListener('change', (e) => {
  el.setAttribute('renderer', (e.target as HTMLSelectElement).value);
  write('renderer = ' + (e.target as HTMLSelectElement).value);
 });
+
+// Element events (re-dispatched by <claude-chan> on every mount): shows model load and mount failures.
+const errText = (d: { message?: string; cause?: unknown } | undefined): string => {
+ const c = d?.cause;
+ return (d?.message ?? 'error') + (c ? ': ' + (c instanceof Error ? c.message : String(c)) : '');
+};
+el.addEventListener('ready', () => write('* ready'));
+el.addEventListener('error', (e) => write('! error ' + errText((e as unknown as CustomEvent).detail)));
+el.addEventListener('motionstart', (e) => write('* motionstart ' + JSON.stringify((e as CustomEvent).detail)));
+el.addEventListener('motionend', (e) => write('* motionend ' + JSON.stringify((e as CustomEvent).detail)));
