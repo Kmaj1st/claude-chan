@@ -1,4 +1,4 @@
-import { AGENT_STATES, EXPRESSIONS, MOTIONS, applyState, type ActRequest, type AgentState, type ClaudeChanElement } from '../src/index';
+import { AGENT_STATES, EXPRESSIONS, MOODS, MOTIONS, applyState, type ActRequest, type AgentState, type ClaudeChanElement } from '../src/index';
 import '../src/index';
 
 const el = document.getElementById('cc') as unknown as ClaudeChanElement;
@@ -23,6 +23,17 @@ function buttons(id: string, names: readonly string[], make: (n: string) => ActR
 }
 buttons('motions', MOTIONS, (n) => ({ motion: n as ActRequest['motion'], priority: 'high' }));
 buttons('expressions', EXPRESSIONS, (n) => ({ expression: n as ActRequest['expression'] }));
+
+const moods = document.getElementById('moods') as HTMLElement;
+for (const m of MOODS) {
+ const b = document.createElement('button');
+ b.textContent = m;
+ b.addEventListener('click', () => {
+ write('> claude_chan_set_mood ' + m);
+ el.controller?.setMood(m);
+ });
+ moods.appendChild(b);
+}
 
 const states = document.getElementById('states') as HTMLElement;
 for (const s of AGENT_STATES) {
