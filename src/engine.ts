@@ -1,5 +1,6 @@
 import { MotionQueue, type QueueItem } from './queue';
 import { MOTION_DEFS } from './motions';
+import { MAX_DURATION_MS } from './tools';
 import {
  EXPRESSIONS, MOTIONS, MOODS, PARAMS, neutralPose,
  type ActRequest, type EventMap, type EventName, type Expression, type Mood, type Motion, type Pose, type Puppet, type Unsubscribe,
@@ -7,6 +8,11 @@ import {
 
 // Headless motion engine: queue, idle behaviours, expression and lip-sync state.
 // Renderers only receive a finished pose through Puppet.render().
+
+// Non-finite durations are dropped (defaults apply); finite ones are capped so timers stay valid.
+function cleanDuration(d: number | undefined): number | undefined {
+ return typeof d === 'number' && Number.isFinite(d) ? Math.min(d, MAX_DURATION_MS) : undefined;
+}
 
 export interface EngineOptions {
  autoIdle?: boolean;
@@ -60,12 +66,13 @@ export class Engine {
 
  act(req: ActRequest): void {
  const priority = req.priority ?? 'normal';
+ const duration = cleanDuration(req.duration);
  if (req.expression && EXPRESSIONS.includes(req.expression)) {
  this.expression = req.expression;
- this.expressionUntil = this.now + (req.duration ?? DEFAULT_EXPRESSION_MS);
+ this.expressionUntil = this.now + (duration ?? DEFAULT_EXPRESSION_MS);
  }
- if (req.motion && MOTIONS.includes(req.motion)) this.play(req.motion, priority, req.duration);
- if (req.say) this.say(req.say, req.duration);
+ if (req.motion && MOTIONS.includes(req.motion)) this.play(req.motion, priority, duration);
+ if (req.say) this.say(req.say, duration);
  }
 
  private play(motion: Motion, priority: QueueItem['priority'], duration?: number): void {
@@ -83,7 +90,8 @@ export class Engine {
 
  say(text: string, duration?: number): void {
  const clean = String(text).slice(0, 500);
- const ms = duration && duration > 0 ? duration : Math.max(2000, clean.length * MS_PER_CHAR + 1200);
+ const d = cleanDuration(duration);
+ const ms = d && d > 0 ? d : Math.max(2000, clean.length * MS_PER_CHAR + 1200);
  this.speakingUntil = this.now + clean.length * MS_PER_CHAR;
  this.opts.onSay?.(clean, ms);
  }
