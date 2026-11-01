@@ -5,7 +5,7 @@ import { EXPRESSIONS, MOODS, MOTIONS, PRIORITIES } from '../src/types';
 describe('tools', () => {
  it('exposes the four stable tool names, unique', () => {
  const names = TOOLS.map((t) => t.name);
- expect(names).toEqual(['claude_chan_act', 'claude_chan_say', 'claude_chan_set_mood', 'claude_chan_list_motions']);
+ expect(names).toEqual(['claude_chan_act', 'claude_chan_say', 'claude_chan_set_mood', 'claude_chan_set_state', 'claude_chan_list_motions']);
  expect(new Set(names).size).toBe(names.length);
  });
 

@@ -26,7 +26,7 @@ describe('docs/API.md matches the code', () => {
  expect(doc).toContain('MAX_DURATION_MS (' + MAX_DURATION_MS + ')');
  });
  it('names the four tools', () => {
- for (const t of ['claude_chan_act', 'claude_chan_say', 'claude_chan_set_mood', 'claude_chan_list_motions']) {
+ for (const t of ['claude_chan_act', 'claude_chan_say', 'claude_chan_set_mood', 'claude_chan_set_state', 'claude_chan_list_motions']) {
  expect(doc).toContain(t);
  }
  });

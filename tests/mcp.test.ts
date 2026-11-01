@@ -48,6 +48,7 @@ describe('mcp server', () => {
  'claude_chan_list_motions',
  'claude_chan_say',
  'claude_chan_set_mood',
+ 'claude_chan_set_state',
  ]);
  });
 

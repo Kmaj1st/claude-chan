@@ -52,7 +52,7 @@ Exported from the package entry:
 - installPostMessageBridge(controller, { allowedOrigins?, target? }) returns an uninstall function
 - parseMarkers(text) and createMarkerStream(onAct, onMood?)
 
-Tool names: claude_chan_act, claude_chan_say, claude_chan_set_mood, claude_chan_list_motions. JSON schema file: claude-chan/schema.
+Tool names: claude_chan_act, claude_chan_say, claude_chan_set_mood, claude_chan_set_state, claude_chan_list_motions. JSON schema file: claude-chan/schema.
 
 ### postMessage bridge
 

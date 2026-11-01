@@ -55,6 +55,7 @@ Start the server with CLAUDE_CHAN_HTTP_PORT=8766 CLAUDE_CHAN_TOKEN=change-me-to-
 - claude_chan_act: play a motion/expression (see schema/claude_chan_act.json).
 - claude_chan_say: show a speech bubble.
 - claude_chan_set_mood: set the idle mood.
+- claude_chan_set_state: report the agent state (idle, listening, thinking, working, waiting, speaking, success, error, sleeping); the mascot picks motion, expression and mood.
 - claude_chan_list_motions: list available motions.
 
 ## System prompt snippet
