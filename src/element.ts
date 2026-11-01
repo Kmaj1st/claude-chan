@@ -1,4 +1,5 @@
 import { mount } from './mount';
+import { applyState, type AgentState } from './states';
 import type { ActRequest, ClaudeChanController, MountOptions, Mood, Position, RendererName } from './types';
 
 // <claude-chan model="" position="bottom-left" size="220" draggable="false"></claude-chan>
@@ -75,6 +76,7 @@ export class ClaudeChanElement extends BaseElement {
  setMood(mood: Mood): void { this.controller?.setMood(mood); }
  lookAt(x: number | null, y?: number): void { this.controller?.lookAt(x, y); }
  stop(): void { this.controller?.stop(); }
+ setState(state: AgentState): void { if (this.controller) applyState(this.controller, state); }
  lipSync(source: HTMLMediaElement | AnalyserNode | null): void { this.controller?.lipSync(source); }
 }
 
