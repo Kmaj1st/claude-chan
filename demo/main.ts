@@ -57,6 +57,29 @@ document.getElementById('run')?.addEventListener('click', () => {
  }
 });
 
+// Live2D: model and core-url are read at mount; changing them remounts the element.
+const modelIn = document.getElementById('model') as HTMLInputElement;
+const coreIn = document.getElementById('core') as HTMLInputElement;
+const loadModel = (model: string, core: string): void => {
+ if (core) el.setAttribute('core-url', core);
+ else el.removeAttribute('core-url');
+ if (model) el.setAttribute('model', model);
+ else el.removeAttribute('model');
+ write(model ? 'model = ' + model + (core ? ' (core ' + core + ')' : '') : 'model cleared');
+};
+document.getElementById('load-model')?.addEventListener('click', () => loadModel(modelIn.value.trim(), coreIn.value.trim()));
+document.getElementById('clear-model')?.addEventListener('click', () => {
+ modelIn.value = '';
+ loadModel('', coreIn.value.trim());
+});
+// Deep link: ?model=...&core=...
+const q = new URLSearchParams(location.search);
+if (q.get('model')) {
+ modelIn.value = q.get('model') as string;
+ coreIn.value = q.get('core') ?? '';
+ loadModel(modelIn.value, coreIn.value);
+}
+
 // Switching the renderer remounts the element (attributes are read once at mount).
 document.getElementById('renderer')?.addEventListener('change', (e) => {
  el.setAttribute('renderer', (e.target as HTMLSelectElement).value);
