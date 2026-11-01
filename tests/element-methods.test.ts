@@ -29,8 +29,15 @@ describe('<claude-chan> controller methods', () => {
  expect(controller.lipSync).toHaveBeenCalledWith(null);
  });
 
+ it('setState applies the agent state mapping', () => {
+ const { el, controller } = fake();
+ el.setState('thinking');
+ expect(controller.setMood).toHaveBeenCalledWith('thinking');
+ expect(controller.act).toHaveBeenCalled();
+ });
+
  it('is a no-op while disconnected', () => {
  const el = new ClaudeChanElement();
- expect(() => { el.say('hi'); el.stop(); el.lookAt(null); }).not.toThrow();
+ expect(() => { el.say('hi'); el.stop(); el.lookAt(null); el.setState('idle'); }).not.toThrow();
  });
 });
