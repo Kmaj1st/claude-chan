@@ -68,6 +68,42 @@ describe('checkModel', () => {
  });
  expect(checkModel(dir).errors.join()).toContain('out of range');
  });
+ it('rejects a model3.json that is not Version 3', () => {
+ const dir = build((m) => {
+ m.Version = 2;
+ });
+ expect(checkModel(dir).errors.join()).toContain('Version must be 3');
+ });
+ it('warns, but does not fail, when motions.json is absent', () => {
+ const dir = build();
+ fs.rmSync(path.join(dir, 'motions.json'));
+ const r = checkModel(dir);
+ expect(r.errors).toEqual([]);
+ expect(r.warnings.join()).toContain('no motions.json');
+ });
+ it('reports a motion whose group is not in model3.json', () => {
+ const dir = build((_m, mj) => {
+ mj.motions.wave.group = 'nope';
+ });
+ expect(checkModel(dir).errors.join()).toContain('group nope not in model3.json');
+ });
+ it('warns about a motion missing from motions.json', () => {
+ const dir = build((_m, mj) => {
+ delete mj.motions.wave;
+ });
+ const r = checkModel(dir);
+ expect(r.errors).toEqual([]);
+ expect(r.warnings.join()).toContain('missing motion wave');
+ });
+ it('warns when cdi3.json lacks a lip-sync parameter', () => {
+ const dir = build((m) => {
+ m.FileReferences.DisplayInfo = 'claude-chan.cdi3.json';
+ });
+ fs.writeFileSync(path.join(dir, 'claude-chan.cdi3.json'), JSON.stringify({ Parameters: [] }));
+ const r = checkModel(dir);
+ expect(r.errors).toEqual([]);
+ expect(r.warnings.join()).toContain('cdi3.json lacks parameter');
+ });
  it('errors on a missing folder or model3.json', () => {
  expect(checkModel(path.join(os.tmpdir(), 'cc-nonexistent-xyz')).errors.length).toBe(1);
  const empty = fs.mkdtempSync(path.join(os.tmpdir(), 'cc-empty-'));
