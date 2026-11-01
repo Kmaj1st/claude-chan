@@ -99,3 +99,24 @@ describe('hub edge cases', () => {
  expect(await done).toBe(1009);
  });
 });
+
+describe('hub socket errors', () => {
+ it('survives clients that reset the socket during an upgrade', async () => {
+ hub = new Hub({ token: TOKEN });
+ const port = await hub.listen();
+ for (let i = 0; i < 5; i++) {
+ await new Promise<void>((resolve) => {
+ const sock = netConnect(port, '127.0.0.1');
+ sock.on('error', () => resolve());
+ sock.on('close', () => resolve());
+ sock.on('connect', () => {
+ sock.write(['GET /?token=wrong HTTP/1.1', 'Host: 127.0.0.1', 'Connection: Upgrade', 'Upgrade: websocket', 'Sec-WebSocket-Version: 13', 'Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==', '', ''].join(CRLF));
+ sock.resetAndDestroy();
+ });
+ });
+ }
+ const ws = await connect(port);
+ expect(typeof ws).not.toBe('string');
+ (ws as WebSocket).close();
+ });
+});
