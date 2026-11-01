@@ -19,3 +19,18 @@ describe('published schema', () => {
  expect(JSON.parse(readFileSync(FILE, 'utf8'))).toEqual(JSON.parse(expected));
  });
 });
+
+// schema/claude_chan_tools.json is the published copy of all tool definitions.
+const ALL_FILE = 'schema/claude_chan_tools.json';
+
+describe('published tools schema', () => {
+ it('matches the full TOOLS list', () => {
+ const expected = JSON.stringify(TOOLS, null, 2);
+ if (process.env.UPDATE_SCHEMA) {
+ mkdirSync('schema', { recursive: true });
+ writeFileSync(ALL_FILE, expected + String.fromCharCode(10));
+ }
+ expect(existsSync(ALL_FILE)).toBe(true);
+ expect(JSON.parse(readFileSync(ALL_FILE, 'utf8'))).toEqual(JSON.parse(expected));
+ });
+});
