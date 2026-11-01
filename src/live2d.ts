@@ -36,6 +36,12 @@ export function loadScript(src: string): Promise<void> {
  return p;
 }
 
+// Render at the device pixel ratio (capped at 2) so the model is crisp on HiDPI screens; CSS size stays 100%.
+export function deviceScale(): number {
+ const r = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
+ return typeof r === 'number' && r >= 1 ? Math.min(r, 2) : 1;
+}
+
 type CoreModel = { setParameterValueById(id: string, v: number): void };
 
 export class Live2DPuppet implements Puppet {
@@ -61,7 +67,7 @@ export class Live2DPuppet implements Puppet {
  this.element.appendChild(canvas);
  const w = this.element.clientWidth || 220;
  const h = this.element.clientHeight || 330;
- this.app = new PIXI.Application({ view: canvas, width: w, height: h, backgroundAlpha: 0, autoStart: true });
+ this.app = new PIXI.Application({ view: canvas, width: w, height: h, backgroundAlpha: 0, autoStart: true, resolution: deviceScale() });
  let model: Awaited<ReturnType<typeof Live2DModel.from>>;
  try {
  model = await Live2DModel.from(this.opts.model, { autoInteract: false });
