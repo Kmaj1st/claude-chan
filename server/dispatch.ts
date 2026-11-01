@@ -24,7 +24,7 @@ export function createDispatcher(hub: Pick<Hub, 'broadcast'>, ratePerSecond = 10
  if (stamps.length >= ratePerSecond) return { ok: false, error: 'rate limit exceeded' };
  stamps.push(now);
  const c = parsed.command;
- const clean = c.tool === 'claude_chan_act' ? c.act : c.tool === 'claude_chan_say' ? { text: c.text } : { mood: (c as { mood: string }).mood };
+ const clean = c.tool === 'claude_chan_act' ? c.act : c.tool === 'claude_chan_say' ? { text: c.text } : c.tool === 'claude_chan_set_state' ? { state: c.state } : { mood: (c as { mood: string }).mood };
  const delivered = hub.broadcast({ type: 'claude-chan', id: ++seq, tool, args: clean });
  return { ok: true, result: { delivered } };
  };
