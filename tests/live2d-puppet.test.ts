@@ -16,6 +16,8 @@ const h = vi.hoisted(() => {
  fromCalled: false,
  gate: null as null | Promise<void>,
  fail: false,
+ size: [100, 200] as [number, number],
+ scaled: [] as number[],
  };
  return state;
 });
@@ -34,8 +36,8 @@ vi.mock('pixi-live2d-display/cubism4', () => ({
  if (h.fail) throw new Error('model load failed');
  if (h.gate) await h.gate;
  const m = {
- width: 100, height: 200, x: 0, y: 0,
- scale: { set: () => {} },
+ width: h.size[0], height: h.size[1], x: 0, y: 0,
+ scale: { set: (v: number) => { h.scaled.push(v); } },
  handlers: {} as Record<string, () => void>,
  set: [] as Array<[string, number]>,
  expressions: [] as string[],
@@ -62,13 +64,21 @@ function fakeEl(): Record<string, unknown> {
 }
 
 beforeEach(() => {
- h.model = null; h.appDestroyed = 0; h.gate = null; h.fromCalled = false; h.fail = false;
+ h.model = null; h.appDestroyed = 0; h.gate = null; h.fromCalled = false; h.fail = false; h.size = [100, 200]; h.scaled = [];
  vi.stubGlobal('window', { Live2DCubismCore: {} });
  vi.stubGlobal('document', { createElement: fakeEl, head: { appendChild: () => {} } });
 });
 afterEach(() => { vi.unstubAllGlobals(); });
 
 describe('Live2DPuppet', () => {
+ it('fits the model to the stage, and keeps scale 1 when the model reports no size', async () => {
+ await new Live2DPuppet({ model: '/m.model3.json' }).init();
+ expect(h.scaled).toEqual([220 / 100 > 330 / 200 ? 330 / 200 : 220 / 100]);
+ h.scaled = []; h.size = [0, 0];
+ await new Live2DPuppet({ model: '/m.model3.json' }).init();
+ expect(h.scaled).toEqual([1]);
+ });
+
  it('applies an expression rendered before the model loaded, through the map', async () => {
  const p = new Live2DPuppet({ model: '/m.model3.json', map: { expressions: { smile: 'f01' } } });
  p.render(neutralPose(), 'smile');
