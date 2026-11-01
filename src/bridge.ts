@@ -1,6 +1,7 @@
 import type { ClaudeChanController } from './types';
 import { listCapabilities } from './tools';
 import { parseCommand } from './validate';
+import { applyState } from './states';
 import type { Command } from './validate';
 
 // Applies a validated command to a controller. Shared by every transport.
@@ -14,6 +15,9 @@ export function runCommand(ctrl: ClaudeChanController, cmd: Command): unknown {
  return { ok: true };
  case 'claude_chan_set_mood':
  ctrl.setMood(cmd.mood);
+ return { ok: true };
+ case 'claude_chan_set_state':
+ applyState(ctrl, cmd.state);
  return { ok: true };
  case 'claude_chan_list_motions':
  return listCapabilities();

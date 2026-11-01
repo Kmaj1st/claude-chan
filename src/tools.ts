@@ -1,4 +1,5 @@
 import { EXPRESSIONS, MOODS, MOTIONS, PRIORITIES } from './types';
+import { AGENT_STATES } from './states';
 
 // JSON-schema tool definitions shared by the MCP server, the postMessage bridge and host apps.
 // Names and shapes are part of the stable contract.
@@ -41,6 +42,16 @@ export const TOOLS = [
  type: 'object',
  properties: { mood: { type: 'string', enum: [...MOODS] } },
  required: ['mood'],
+ additionalProperties: false,
+ },
+ },
+ {
+ name: 'claude_chan_set_state',
+ description: 'Report what the agent is doing (idle, thinking, working, success, error ...); the mascot reacts with a fitting motion, expression and mood.',
+ inputSchema: {
+ type: 'object',
+ properties: { state: { type: 'string', enum: [...AGENT_STATES] } },
+ required: ['state'],
  additionalProperties: false,
  },
  },
