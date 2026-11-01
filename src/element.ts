@@ -10,11 +10,25 @@ const rendererAttr = (v: string | null): RendererName | undefined => RENDERERS.f
 const storageKeyAttr = (v: string | null): string | false => (v === null ? 'claude-chan:position' : v === 'false' ? false : v);
 const POSITIONS: Position[] = ['bottom-left', 'bottom-right', 'top-left', 'top-right'];
 
+// expressions attribute: JSON object mapping preset expression names to model expression ids. Invalid JSON or non-string values are ignored.
+export function expressionsAttr(v: string | null): MountOptions['expressions'] {
+ if (!v) return undefined;
+ try {
+ const raw: unknown = JSON.parse(v);
+ if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
+ const out: Record<string, string> = {};
+ for (const [k, id] of Object.entries(raw)) if (typeof id === 'string' && id) out[k] = id;
+ return Object.keys(out).length ? out : undefined;
+ } catch {
+ return undefined;
+ }
+}
+
 // Safe to import during SSR (Node has no HTMLElement); the element only registers in a browser.
 const BaseElement = (typeof HTMLElement !== 'undefined' ? HTMLElement : class {}) as typeof HTMLElement;
 
 export class ClaudeChanElement extends BaseElement {
- static observedAttributes = ['renderer', 'model', 'sprites', 'core-url', 'position', 'size', 'draggable', 'storage-key'];
+ static observedAttributes = ['renderer', 'model', 'sprites', 'core-url', 'expressions', 'position', 'size', 'draggable', 'storage-key'];
 
  controller: ClaudeChanController | null = null;
  private remountQueued = false;
@@ -30,6 +44,7 @@ export class ClaudeChanElement extends BaseElement {
  model: this.getAttribute('model') || undefined,
  sprites: this.getAttribute('sprites') || undefined,
  coreUrl: this.getAttribute('core-url') || undefined,
+ expressions: expressionsAttr(this.getAttribute('expressions')),
  position: pos && POSITIONS.includes(pos) ? pos : 'bottom-left',
  size: Number.isFinite(size) && size >= 60 && size <= 1000 ? size : 220,
  draggable: this.getAttribute('draggable') !== 'false',
