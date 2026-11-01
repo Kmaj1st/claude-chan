@@ -81,3 +81,11 @@ Hosts report what the agent is doing; Claude-chan picks motion, expression and m
  applyState(cc, 'thinking');
 
 The demo page (npm run dev, demo/) has a button per state.
+
+## Element events
+
+<claude-chan> re-dispatches the controller events as DOM CustomEvents on the element: ready, motionstart, motionend and error. The payload is in event.detail.
+
+If mount() throws (for example renderer="live2d" without a model), the element does not throw; it dispatches error with detail { message: 'mount failed', cause } and shows nothing. Later load failures arrive as the controller's own error event. Listeners on the element survive remounts.
+
+ el.addEventListener('error', (e) => console.warn(e.detail.message, e.detail.cause));
