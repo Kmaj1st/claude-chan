@@ -93,7 +93,7 @@ The exact schema is defined by the loader and must be kept in sync with this fil
 1. Build the model from the PSD, then set up the parameters and deformers.
 2. Add physics and the model settings (File > Export Runtime Files).
 3. Export motions and expressions from the Animation workspace.
-4. Run npm run check:model -- <folder> (server/modelcheck.ts): it verifies the files named in model3.json exist, motions.json matches the presets and expressions, and cdi3.json has the standard parameters. Then check that the model loads and run the demo with model pointing at the folder.
+4. Run npm run check:model -- <folder> (server/modelcheck.ts): it verifies the files named in model3.json exist, motions.json matches the presets and expressions, and cdi3.json has the standard parameters. Then check that the model loads and run the demo and enter the model3.json URL (and the Core URL) in the Live2D row, or open it with ?model=<url>&core=<url>.
 5. Check every preset motion and expression, with and without lip-sync.
 
 ## 9. Licence checklist
