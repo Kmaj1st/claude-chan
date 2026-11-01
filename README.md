@@ -64,6 +64,15 @@ Report what the agent is doing and Claude-chan picks motion, expression and mood
  el.setState('thinking'); // <claude-chan> element
 
 Over MCP or postMessage use the claude_chan_set_state tool (docs/API.md).
+
+## Real Live2D model
+
+Set model to a .model3.json URL and core-url to your self-hosted live2dcubismcore.min.js (the proprietary Core is not bundled, see docs/LICENSES.md). With renderer=auto a model that fails to load falls back to sprites.
+
+ <claude-chan model="/model/claude.model3.json" core-url="/live2dcubismcore.min.js"></claude-chan>
+
+The demo page accepts ?model=...&core=... for a quick try. Map preset expressions to the model's own ids with the expressions option. Validate a model folder with npm run check:model -- <folder>; run the opt-in headless test with LIVE2D_MODEL_DIR and LIVE2D_CORE set, then npm run test:live2d.
+
 ## Driving it from an AI
 
 | Way | Use when | Docs |
