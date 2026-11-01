@@ -65,7 +65,7 @@ function runChecks(dir: string, res: CheckResult): CheckResult {
  }
  const mapFile = path.join(dir, 'motions.json');
  if (!fs.existsSync(mapFile)) {
- res.warnings.push('no motions.json; defaults (src/model/motions.default.json) will be used');
+ res.warnings.push('no motions.json; no preset motions will play on this model (start from src/model/motions.default.json, exported as claude-chan/motions.json)');
  } else {
  const map = readJson(mapFile, res);
  for (const e of EXPRESSIONS) {
