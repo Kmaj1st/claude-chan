@@ -16,6 +16,9 @@
 
 - Unit tests for the bridge (error replies, wildcard origin rejected), prefers-reduced-motion, and host clamping/corner vars
 - Model folder validator: npm run check:model -- <folder> (server/modelcheck.ts, tests/modelcheck.test.ts)
+- Agent states: applyState/setState and the claude_chan_set_state tool (idle, listening, thinking, working, waiting, speaking, success, error, sleeping); all five tools in schema/claude_chan_tools.json (export claude-chan/schema/tools)
+- storage-key="false" disables position persistence; README covers agent states and the real Live2D model path (npm run test:live2d is opt-in)
+- Demo page (demo/) with renderer select (auto, sprite, procedural, live2d), moods, agent states and model/core-url inputs
 
 ## Next
 1. Test the Live2D loader against a redistributable sample model (none committed; Core file must be downloaded manually, see docs/LICENSES.md)
