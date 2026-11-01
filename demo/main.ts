@@ -40,7 +40,7 @@ for (const s of AGENT_STATES) {
  const b = document.createElement('button');
  b.textContent = s;
  b.addEventListener('click', () => {
- write('> applyState ' + s);
+ write('> claude_chan_set_state ' + s);
  if (el.controller) applyState(el.controller, s as AgentState);
  });
  states.appendChild(b);
