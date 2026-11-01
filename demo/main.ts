@@ -99,3 +99,19 @@ el.addEventListener('ready', () => write('* ready'));
 el.addEventListener('error', (e) => write('! error ' + errText((e as unknown as CustomEvent).detail)));
 el.addEventListener('motionstart', (e) => write('* motionstart ' + JSON.stringify((e as CustomEvent).detail)));
 el.addEventListener('motionend', (e) => write('* motionend ' + JSON.stringify((e as CustomEvent).detail)));
+
+// Lip-sync: the mouth follows the level of the chosen audio file; the button returns to text-length lip-sync.
+const audio = document.getElementById('audio') as HTMLAudioElement;
+document.getElementById('audio-file')?.addEventListener('change', (e) => {
+ const f = (e.target as HTMLInputElement).files?.[0];
+ if (!f) return;
+ audio.src = URL.createObjectURL(f);
+ write('> lipSync(audio) ' + f.name);
+ el.controller?.lipSync(audio);
+ void audio.play().catch(() => write('! press play on the audio control'));
+});
+document.getElementById('lip-stop')?.addEventListener('click', () => {
+ audio.pause();
+ write('> lipSync(null)');
+ el.controller?.lipSync(null);
+});
