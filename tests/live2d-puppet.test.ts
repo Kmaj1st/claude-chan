@@ -97,6 +97,13 @@ describe('Live2DPuppet', () => {
  expect(h.appDestroyed).toBe(1);
  });
 
+ it('survives an expression call that throws synchronously', async () => {
+ const p = new Live2DPuppet({ model: '/m.model3.json' });
+ await p.init();
+ h.model!.expression = () => { throw new Error('bad expression'); };
+ expect(() => p.render(neutralPose(), 'smile')).not.toThrow();
+ });
+
  it('writes the pose into the core model before each update', async () => {
  const p = new Live2DPuppet({ model: '/m.model3.json' });
  await p.init();
