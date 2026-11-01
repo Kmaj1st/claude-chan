@@ -67,3 +67,38 @@ describe('MotionQueue', () => {
  expect(q.pending.length).toBe(0);
  });
 });
+
+describe('MotionQueue edge cases', () => {
+ it('finish and clear on an empty queue return null', () => {
+ const q = new MotionQueue();
+ expect(q.finish()).toBeNull();
+ expect(q.clear()).toBeNull();
+ expect(q.current).toBeNull();
+ });
+
+ it('does not requeue an interrupted item', () => {
+ const q = new MotionQueue();
+ q.push(item('sleepy', 'low'));
+ q.push(item('surprised', 'high'));
+ expect(q.pending.length).toBe(0);
+ expect(q.finish()).toBeNull();
+ });
+
+ it('drops an equal-rank item when pending is full', () => {
+ const q = new MotionQueue();
+ q.push(item('wave', 'urgent'));
+ for (let i = 0; i < MAX_PENDING; i++) q.push(item('nod', 'normal'));
+ const r = q.push(item('pout', 'normal'));
+ expect(r.queued).toBe(false);
+ expect(r.start).toBeNull();
+ expect(q.pending.length).toBe(MAX_PENDING);
+ });
+
+ it('finish after clear starts nothing', () => {
+ const q = new MotionQueue();
+ q.push(item('wave'));
+ q.push(item('nod'));
+ q.clear();
+ expect(q.finish()).toBeNull();
+ });
+});
