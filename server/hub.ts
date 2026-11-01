@@ -46,6 +46,7 @@ export class Hub {
  const origin = req.headers.origin;
  const originOk =
  origin === undefined || (o.allowedOrigins ? o.allowedOrigins.includes(origin) : LOOPBACK.test(origin));
+ socket.on('error', () => undefined); // a reset client must not crash the hub
  const reject = (code: number): void => {
  socket.write('HTTP/1.1 ' + code + ' Rejected' + CRLF + 'Connection: close' + CRLF + CRLF);
  socket.destroy();
