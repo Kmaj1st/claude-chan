@@ -38,7 +38,7 @@ export function createLevelReader(source: HTMLMediaElement | AnalyserNode): Leve
  g = { ctx, analyser: a };
  graphs.set(source, g);
  }
- if (g.ctx.state === 'suspended') void g.ctx.resume();
+ if (g.ctx.state === 'suspended') g.ctx.resume().catch(() => {}); // autoplay policy may reject; level just stays 0
  analyser = g.analyser;
  } else {
  analyser = source as AnalyserNode;
