@@ -13,7 +13,7 @@ Environment:
 
 | Variable | Default | Meaning |
 |---|---|---|
-| CLAUDE_CHAN_TOKEN | random per start | Shared token for hub and HTTP. Printed to stderr only when generated. |
+| CLAUDE_CHAN_TOKEN | random per start | Shared token for hub and HTTP, at least 16 characters. Printed to stderr only when generated. |
 | CLAUDE_CHAN_PORT | 8765 | WebSocket hub port (loopback only). |
 | CLAUDE_CHAN_HTTP_PORT | unset | Also serve streamable HTTP at http://127.0.0.1:<port>/mcp (Bearer token). |
 
@@ -28,7 +28,7 @@ json
  "claude-chan": {
  "command": "node",
  "args": ["server/dist/cli.js"],
- "env": { "CLAUDE_CHAN_TOKEN": "change-me", "CLAUDE_CHAN_PORT": "8765" }
+ "env": { "CLAUDE_CHAN_TOKEN": "change-me-to-a-long-random-token", "CLAUDE_CHAN_PORT": "8765" }
  }
  }
 }
@@ -42,13 +42,13 @@ json
  "claude-chan": {
  "type": "http",
  "url": "http://127.0.0.1:8766/mcp",
- "headers": { "Authorization": "Bearer change-me" }
+ "headers": { "Authorization": "Bearer change-me-to-a-long-random-token" }
  }
  }
 }
 
 
-Start the server with CLAUDE_CHAN_HTTP_PORT=8766 CLAUDE_CHAN_TOKEN=change-me node server/dist/cli.js --http-only.
+Start the server with CLAUDE_CHAN_HTTP_PORT=8766 CLAUDE_CHAN_TOKEN=change-me-to-a-long-random-token node server/dist/cli.js --http-only.
 
 ## Tools
 
