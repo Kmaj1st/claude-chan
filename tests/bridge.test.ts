@@ -61,6 +61,31 @@ describe('postMessage bridge', () => {
  expect(posts).toBe(1);
  });
 
+ it('ignores messages that are not claude-chan requests', () => {
+ const b = setup({ say: () => { throw new Error('must not run'); } });
+ b.send('http://a.test', null);
+ b.send('http://a.test', 'claude-chan');
+ b.send('http://a.test', { type: 'other', tool: 'claude_chan_say', args: { text: 'x' } });
+ expect(b.replies).toEqual([]);
+ });
+
+ it('replies with id null when the id is not a string or number', () => {
+ const b = setup({ say: () => {} });
+ b.send('http://a.test', { type: 'claude-chan', id: { x: 1 }, tool: 'claude_chan_say', args: { text: 'x' } });
+ expect(b.replies[0]).toMatchObject({ type: 'claude-chan-result', id: null, ok: true });
+ });
+
+ it('routes set_mood and returns the capability list for list_motions', () => {
+ const moods: string[] = [];
+ const b = setup({ setMood: (m: never) => { moods.push(m); } });
+ b.send('http://a.test', { type: 'claude-chan', id: 1, tool: 'claude_chan_set_mood', args: { mood: 'happy' } });
+ b.send('http://a.test', { type: 'claude-chan', id: 2, tool: 'claude_chan_list_motions', args: {} });
+ expect(moods).toEqual(['happy']);
+ expect(b.replies[0]).toMatchObject({ id: 1, ok: true });
+ expect(b.replies[1]).toMatchObject({ id: 2, ok: true });
+ expect((b.replies[1] as { result: unknown }).result).toBeTruthy();
+ });
+
  it('uninstalls', () => {
  const b = setup({});
  b.off();
