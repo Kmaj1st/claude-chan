@@ -40,7 +40,7 @@ Web component: <claude-chan renderer="auto" sprites="/chars" model="" core-url="
 - lipSync(source) drives the mouth from an HTMLMediaElement or AnalyserNode; lipSync(null) returns to text-length lip-sync
 - on('ready' | 'motionstart' | 'motionend' | 'error', fn) returns an unsubscribe function
 - destroy()
-- ready promise
+- ready promise: resolves once init has finished. It also resolves (never rejects) when init fails, so listen for the error event to detect that
 
 ## Tool-call surface
 
