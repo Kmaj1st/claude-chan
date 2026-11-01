@@ -86,6 +86,13 @@ Maps our preset names to Live2D motion groups, expressions and parameter overrid
  }
 
 
+Runtime behaviour (src/live2d.ts):
+
+- The loader fetches motions.json from the folder of the model3.json URL. A parsed map passed in code (map) takes precedence. A missing or invalid file is ignored.
+- When the engine starts a preset motion, the loader plays motions[preset] with model.motion(group, index). Presets without an entry only get the procedural pose. An unknown group is ignored.
+- expressions[preset] maps a preset expression to a model expression id.
+- The shared procedural pose is applied before each model update, so it wins over built-in idle motions.
+
 The exact schema is defined by the loader and must be kept in sync with this file.
 
 ## 8. Export steps (Cubism Editor)
