@@ -43,6 +43,13 @@ describe('<claude-chan> attribute parsing', () => {
  expect(optsOf()).toMatchObject({ renderer: 'sprite', position: 'top-right', size: 300, draggable: false, storageKey: 'k' });
  });
 
+ it('passes core-url and model through, and observes core-url', () => {
+ mount.mockReturnValueOnce(ctrl());
+ make({ model: '/m/model3.json', 'core-url': '/core.js' }).connectedCallback();
+ expect(optsOf()).toMatchObject({ model: '/m/model3.json', coreUrl: '/core.js' });
+ expect(ClaudeChanElement.observedAttributes).toContain('core-url');
+ });
+
  it('keeps an empty storage-key (disables persistence key) instead of the default', () => {
  mount.mockReturnValueOnce(ctrl());
  make({ 'storage-key': '' }).connectedCallback();
