@@ -29,6 +29,8 @@
 <div class="row"><select id="renderer"><option value="auto">auto (sprite, else procedural)</option><option value="sprite">sprite</option><option value="procedural">procedural</option><option value="live2d">live2d (needs a model below)</option></select></div>
 <h3>Live2D model (optional)</h3>
 <div class="row"><input id="model" placeholder="model3.json URL, e.g. /model/claude.model3.json"><input id="core" placeholder="Core URL, e.g. /live2dcubismcore.min.js"><input id="expr" placeholder='Expressions JSON, e.g. {"smile":"f01"}'><button id="load-model">load model</button><button id="clear-model">clear</button></div>
+<h3>Layout</h3>
+<div class="row"><select id="position"><option>bottom-left</option><option>bottom-right</option><option>top-left</option><option>top-right</option></select><input id="size" type="range" min="60" max="600" value="220"><label><input id="draggable" type="checkbox" checked> draggable</label></div>
 <h3>Lip-sync (audio file)</h3>
 <div class="row"><input id="audio-file" type="file" accept="audio/*,video/*"><button id="lip-stop">text lip-sync</button></div>
 <audio id="audio" controls></audio>
