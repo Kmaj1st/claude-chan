@@ -28,7 +28,7 @@ New names may be added in minor versions; existing names are never renamed or re
  autoIdle: true,
  });
 
-Web component: <claude-chan renderer="auto" sprites="/chars" model="" core-url="/live2dcubismcore.min.js" position="bottom-left" size="220" draggable="false" storage-key="claude-chan:position"></claude-chan> (storage-key="false" disables position persistence). The element forwards act, say, setMood, setState, lookAt, stop and lipSync to its controller (el.say('hi')); they do nothing while it is disconnected. ready, motionstart, motionend and error are re-dispatched as CustomEvents.
+Web component: <claude-chan renderer="auto" sprites="/chars" model="" core-url="/live2dcubismcore.min.js" expressions='{"smile":"f01"}' position="bottom-left" size="220" draggable="false" storage-key="claude-chan:position"></claude-chan> (storage-key="false" disables position persistence; expressions is a JSON object that maps preset expression names to the model's own ids, and invalid JSON is ignored). The element forwards act, say, setMood, setState, lookAt, stop and lipSync to its controller (el.say('hi')); they do nothing while it is disconnected. ready, motionstart, motionend and error are re-dispatched as CustomEvents.
 
 ## Controller
 
