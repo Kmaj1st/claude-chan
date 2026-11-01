@@ -1,4 +1,4 @@
-import { EXPRESSIONS, MOTIONS, type ActRequest, type ClaudeChanElement } from '../src/index';
+import { AGENT_STATES, EXPRESSIONS, MOTIONS, applyState, type ActRequest, type AgentState, type ClaudeChanElement } from '../src/index';
 import '../src/index';
 
 const el = document.getElementById('cc') as unknown as ClaudeChanElement;
@@ -23,6 +23,17 @@ function buttons(id: string, names: readonly string[], make: (n: string) => ActR
 }
 buttons('motions', MOTIONS, (n) => ({ motion: n as ActRequest['motion'], priority: 'high' }));
 buttons('expressions', EXPRESSIONS, (n) => ({ expression: n as ActRequest['expression'] }));
+
+const states = document.getElementById('states') as HTMLElement;
+for (const s of AGENT_STATES) {
+ const b = document.createElement('button');
+ b.textContent = s;
+ b.addEventListener('click', () => {
+ write('> applyState ' + s);
+ if (el.controller) applyState(el.controller, s as AgentState);
+ });
+ states.appendChild(b);
+}
 
 const text = document.getElementById('text') as HTMLInputElement;
 document.getElementById('say')?.addEventListener('click', () => act({ say: text.value }));
