@@ -59,7 +59,7 @@ Expressions: neutral, smile, sad, angry, blush, surprised.
 
 | Way | Use when | Docs |
 | --- | --- | --- |
-| MCP server (stdio or streamable HTTP) with claude_chan_act, claude_chan_say, claude_chan_set_mood, claude_chan_list_motions | Claude Code / HAPI sessions | docs/MCP.md |
+| MCP server (stdio or streamable HTTP) with claude_chan_act, claude_chan_say, claude_chan_set_mood, claude_chan_set_state, claude_chan_list_motions | Claude Code / HAPI sessions | docs/MCP.md |
 | JSON schema schema/claude_chan_act.json | Any tool-calling LLM API | schema/ |
 | postMessage bridge | Page inside an iframe | src/bridge.ts |
 | Text markers such as [motion:wave] in streamed text | Models without tool calls | src/markers.ts |

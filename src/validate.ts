@@ -1,5 +1,7 @@
 import { EXPRESSIONS, MOODS, MOTIONS, PRIORITIES } from './types';
 import type { ActRequest, Mood } from './types';
+import { AGENT_STATES } from './states';
+import type { AgentState } from './states';
 import { MAX_DURATION_MS, MAX_SAY_LENGTH } from './tools';
 import type { ToolName } from './tools';
 
@@ -9,6 +11,7 @@ export type Command =
  | { tool: 'claude_chan_act'; act: ActRequest }
  | { tool: 'claude_chan_say'; text: string }
  | { tool: 'claude_chan_set_mood'; mood: Mood }
+ | { tool: 'claude_chan_set_state'; state: AgentState }
  | { tool: 'claude_chan_list_motions' };
 
 export type Parsed = { ok: true; command: Command } | { ok: false; error: string };
@@ -61,6 +64,9 @@ export function parseCommand(tool: unknown, args: unknown): Parsed {
  case 'claude_chan_set_mood':
  noExtra(a, ['mood']);
  return { ok: true, command: { tool: 'claude_chan_set_mood', mood: oneOf(a.mood, MOODS, 'mood') } };
+ case 'claude_chan_set_state':
+ noExtra(a, ['state']);
+ return { ok: true, command: { tool: 'claude_chan_set_state', state: oneOf(a.state, AGENT_STATES, 'state') } };
  case 'claude_chan_list_motions':
  noExtra(a, []);
  return { ok: true, command: { tool: 'claude_chan_list_motions' } };
