@@ -95,7 +95,7 @@ export class Live2DPuppet implements Puppet {
  // render() may have run before the model loaded: apply the pending expression now.
  if (this.lastExpression) {
  const pending = this.opts.map?.expressions?.[this.lastExpression] ?? this.lastExpression;
- Promise.resolve(model.expression(pending)).catch(() => { /* unknown id */ });
+ this.callExpression(model, pending).catch(() => { /* unknown id */ });
  }
  }
 
@@ -104,7 +104,16 @@ export class Live2DPuppet implements Puppet {
  if (expression !== this.lastExpression) {
  this.lastExpression = expression;
  const id = this.opts.map?.expressions?.[expression] ?? expression;
- if (this.model) Promise.resolve(this.model.expression(id)).catch(() => { /* unknown expression id: keep current face */ });
+ if (this.model) this.callExpression(this.model, id).catch(() => { /* unknown expression id: keep current face */ });
+ }
+ }
+
+ // A synchronous throw from expression() becomes a rejection, so callers keep the current face.
+ private callExpression(model: NonNullable<Live2DPuppet['model']>, id: string): Promise<unknown> {
+ try {
+ return Promise.resolve(model.expression(id));
+ } catch (e) {
+ return Promise.reject(e);
  }
  }
 
