@@ -68,3 +68,16 @@ Response (posted back to the sender's window, targeted at its origin):
  { type: 'claude-chan-result', id: 1, ok: false, error: 'message' }
 
 claude_chan_list_motions returns the capabilities object as result. An invalid tool or args gives ok false with the validation error.
+
+## Agent states
+
+Hosts report what the agent is doing; Claude-chan picks motion, expression and mood.
+
+- States: idle, listening, thinking, working, waiting, speaking, success, error, sleeping
+- applyState(controller, state) sets the mood and plays the mapped motion/expression (STATE_MAP holds the table)
+- isAgentState(value) is a type guard for untrusted input
+
+ import { applyState } from 'claude-chan';
+ applyState(cc, 'thinking');
+
+The demo page (npm run dev, demo/) has a button per state.
