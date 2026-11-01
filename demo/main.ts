@@ -90,6 +90,15 @@ document.getElementById('renderer')?.addEventListener('change', (e) => {
  write('renderer = ' + (e.target as HTMLSelectElement).value);
 });
 
+// Layout: position, size and draggable are attributes of the element.
+const setAttr = (name: string, value: string): void => {
+ el.setAttribute(name, value);
+ write(name + ' = ' + value);
+};
+document.getElementById('position')?.addEventListener('change', (e) => setAttr('position', (e.target as HTMLSelectElement).value));
+document.getElementById('size')?.addEventListener('change', (e) => setAttr('size', (e.target as HTMLInputElement).value));
+document.getElementById('draggable')?.addEventListener('change', (e) => setAttr('draggable', String((e.target as HTMLInputElement).checked)));
+
 // Element events (re-dispatched by <claude-chan> on every mount): shows model load and mount failures.
 const errText = (d: { message?: string; cause?: unknown } | undefined): string => {
  const c = d?.cause;
