@@ -5,7 +5,7 @@ Contract: docs/API.md (stable under semver). This page covers packaging traps.
 ## Install paths
 
 1. npm/package: import 'claude-chan'. Default sprites are found at ../assets/chars/ relative to dist/claude-chan.js, so keep dist/ and assets/ side by side.
-2. Vendored bundle (a copy of dist/claude-chan.js inside the host): the relative lookup breaks. Copy assets/chars to a public URL and pass it explicitly.
+2. Vendored bundle (a copy of dist inside the host): the relative lookup breaks, and dist/ has lazy chunks next to claude-chan.js (Live2D), so copy all dist/.js. Run npm run build, then npm run vendor -- <target-dir>: it copies dist/.js and assets/chars to the target. Pass the chars URL explicitly.
 
  import { mount } from './vendor/claude-chan.js';
  mount({ sprites: '/vendor/claude-chan/chars', position: 'bottom-right', size: 220 });
