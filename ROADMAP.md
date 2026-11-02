@@ -27,7 +27,7 @@
 - Iframe embedding: bridge announce option posts claude-chan-ready; demo/embed.html hosts demo/frame.html, which accepts the model, core and expressions query params (docs/INTEGRATION.md)
 
 ## Next
-1. Test the Live2D loader against a redistributable sample model (none committed; Core file must be downloaded manually, see docs/LICENSES.md)
+1. Run npm run test:live2d (tests/e2e/live2d.mjs, opt-in) against a locally downloaded model and Cubism Core: set LIVE2D_MODEL_DIR and LIVE2D_CORE; nothing is committed, see docs/LICENSES.md. Not yet run against a real model.
 2. Tell hapi-chan: API contract is stable and written in docs/API.md
 3. Real Claude-chan Live2D model from an artist with layered parts (docs/ART-PIPELINE.md); sprites are the current art
 4. More sprite poses via docs/ART-REQUESTS.md (an angry bust and a real bow are missing)
