@@ -129,6 +129,7 @@ const audio = document.getElementById('audio') as HTMLAudioElement;
 document.getElementById('audio-file')?.addEventListener('change', (e) => {
  const f = (e.target as HTMLInputElement).files?.[0];
  if (!f) return;
+ if (audio.src.startsWith('blob:')) URL.revokeObjectURL(audio.src);
  audio.src = URL.createObjectURL(f);
  write('> lipSync(audio) ' + f.name);
  el.controller?.lipSync(audio);
