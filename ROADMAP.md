@@ -23,6 +23,8 @@
 - Demo lip-sync section: pick an audio file and the mouth follows its level (controller.lipSync)
 - Demo logs element ready/error/motion events and has an expressions field; README says how to run it (npm run dev)
 - expressions attribute on the element (JSON map of preset to model expression ids); element CustomEvents and mount failure documented in docs/API.md
+- Live2D plays motions.json presets via setMotion (motions.json next to the model3.json, or a parsed map option); ART-PIPELINE section 7 describes it
+- Iframe embedding: bridge announce option posts claude-chan-ready; demo/embed.html hosts demo/frame.html, which accepts the model, core and expressions query params (docs/INTEGRATION.md)
 
 ## Next
 1. Test the Live2D loader against a redistributable sample model (none committed; Core file must be downloaded manually, see docs/LICENSES.md)
