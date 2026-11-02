@@ -77,7 +77,7 @@ Hair (front, side, back), headdress frill, tassels and the ahoge. Keep it subtle
 
 ## 7. motions.json
 
-Maps our preset names to Live2D motion groups, expressions and parameter overrides. The artist fills it in with the engineer. Example shape:
+Maps our preset names to Live2D motion groups and expressions. The artist fills it in with the engineer. Example shape:
 
 
  {
@@ -92,6 +92,7 @@ Runtime behaviour (src/live2d.ts):
 - When the engine starts a preset motion, the loader plays motions[preset] with model.motion(group, index). Presets without an entry only get the procedural pose. An unknown group is ignored.
 - expressions[preset] maps a preset expression to a model expression id.
 - The shared procedural pose is applied before each model update, so it wins over built-in idle motions.
+- The params key in the default file is reserved and ignored by the loader; do not rely on it.
 
 The exact schema is defined by the loader and must be kept in sync with this file.
 
