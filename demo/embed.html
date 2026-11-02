@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Claude-chan embed demo</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+ body{font:15px/1.5 system-ui,sans-serif;background:#FFF9F0;color:#4A2C1A;margin:0;padding:24px}
+ .row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+ button{padding:6px 12px;border:2px solid #4A2C1A;border-radius:10px;background:#fff;color:#4A2C1A;cursor:pointer}
+ button:hover:not(:disabled){background:#F28C28;color:#fff}
+ button:disabled{opacity:.5;cursor:default}
+ iframe{width:340px;height:320px;border:2px dashed #4A2C1A;border-radius:10px;background:#fff}
+ pre{background:#4A2C1A;color:#FFE9CC;padding:12px;border-radius:10px;height:180px;overflow:auto}
+</style>
+</head>
+<body>
+<h1>Embedding Claude-chan in an iframe</h1>
+<p>This host page talks to frame.html over the postMessage bridge (docs/API.md, docs/INTEGRATION.md). Buttons stay disabled until the frame announces <code>claude-chan-ready</code>.</p>
+<div class="row">
+ <button id="wave" disabled>wave</button>
+ <button id="say" disabled>say hello</button>
+ <button id="thinking" disabled>state: thinking</button>
+ <button id="caps" disabled>list capabilities</button>
+</div>
+<iframe id="frame" src="/frame.html" title="Claude-chan"></iframe>
+<pre id="log"></pre>
+<script>
+ (function () {
+ var frame = document.getElementById('frame');
+ var log = document.getElementById('log');
+ var buttons = document.querySelectorAll('button');
+ var nextId = 1;
+ function write(line) { log.textContent += line + String.fromCharCode(10); log.scrollTop = log.scrollHeight; }
+ function send(tool, args) {
+ var msg = { type: 'claude-chan', id: nextId++, tool: tool, args: args || {} };
+ write('> ' + JSON.stringify(msg));
+ frame.contentWindow.postMessage(msg, location.origin);
+ }
+ window.addEventListener('message', function (ev) {
+ if (ev.origin !== location.origin || ev.source !== frame.contentWindow) return;
+ var d = ev.data;
+ if (!d || typeof d.type !== 'string') return;
+ if (d.type === 'claude-chan-ready') {
+ write('< ready');
+ buttons.forEach(function (b) { b.disabled = false; });
+ } else if (d.type === 'claude-chan-result') {
+ write('< ' + JSON.stringify(d));
+ }
+ });
+ document.getElementById('wave').onclick = function () { send('claude_chan_act', { motion: 'wave' }); };
+ document.getElementById('say').onclick = function () { send('claude_chan_say', { text: 'Hello from the host page!' }); };
+ document.getElementById('thinking').onclick = function () { send('claude_chan_set_state', { state: 'thinking' }); };
+ document.getElementById('caps').onclick = function () { send('claude_chan_list_motions', {}); };
+ })();
+</script>
+</body>
+</html>
