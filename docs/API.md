@@ -27,13 +27,14 @@ New names may be added in minor versions; existing names are never renamed or re
  draggable: true, // legacy: false = dock 'fixed-default' (dock wins when both are set)
  margin: 8, // min gap in px to the viewport edges
  snap: false, // edge snapping on drop: true = 24 px, a number = px
- resetOnDoubleClick: true, // double-click on a moved mascot returns it home
+ resetOnDoubleClick: false, // opt-in: double-click on a moved mascot returns it home (off: a double-click is two clicks)
+ consoleApi: true, // window.claudeChan console commands; a string = other global name, false = none
  storageKey: 'claude-chan:position', // false disables persistence
  zIndex: 2147483000,
  autoIdle: true,
  });
 
-Web component: <claude-chan renderer="auto" sprites="/chars" model="" core-url="/live2dcubismcore.min.js" expressions='{"smile":"f01"}' position="bottom-left" size="220" dock="free" snap="false" margin="8" storage-key="claude-chan:position"></claude-chan> (draggable="false" still works as dock="fixed-default"; snap is "true", "false" or a px number; storage-key="false" disables position persistence; expressions is a JSON object that maps preset expression names to the model's own ids, and invalid JSON is ignored). The element forwards act, say, setMood, setState, lookAt, stop, lipSync, getPosition, setPosition, resetPosition, setDock and relayout to its controller (el.say('hi')); they do nothing while it is disconnected. ready, motionstart, motionend, error, dragstart and move are re-dispatched as CustomEvents.
+Web component: <claude-chan renderer="auto" sprites="/chars" model="" core-url="/live2dcubismcore.min.js" expressions='{"smile":"f01"}' position="bottom-left" size="220" dock="free" snap="false" margin="8" storage-key="claude-chan:position"></claude-chan> (draggable="false" still works as dock="fixed-default"; snap is "true", "false" or a px number; storage-key="false" disables position persistence; expressions is a JSON object that maps preset expression names to the model's own ids, and invalid JSON is ignored). The element forwards act, say, setMood, setState, lookAt, stop, lipSync, getPosition, setPosition, resetPosition, hide, show, toggle, setDock and relayout to its controller (el.say('hi')); they do nothing while it is disconnected. ready, motionstart, motionend, error, dragstart and move are re-dispatched as CustomEvents.
 
 ## Controller
 
@@ -46,11 +47,27 @@ Web component: <claude-chan renderer="auto" sprites="/chars" model="" core-url="
 - getPosition() returns { x, y, fx, fy, free, dock } (see Position and dragging)
 - setPosition({ x, y }) in viewport px, or setPosition({ fx, fy }) as fractions; clamped and remembered; ignored with dock 'fixed-default'
 - resetPosition() returns to the home spot and forgets the remembered one
+- hide() hides the mascot for this page load; hide({ persist: true }) keeps it hidden after reloads too (stored under '<storageKey>:hidden'; never set by any UI)
+- show() shows it again and clears a persisted hide; toggle() flips hide/show for this page load and returns true when visible; isHidden()
 - setDock('free' | 'fixed-default')
 - relayout() re-reads the home function and the viewport (call it when the host moved its home slot)
 - on('ready' | 'motionstart' | 'motionend' | 'error' | 'dragstart' | 'move', fn) returns an unsubscribe function
 - destroy()
 - ready promise: resolves once init has finished. It also resolves (never rejects) when init fails, so listen for the error event to detect that
+
+## Console commands
+
+mount() puts a small API on window.claudeChan (option consoleApi; the first mounted mascot owns the name and destroy() removes it) for use from the browser's developer console:
+
+- claudeChan.help() prints this list (and returns it as an array)
+- claudeChan.getPosition() returns { x, y, fx, fy, free, dock }
+- claudeChan.setPosition(fx, fy) moves the mascot; two numbers from 0 to 1 are fractions of the free space, exactly like claude_chan_set_position { x, y }; larger numbers are viewport px; an object ({ x, y } px or { fx, fy }) is passed to the controller as is. Returns the new position
+- claudeChan.resetPosition() back to the home spot (same as Home and claude_chan_reset_position). Returns the new position
+- claudeChan.hide() hides it for this page load; claudeChan.hide({ persist: true }) also after reloads
+- claudeChan.show() shows it and clears a persisted hide, so it can never stay hidden by accident
+- claudeChan.toggle() hides/shows for this page load (never persists)
+
+Without a persisted hide the mascot is always visible on load. A page that starts hidden because of hide({ persist: true }) logs a console.info hint that names claudeChan.show(). createConsoleApi(controller, name?) and installConsoleApi(controller, name?) are exported for hosts that wrap the controller (hapi-chan does). The agent tools deliberately have no hide/show: only the user can hide the mascot.
 
 ## Tool-call surface
 
@@ -90,7 +107,7 @@ With dock 'free' (the default) the mascot can be picked up and put anywhere insi
 
 - Pointer events, so mouse, touch and pen all work. A press becomes a drag only after 4 px (mouse) or 8 px (touch, pen) of travel, so a click or tap on the mascot still reaches the page as a normal click; the click that ends a drag is swallowed. touch-action: none and no text selection apply to the mascot only, and only while it can be dragged. Escape during a drag, or a pointercancel, puts it back where the drag started.
 - While carried the character lifts a little and tilts (CSS translate/rotate on the renderer element, so it works for the sprite, procedural and Live2D renderers; off with prefers-reduced-motion). No extra art.
-- Keyboard: the mascot is focusable (Tab). Arrow keys move 10 px, Shift+arrow 60 px, Home returns it home. Double-click on a moved mascot also returns it home (resetOnDoubleClick: false turns that off).
+- Keyboard: the mascot is focusable (Tab). Arrow keys move 10 px, Shift+arrow 60 px, Home returns it home. A double-click does nothing special by default (two ordinary clicks; it never moves the mascot); resetOnDoubleClick: true makes a double-click on a moved mascot return it home. The mascot has no close/hide control: hiding is only possible through hide() or the console commands below.
 - It always stays fully inside the viewport, at least margin px from each edge. It is re-clamped on window resize, orientation change and visual-viewport changes (a phone keyboard shrinks the usable band; pinch zoom does not move it). Re-clamping never overwrites the remembered spot, so it returns there when the space comes back.
 - The spot is saved in localStorage under storageKey (per origin) as { v: 2, fx, fy }, fractions of the free space, so it survives other window sizes. The older { x, y } px format is still read. Storage errors are ignored. resetPosition() removes the key.
 - snap: true (or a px distance) pulls the mascot flush to an edge when it is dropped within 24 px (or that distance) of it. Off by default.

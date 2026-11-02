@@ -228,15 +228,46 @@ describe('createShell', () => {
  expect(onMove).toHaveBeenLastCalledWith(expect.objectContaining({ source: 'reset', free: false }));
  });
 
- it('double-click resets a moved mascot unless disabled', () => {
- const { host, sh } = make();
+ it('double-click never moves the mascot by default; resetOnDoubleClick: true opts in', () => {
+ const { host, sh, onMove } = make();
  sh.setPosition({ x: 300, y: 200 });
- stage.fire('dblclick', { preventDefault: vi.fn() });
- expect(at(host)).toEqual(['16px', '484px']);
- const b = make({ resetOnDoubleClick: false });
+ onMove.mockClear();
+ const e = { preventDefault: vi.fn() };
+ stage.fire('dblclick', e);
+ expect(at(host)).toEqual(['300px', '200px']);
+ expect(e.preventDefault).not.toHaveBeenCalled();
+ expect(onMove).not.toHaveBeenCalled();
+ const b = make({ resetOnDoubleClick: true });
  b.sh.setPosition({ x: 300, y: 200 });
  stage.fire('dblclick', { preventDefault: vi.fn() });
- expect(at(b.host)).toEqual(['300px', '200px']);
+ expect(at(b.host)).toEqual(['16px', '484px']);
+ });
+
+ it('hide/show: page-load hide by default, persisted only on request, show clears it', () => {
+ const { host, sh } = make();
+ expect(sh.isHidden()).toBe(false);
+ sh.setHidden(true);
+ expect((host as any).hidden).toBe(true);
+ expect(store.setItem).not.toHaveBeenCalledWith('k:hidden', '1');
+ sh.setHidden(false);
+ expect(sh.isHidden()).toBe(false);
+ expect(store.removeItem).toHaveBeenCalledWith('k:hidden');
+ sh.setHidden(true, true);
+ expect(store.setItem).toHaveBeenCalledWith('k:hidden', '1');
+ // a persisted flag starts the next page hidden (with a console hint), never anything else
+ const info = vi.spyOn(console, 'info').mockImplementation(() => undefined);
+ store.getItem.mockImplementation((k: string) => (k === 'k:hidden' ? '1' : null));
+ const c = make();
+ expect(c.sh.isHidden()).toBe(true);
+ expect(info).toHaveBeenCalled();
+ c.sh.setHidden(false);
+ expect(store.removeItem).toHaveBeenCalledWith('k:hidden');
+ info.mockRestore();
+ // storageKey false: nothing is stored
+ store.setItem.mockClear();
+ const d = make({ storageKey: false });
+ d.sh.setHidden(true, true);
+ expect(store.setItem).not.toHaveBeenCalled();
  });
 
  it('setPosition takes px or fractions, clamps and ignores junk', () => {

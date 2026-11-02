@@ -23,11 +23,13 @@ If the sprites folder is unreachable, auto falls back to the procedural puppet a
 
 ## Home slot and free dragging
 
-hapi-chan keeps the mascot at the bottom-left of its chat bar. Pass that spot as the home option (a function, re-read on resize) and call relayout() when the bar moves; the user can still drag the mascot anywhere, and resetPosition() (or double-click, or Home) brings it back:
+hapi-chan keeps the mascot at the bottom-left of its chat bar. Pass that spot as the home option (a function, re-read on resize) and call relayout() when the bar moves; the user can still drag the mascot anywhere, and resetPosition() (or Home, or claudeChan.resetPosition() in the console) brings it back:
 
  const cc = mount(document.body, { sprites: '/vendor/claude-chan/chars', home: () => { const r = bar.getBoundingClientRect(); return { x: r.left + 8, y: r.top - 228 }; }, zIndex: 40 });
  new ResizeObserver(() => cc.relayout()).observe(bar);
 
+- Global mount (one mascot for the whole app): call mount(document.body, ...) once at the app shell level, outside the router, and never unmount it on navigation. Let home return the slot of the current page when it has one (e.g. a chat bar) and null otherwise (then the position corner, 16 px in, is used), and call relayout() when the slot appears, moves or disappears. A spot the user dragged to is kept on every page; home only applies while the user has never dragged it (or after resetPosition()). The overlay must not hide its container with display: none, which would hide the mascot too.
+- Never put the mascot inside an element with transform, filter, perspective, contain or will-change: transform: that element becomes the containing block for position: fixed and the viewport coordinates go wrong.
 - Use dock: 'fixed-default' (or setDock) for a mode where the mascot must stay in the slot.
 - zIndex: pick a value above your content and below your modals; the default (2147483000) is above everything.
 - The remembered spot is per origin under storageKey; give each app its own key if several share an origin.
