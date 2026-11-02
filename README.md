@@ -30,7 +30,7 @@ cc.setMood('happy');
 cc.on('motionend', (e) => console.log(e));
 
 
-Controller: act, say, setMood, lookAt, stop, on, destroy, ready.
+Controller: act, say, setMood, lookAt, stop, lipSync, on, destroy, ready.
 
 ### 3. React
 
@@ -97,6 +97,8 @@ The demo page is in demo/ and has a button for every motion, expression, mood an
 
 ## More docs
 
+- docs/API.md: stable API contract (options, attributes, events, tools)
+- docs/INTEGRATION.md: packaging and host-app integration (hapi-chan)
 - docs/CHARACTER.md: character sheet
 - docs/MCP.md: MCP setup and system prompt snippet
 - ROADMAP.md: status and next steps
