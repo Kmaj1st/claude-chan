@@ -1,5 +1,6 @@
 import { Engine } from './engine';
 import { createShell } from './host';
+import { installConsoleApi } from './console';
 import { createLevelReader, type LevelReader } from './lipsync';
 import { createPuppet } from './renderer-select';
 import type { ClaudeChanController, Dock, MountOptions, Puppet } from './types';
@@ -76,7 +77,7 @@ export function mount(parent: HTMLElement, options: MountOptions = {}): ClaudeCh
  },
  );
 
- return {
+ const ctrl: ClaudeChanController = {
  ready,
  act: (req) => engine.act(req),
  say: (text) => engine.say(text),
@@ -110,13 +111,21 @@ export function mount(parent: HTMLElement, options: MountOptions = {}): ClaudeCh
  resetPosition: () => { if (alive) shell.resetPosition(); },
  setDock: (d) => { if (alive) shell.setDock(d); },
  relayout: () => { if (alive) shell.relayout(); },
+ hide: (opts) => { if (alive) shell.setHidden(true, opts?.persist === true); },
+ show: () => { if (alive) shell.setHidden(false); },
+ toggle: () => { if (alive) shell.setHidden(!shell.isHidden()); return !shell.isHidden(); },
+ isHidden: () => shell.isHidden(),
  destroy() {
  if (!alive) return;
  alive = false;
+ uninstall();
  reader?.dispose();
  cancelAnimationFrame(raf);
  puppet.destroy();
  shell.destroy();
  },
  };
+ const uninstall = o.consoleApi === false ? (): void => undefined
+ : installConsoleApi(ctrl, typeof o.consoleApi === 'string' && o.consoleApi ? o.consoleApi : 'claudeChan');
+ return ctrl;
 }
