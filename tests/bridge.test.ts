@@ -86,6 +86,31 @@ describe('postMessage bridge', () => {
  expect((b.replies[1] as { result: unknown }).result).toBeTruthy();
  });
 
+ it('announces ready to the parent only when asked and framed', () => {
+ const posted: unknown[][] = [];
+ const parent = { postMessage: (m: unknown, o: string) => { posted.push([m, o]); } };
+ const mk = (par: unknown) => ({
+ location: { origin: 'http://a.test' },
+ parent: par,
+ addEventListener: () => {},
+ removeEventListener: () => {},
+ });
+ const t1 = mk(parent);
+ const origins = ['http://a.test', 'http://b.test'];
+ installPostMessageBridge({} as ClaudeChanController, { target: t1 as never, allowedOrigins: origins });
+ expect(posted).toEqual([]);
+ installPostMessageBridge({} as ClaudeChanController, { target: t1 as never, allowedOrigins: origins, announce: true });
+ expect(posted).toEqual([
+ [{ type: 'claude-chan-ready' }, 'http://a.test'],
+ [{ type: 'claude-chan-ready' }, 'http://b.test'],
+ ]);
+ const t2: Record<string, unknown> = mk(null);
+ t2.parent = t2;
+ posted.length = 0;
+ installPostMessageBridge({} as ClaudeChanController, { target: t2 as never, announce: true });
+ expect(posted).toEqual([]);
+ });
+
  it('uninstalls', () => {
  const b = setup({});
  b.off();

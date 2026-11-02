@@ -29,6 +29,9 @@ export interface PostMessageBridgeOptions {
  allowedOrigins?: string[];
  // Window to listen on (default: globalThis window).
  target?: Window;
+ // Post { type: 'claude-chan-ready' } to the parent window (once per allowed origin) when installed,
+ // so an embedding host knows it can send commands. Off by default; no-op when not in a frame.
+ announce?: boolean;
 }
 
 // Request: { type: 'claude-chan', id?, tool, args }
@@ -60,5 +63,17 @@ export function installPostMessageBridge(
  }
  };
  target.addEventListener('message', handler);
+ if (opts.announce) {
+ const parent = (target as Window).parent;
+ if (parent && parent !== target) {
+ for (const origin of allowed) {
+ try {
+ parent.postMessage({ type: 'claude-chan-ready' }, origin);
+ } catch {
+ // Parent not addressable for this origin: skip.
+ }
+ }
+ }
+ }
  return () => target.removeEventListener('message', handler);
 }
