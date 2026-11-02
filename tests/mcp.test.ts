@@ -40,14 +40,16 @@ describe('mcp server', () => {
  expect(() => JSON.parse(first.text)).not.toThrow();
  });
 
- it('lists the four tools', async () => {
+ it('lists every tool', async () => {
  const { client } = await setup();
  const { tools } = await client.listTools();
  expect(tools.map((t) => t.name).sort()).toEqual([
  'claude_chan_act',
  'claude_chan_list_motions',
+ 'claude_chan_reset_position',
  'claude_chan_say',
  'claude_chan_set_mood',
+ 'claude_chan_set_position',
  'claude_chan_set_state',
  ]);
  });

@@ -7,7 +7,7 @@ The renderer option (or renderer attribute) is auto, sprite, procedural or live2
 ### 1. Plain HTML (web component)
 
 html
-<claude-chan position="bottom-left" size="220" draggable="true"></claude-chan>
+<claude-chan position="bottom-left" size="220" dock="free"></claude-chan>
 <script type="module">
  import { defineClaudeChan } from 'claude-chan';
  defineClaudeChan();
@@ -22,7 +22,7 @@ import { ClaudeChan } from 'claude-chan';
 const cc = ClaudeChan.mount(document.body, {
  position: 'bottom-left',
  size: 220,
- draggable: true,
+ dock: 'free',
 });
 await cc.ready;
 cc.act({ motion: 'wave', expression: 'smile', say: 'Hello!' });
@@ -30,7 +30,24 @@ cc.setMood('happy');
 cc.on('motionend', (e) => console.log(e));
 
 
-Controller: act, say, setMood, lookAt, stop, lipSync, on, destroy, ready.
+Controller: act, say, setMood, lookAt, stop, lipSync, getPosition, setPosition, resetPosition, setDock, relayout, on, destroy, ready.
+
+### Dragging and position
+
+The mascot can be dragged anywhere on the screen with mouse, touch or pen (a short press is still a click), or moved with the arrow keys after focusing it (Shift for big steps, Home to go back). It stays inside the viewport, follows resizes, rotation and the phone keyboard, and remembers its spot per site as fractions of the window. Double-click or resetPosition() returns it home.
+
+Options: dock ('free' default, or 'fixed-default' to keep it at home), home ({ x, y } or a function, for a host's own slot), margin (8), snap (false; true or px to snap to edges on drop), resetOnDoubleClick (true), storageKey. Events: dragstart, move.
+
+js
+// Host app: keep your own slot as the home spot and let the user drag away.
+const slot = () => { const r = chatBar.getBoundingClientRect(); return { x: r.left + 8, y: r.top - 228 }; };
+const cc = ClaudeChan.mount(document.body, { home: slot, zIndex: 40 });
+new ResizeObserver(() => cc.relayout()).observe(chatBar);
+cc.setPosition({ fx: 1, fy: 1 }); // bottom-right corner
+cc.resetPosition(); // back to the slot
+
+
+The same works remotely: claude_chan_set_position { x, y } (fractions) and claude_chan_reset_position over postMessage or the hub. Details: docs/API.md (Position and dragging).
 
 ### 3. React
 
@@ -77,7 +94,7 @@ The demo page accepts ?model=...&core=...&expressions=... for a quick try. Map p
 
 | Way | Use when | Docs |
 | --- | --- | --- |
-| MCP server (stdio or streamable HTTP) with claude_chan_act, claude_chan_say, claude_chan_set_mood, claude_chan_set_state, claude_chan_list_motions | Claude Code / HAPI sessions | docs/MCP.md |
+| MCP server (stdio or streamable HTTP) with claude_chan_act, claude_chan_say, claude_chan_set_mood, claude_chan_set_state, claude_chan_list_motions, claude_chan_set_position, claude_chan_reset_position | Claude Code / HAPI sessions | docs/MCP.md |
 | JSON schema schema/claude_chan_act.json | Any tool-calling LLM API | schema/ |
 | postMessage bridge | Page inside an iframe | src/bridge.ts |
 | Text markers such as [motion:wave] in streamed text | Models without tool calls | src/markers.ts |

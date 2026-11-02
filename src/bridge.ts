@@ -21,6 +21,12 @@ export function runCommand(ctrl: ClaudeChanController, cmd: Command): unknown {
  return { ok: true };
  case 'claude_chan_list_motions':
  return listCapabilities();
+ case 'claude_chan_set_position':
+ ctrl.setPosition({ fx: cmd.fx, fy: cmd.fy });
+ return { ok: true };
+ case 'claude_chan_reset_position':
+ ctrl.resetPosition();
+ return { ok: true };
  }
 }
 

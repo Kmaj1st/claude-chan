@@ -3,9 +3,9 @@ import { MAX_DURATION_MS, MAX_SAY_LENGTH, TOOLS, actInputSchema, listCapabilitie
 import { EXPRESSIONS, MOODS, MOTIONS, PRIORITIES } from '../src/types';
 
 describe('tools', () => {
- it('exposes the four stable tool names, unique', () => {
+ it('exposes the stable tool names, unique', () => {
  const names = TOOLS.map((t) => t.name);
- expect(names).toEqual(['claude_chan_act', 'claude_chan_say', 'claude_chan_set_mood', 'claude_chan_set_state', 'claude_chan_list_motions']);
+ expect(names).toEqual(['claude_chan_act', 'claude_chan_say', 'claude_chan_set_mood', 'claude_chan_set_state', 'claude_chan_list_motions', 'claude_chan_set_position', 'claude_chan_reset_position']);
  expect(new Set(names).size).toBe(names.length);
  });
 

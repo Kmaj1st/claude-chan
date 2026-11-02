@@ -17,6 +17,7 @@
 - Unit tests for the bridge (error replies, wildcard origin rejected), prefers-reduced-motion, and host clamping/corner vars
 - Model folder validator: npm run check:model -- <folder> (server/modelcheck.ts, tests/modelcheck.test.ts)
 - Agent states: applyState/setState and the claude_chan_set_state tool (idle, listening, thinking, working, waiting, speaking, success, error, sleeping); all five tools in schema/claude_chan_tools.json (export claude-chan/schema/tools)
+- Free dragging over the full viewport: dock free | fixed-default, home slot option, threshold so clicks stay clicks, keyboard move, clamp and re-clamp on resize/rotation/phone keyboard, spot saved as fractions, optional edge snap, set_position/reset_position tools (tests/shell.test.ts, tests/position.test.ts, npm run test:e2e)
 - storage-key="false" disables position persistence; README covers agent states and the real Live2D model path (npm run test:live2d is opt-in)
 - Demo page (demo/) with renderer select (auto, sprite, procedural, live2d), moods, agent states and model/core-url inputs
 - Iframe demo (demo/embed.html + frame.html) showing the postMessage bridge with the ready announce
