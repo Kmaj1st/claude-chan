@@ -66,6 +66,12 @@ Call claude_chan_act briefly when starting, finishing or failing a task.
 Use claude_chan_say for short messages (one sentence). Do not spam; skip it when idle.
 
 
+## Connecting a page
+
+The package ships the browser side of the hub: connectHub(controller, { token, port?, host?, reconnect?, onStatus? }) returns a disconnect function. Use the same token as the server. Defaults: host 127.0.0.1, port 8765, reconnect with backoff (1 s up to 15 s). Every message is validated with parseCommand before it runs; messages over 4096 characters are ignored.
+
+The token ends up in the page, so use this only for local pages.
+
 ## Security
 
 The hub binds to loopback, requires the token, checks the Origin header, rate-limits and bounds message sizes. Keep the token out of shared configs.

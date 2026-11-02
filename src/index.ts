@@ -8,6 +8,8 @@ export { ClaudeChanElement } from './element';
 // Tool-call surface: bridge, text markers, validation and tool definitions.
 export { runCommand, installPostMessageBridge } from './bridge';
 export type { PostMessageBridgeOptions } from './bridge';
+export { connectHub } from './hubclient';
+export type { HubClientOptions } from './hubclient';
 export { parseMarkers, createMarkerStream } from './markers';
 export type { MarkerResult, MarkerStream } from './markers';
 export { parseCommand } from './validate';

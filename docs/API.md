@@ -50,6 +50,7 @@ Exported from the package entry:
 - parseCommand(tool, args) returns { ok: true, command } | { ok: false, error }
 - runCommand(controller, command) applies a validated command
 - installPostMessageBridge(controller, { allowedOrigins?, target?, announce? }) returns an uninstall function
+- connectHub(controller, { token, port?, host?, reconnect?, onStatus? }) connects to the local MCP hub (docs/MCP.md) and returns a disconnect function
 - parseMarkers(text) and createMarkerStream(onAct, onMood?)
 
 Tool names: claude_chan_act, claude_chan_say, claude_chan_set_mood, claude_chan_set_state, claude_chan_list_motions. JSON schema files: claude-chan/schema (claude_chan_act only) and claude-chan/schema/tools (all five tools).
