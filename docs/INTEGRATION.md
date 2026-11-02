@@ -22,7 +22,7 @@ If the sprites folder is unreachable, auto falls back to the procedural puppet a
 
 ## Live2D
 
-Set model (a .model3.json URL) and coreUrl (self-hosted live2dcubismcore.min.js; the proprietary Core is not bundled, see docs/LICENSES.md). With renderer auto a failing model falls back to sprites.
+Set model (a .model3.json URL) and coreUrl (self-hosted live2dcubismcore.min.js; the proprietary Core is not bundled, see docs/LICENSES.md). On the web component the attributes are model, core-url and expressions (JSON, e.g. {"smile":"f01"} maps preset expressions to model expression ids). They are read at mount, so change them by remounting. With renderer auto a failing model falls back to sprites; the element re-dispatches the load error as an event.
 
 ## Checklist
 
