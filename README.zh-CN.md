@@ -42,27 +42,23 @@ cc.act({ motion: 'wave', expression: 'smile', say: 'Hello!' });
 
 ### b) 热加载到任意页面
 
-先启动本地加载服务，再在任意页面的浏览器控制台粘贴下面的代码：
-
-```bash
-npm run serve:loader   # 提供 http://127.0.0.1:5179
-```
+热加载文件托管在 GitHub Pages 上。安装页 https://kmaj1st.github.io/claude-chan/docs/install.html （中文 / English）逐一介绍每种方式，带复制按钮，会检查基础地址，还有“在本页试一下”按钮。也可以在任意页面的浏览器控制台（F12）粘贴下面的代码（如果 Chrome 或 Edge 拒绝粘贴，先输入 `allow pasting`）：
 
 ```js
-document.head.append(Object.assign(document.createElement('script'),{src:'http://127.0.0.1:5179/hotload/loader.js'}))
+document.head.append(Object.assign(document.createElement('script'),{src:'https://kmaj1st.github.io/claude-chan/hotload/loader.js'}))
 ```
 
-仓库公开后可改用 CDN：把 `src` 换成 `https://cdn.jsdelivr.net/gh/Kmaj1st/claude-chan@main/hotload/loader.js`。要移除热加载的吉祥物，运行 `claudeChan.unload()`。
+离线或测试本地改动时，运行 `npm run serve:loader`（提供 http://127.0.0.1:5179），改用 `http://127.0.0.1:5179/hotload/loader.js`。仓库公开后也可用 jsDelivr：`https://cdn.jsdelivr.net/gh/Kmaj1st/claude-chan@main/hotload/loader.js`。要移除热加载的吉祥物，运行 `claudeChan.unload()`。
 
 <!-- SCREENSHOT: docs/images/hot-load.png — mascot hot-loaded on a third-party site, 1200x700 -->
 
 ### c) 书签
 
-把 [docs/install.html](docs/install.html) 里的书签拖到书签栏，在任意页面点击即可。
+打开安装页 https://kmaj1st.github.io/claude-chan/docs/install.html （仓库中的 [docs/install.html](docs/install.html)），把书签拖到书签栏，在任意页面点击即可。
 
 ### d) 用户脚本
 
-在 Tampermonkey 或 Violentmonkey 中安装 `hotload/claude-chan.user.js`。对内容安全策略（CSP）严格的网站，请用 `hotload/claude-chan.inline.user.js`。
+在 Tampermonkey 或 Violentmonkey 中安装 https://kmaj1st.github.io/claude-chan/hotload/claude-chan.user.js 。对内容安全策略（CSP）严格的网站，请用 `hotload/claude-chan.inline.user.js`。
 
 更多内容（包括 CSP 限制）见 [docs/HOT-LOAD.md](docs/HOT-LOAD.md)。
 

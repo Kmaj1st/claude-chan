@@ -324,6 +324,48 @@ try {
  check('userscript: no page errors', errors.length === 0, errors.join(' | '));
  await p.close();
  }
+
+ // 11. Install page (docs/install.html) served by the loader server: base derived from its own URL, every
+ // snippet and link uses it, the status line probes loader.js, and "Try it" loads the mascot on the page itself.
+ {
+ const p = await browser.newPage();
+ const errors = [];
+ p.on('pageerror', (e) => errors.push(String(e)));
+ await p.goto(BASE + 'docs/install.html', { waitUntil: 'load' });
+ const ok = await p.waitForFunction(() => /\bok\b/.test(document.getElementById('status').className), { timeout: 8000 }).then(() => true, () => false);
+ const info = await p.evaluate(() => ({
+ base: document.getElementById('base').value,
+ h1: document.querySelector('h1').textContent,
+ sections: document.querySelectorAll('h2').length,
+ snippets: [...document.querySelectorAll('[data-tpl]')].map((e) => e.textContent),
+ links: [...document.querySelectorAll('[data-link]')].map((e) => e.href),
+ bm: document.getElementById('bm').getAttribute('href'),
+ copy: document.querySelectorAll('[data-copy]').length,
+ }));
+ const withBase = info.snippets.filter((s) => s.includes('hotload/loader.js'));
+ check('install page: base = its own site root', info.base === BASE, info.base);
+ check('install page: title and 6 sections', /Load Claude-chan onto any page/.test(info.h1) && info.sections === 6, JSON.stringify([info.h1, info.sections]));
+ check('install page: snippets, links and bookmarklet use the base',
+ withBase.length >= 4 && withBase.every((s) => s.includes(BASE + 'hotload/loader.js')) &&
+ info.links.length === 4 && info.links.every((h) => h.startsWith(BASE + 'hotload/')) && info.bm.includes(BASE + 'hotload/loader.js') &&
+ info.copy === info.snippets.length, JSON.stringify(info));
+ check('install page: status line OK for the base', ok);
+ await p.click('#try');
+ check('install page: Try it mounts the mascot', await waitMascot(p));
+ check('install page: window.claudeChan exists', await p.evaluate(() => typeof window.claudeChan?.unload === 'function'));
+ await p.evaluate(() => { document.getElementById('base').value = 'http://127.0.0.1:1/nope/'; document.getElementById('base').dispatchEvent(new Event('input')); });
+ check('install page: wrong base shows FAILED', await p.waitForFunction(() => /\bbad\b/.test(document.getElementById('status').className), { timeout: 8000 }).then(() => true, () => false));
+ const flip = await p.evaluate(() => {
+ const before = document.documentElement.getAttribute('data-lang');
+ document.getElementById('lang').click();
+ const after = document.documentElement.getAttribute('data-lang');
+ return before !== after && getComputedStyle(document.querySelector('h1 .' + after)).display !== 'none' &&
+ getComputedStyle(document.querySelector('h1 .' + before)).display === 'none';
+ });
+ check('install page: language toggle', flip);
+ check('install page: no page errors', errors.length === 0, errors.join(' | '));
+ await p.close();
+ }
 } finally {
  await browser.close();
  loaderServer.close();
