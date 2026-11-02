@@ -34,9 +34,9 @@ Controller: act, say, setMood, lookAt, stop, lipSync, getPosition, setPosition, 
 
 ### Dragging and position
 
-The mascot can be dragged anywhere on the screen with mouse, touch or pen (a short press is still a click), or moved with the arrow keys after focusing it (Shift for big steps, Home to go back). It stays inside the viewport, follows resizes, rotation and the phone keyboard, and remembers its spot per site as fractions of the window. Double-click or resetPosition() returns it home.
+The mascot can be dragged anywhere on the screen with mouse, touch or pen (a short press is still a click), or moved with the arrow keys after focusing it (Shift for big steps, Home to go back). It stays inside the viewport, follows resizes, rotation and the phone keyboard, and remembers its spot per site as fractions of the window. resetPosition() or Home returns it home; a double-click does nothing special. There is no close button: the mascot is always visible on load. From the browser console, claudeChan.help() lists the commands (resetPosition, setPosition, getPosition, hide, show, toggle; see docs/API.md).
 
-Options: dock ('free' default, or 'fixed-default' to keep it at home), home ({ x, y } or a function, for a host's own slot), margin (8), snap (false; true or px to snap to edges on drop), resetOnDoubleClick (true), storageKey. Events: dragstart, move.
+Options: dock ('free' default, or 'fixed-default' to keep it at home), home ({ x, y } or a function, for a host's own slot), margin (8), snap (false; true or px to snap to edges on drop), resetOnDoubleClick (false; true opts in to double-click = back home), consoleApi (true = window.claudeChan), storageKey. Events: dragstart, move.
 
 js
 // Host app: keep your own slot as the home spot and let the user drag away.

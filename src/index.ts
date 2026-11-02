@@ -5,6 +5,10 @@ export * from './types';
 export { mount, defineClaudeChan };
 export { ClaudeChanElement } from './element';
 
+// Browser-console commands (window.claudeChan).
+export { createConsoleApi, installConsoleApi, CONSOLE_COMMANDS } from './console';
+export type { ConsoleApi } from './console';
+
 // Tool-call surface: bridge, text markers, validation and tool definitions.
 export { runCommand, installPostMessageBridge } from './bridge';
 export type { PostMessageBridgeOptions } from './bridge';
