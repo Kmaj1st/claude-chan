@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { EXPRESSIONS, MOODS, MOTIONS, PRIORITIES } from '../src/types';
 import { MAX_DURATION_MS, MAX_SAY_LENGTH } from '../src/tools';
 
-// docs/API.md is the contract hapi-chan relies on: keep it in sync with the code.
+// docs/API.md is the contract host apps rely on: keep it in sync with the code.
 const doc = readFileSync(new URL('../docs/API.md', import.meta.url), 'utf8');
 const NL = String.fromCharCode(10);
 
