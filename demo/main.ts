@@ -1,4 +1,4 @@
-import { AGENT_STATES, EXPRESSIONS, MOODS, MOTIONS, applyState, type ActRequest, type AgentState, type ClaudeChanElement } from '../src/index';
+import { AGENT_STATES, EXPRESSIONS, MOODS, MOTIONS, applyState, parseCommand, runCommand, type ActRequest, type AgentState, type ClaudeChanElement } from '../src/index';
 import '../src/index';
 
 const el = document.getElementById('cc') as unknown as ClaudeChanElement;
@@ -46,12 +46,27 @@ for (const s of AGENT_STATES) {
  states.appendChild(b);
 }
 
+// Raw tool-call console: accepts {tool, args} or a bare act request; validated like the real bridge.
+function runCall(raw: string): void {
+ const v = JSON.parse(raw) as Record<string, unknown>;
+ const wrapped = typeof v.tool === 'string';
+ const args = wrapped ? v.args : v;
+ const parsed = parseCommand(wrapped ? v.tool : 'claude_chan_act', args);
+ if (!parsed.ok) {
+ write('! ' + parsed.error);
+ return;
+ }
+ write('> ' + parsed.command.tool + ' ' + JSON.stringify(args ?? {}));
+ const res = el.controller ? runCommand(el.controller, parsed.command) : undefined;
+ write('< ' + JSON.stringify(res ?? null));
+}
+
 const text = document.getElementById('text') as HTMLInputElement;
 document.getElementById('say')?.addEventListener('click', () => act({ say: text.value }));
 document.getElementById('stop')?.addEventListener('click', () => el.controller?.stop());
 document.getElementById('run')?.addEventListener('click', () => {
  try {
- act(JSON.parse((document.getElementById('call') as HTMLInputElement).value) as ActRequest);
+ runCall((document.getElementById('call') as HTMLInputElement).value);
  } catch (e) {
  write('! invalid JSON: ' + String(e));
  }
