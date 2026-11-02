@@ -49,7 +49,7 @@ Exported from the package entry:
 - TOOLS, actInputSchema, listCapabilities(), MAX_SAY_LENGTH (280), MAX_DURATION_MS (60000)
 - parseCommand(tool, args) returns { ok: true, command } | { ok: false, error }
 - runCommand(controller, command) applies a validated command
-- installPostMessageBridge(controller, { allowedOrigins?, target? }) returns an uninstall function
+- installPostMessageBridge(controller, { allowedOrigins?, target?, announce? }) returns an uninstall function
 - parseMarkers(text) and createMarkerStream(onAct, onMood?)
 
 Tool names: claude_chan_act, claude_chan_say, claude_chan_set_mood, claude_chan_set_state, claude_chan_list_motions. JSON schema files: claude-chan/schema (claude_chan_act only) and claude-chan/schema/tools (all five tools).
@@ -66,6 +66,8 @@ Response (posted back to the sender's window, targeted at its origin):
 
  { type: 'claude-chan-result', id: 1, ok: true, result: { ok: true } }
  { type: 'claude-chan-result', id: 1, ok: false, error: 'message' }
+
+With announce: true, and when the page runs inside a frame, the bridge posts { type: 'claude-chan-ready' } to the parent once per allowed origin right after install, so the host knows it can send commands. Off by default.
 
 claude_chan_list_motions returns the capabilities object as result. An invalid tool or args gives ok false with the validation error.
 
