@@ -1,4 +1,4 @@
-import { parseCommand } from '../src/validate';
+import { parseCommand, type Command } from '../src/validate';
 import { listCapabilities } from '../src/tools';
 import type { Hub } from './hub';
 
@@ -8,6 +8,19 @@ export interface DispatchResult {
  ok: boolean;
  result?: unknown;
  error?: string;
+}
+
+// Re-serialises a validated command into the args pages expect (only known fields go out).
+export function cleanArgs(c: Command): Record<string, unknown> {
+ switch (c.tool) {
+ case 'claude_chan_act': return { ...c.act };
+ case 'claude_chan_say': return { text: c.text };
+ case 'claude_chan_set_mood': return { mood: c.mood };
+ case 'claude_chan_set_state': return { state: c.state };
+ case 'claude_chan_set_position': return { x: c.fx, y: c.fy };
+ case 'claude_chan_reset_position':
+ case 'claude_chan_list_motions': return {};
+ }
 }
 
 export function createDispatcher(hub: Pick<Hub, 'broadcast'>, ratePerSecond = 10) {
@@ -23,8 +36,7 @@ export function createDispatcher(hub: Pick<Hub, 'broadcast'>, ratePerSecond = 10
  stamps = stamps.filter((t) => now - t < 1000);
  if (stamps.length >= ratePerSecond) return { ok: false, error: 'rate limit exceeded' };
  stamps.push(now);
- const c = parsed.command;
- const clean = c.tool === 'claude_chan_act' ? c.act : c.tool === 'claude_chan_say' ? { text: c.text } : c.tool === 'claude_chan_set_state' ? { state: c.state } : { mood: (c as { mood: string }).mood };
+ const clean = cleanArgs(parsed.command);
  const delivered = hub.broadcast({ type: 'claude-chan', id: ++seq, tool, args: clean });
  return { ok: true, result: { delivered } };
  };

@@ -112,7 +112,9 @@ const setAttr = (name: string, value: string): void => {
 };
 document.getElementById('position')?.addEventListener('change', (e) => setAttr('position', (e.target as HTMLSelectElement).value));
 document.getElementById('size')?.addEventListener('change', (e) => setAttr('size', (e.target as HTMLInputElement).value));
-document.getElementById('draggable')?.addEventListener('change', (e) => setAttr('draggable', String((e.target as HTMLInputElement).checked)));
+document.getElementById('draggable')?.addEventListener('change', (e) => setAttr('dock', (e.target as HTMLInputElement).checked ? 'free' : 'fixed-default'));
+document.getElementById('snap')?.addEventListener('change', (e) => setAttr('snap', String((e.target as HTMLInputElement).checked)));
+document.getElementById('reset-pos')?.addEventListener('click', () => { el.resetPosition(); write('resetPosition()'); });
 
 // Element events (re-dispatched by <claude-chan> on every mount): shows model load and mount failures.
 const errText = (d: { message?: string; cause?: unknown } | undefined): string => {
@@ -123,6 +125,7 @@ el.addEventListener('ready', () => write('* ready'));
 el.addEventListener('error', (e) => write('! error ' + errText((e as unknown as CustomEvent).detail)));
 el.addEventListener('motionstart', (e) => write('* motionstart ' + JSON.stringify((e as CustomEvent).detail)));
 el.addEventListener('motionend', (e) => write('* motionend ' + JSON.stringify((e as CustomEvent).detail)));
+el.addEventListener('move', (e) => write('* move ' + JSON.stringify((e as CustomEvent).detail)));
 
 // Lip-sync: the mouth follows the level of the chosen audio file; the button returns to text-length lip-sync.
 const audio = document.getElementById('audio') as HTMLAudioElement;

@@ -142,5 +142,38 @@
       "properties": {},
       "additionalProperties": false
     }
+  },
+  {
+    "name": "claude_chan_set_position",
+    "description": "Move the mascot on screen (only when the user asks). x and y are fractions of the free space: 0 = left/top edge, 1 = right/bottom edge. Ignored when the host keeps it docked.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "y": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "claude_chan_reset_position",
+    "description": "Return the mascot to its default (home) position.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {},
+      "additionalProperties": false
+    }
   }
 ]
