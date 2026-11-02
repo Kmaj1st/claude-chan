@@ -34,6 +34,8 @@
 <h3>Lip-sync (audio file)</h3>
 <div class="row"><input id="audio-file" type="file" accept="audio/*,video/*"><button id="lip-stop">text lip-sync</button></div>
 <audio id="audio" controls></audio>
+<h3>MCP hub (local)</h3>
+<div class="row"><input id="hub-token" type="password" placeholder="CLAUDE_CHAN_TOKEN"><input id="hub-port" type="number" value="8765" style="min-width:80px;width:80px"><button id="hub-connect">connect</button><button id="hub-disconnect">disconnect</button></div>
 <h3>Say</h3>
 <div class="row"><input id="text" value="Welcome back, master!"><button id="say">say</button><button id="stop">stop</button></div>
 <h3>Tool-call console</h3>

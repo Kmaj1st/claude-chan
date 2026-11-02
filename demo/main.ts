@@ -1,4 +1,4 @@
-import { AGENT_STATES, EXPRESSIONS, MOODS, MOTIONS, applyState, parseCommand, runCommand, type ActRequest, type AgentState, type ClaudeChanElement } from '../src/index';
+import { connectHub, AGENT_STATES, EXPRESSIONS, MOODS, MOTIONS, applyState, parseCommand, runCommand, type ActRequest, type AgentState, type ClaudeChanElement } from '../src/index';
 import '../src/index';
 
 const el = document.getElementById('cc') as unknown as ClaudeChanElement;
@@ -139,4 +139,31 @@ document.getElementById('lip-stop')?.addEventListener('click', () => {
  audio.pause();
  write('> lipSync(null)');
  el.controller?.lipSync(null);
+});
+
+// MCP hub: connect this page to the local claude-chan server so MCP tool calls drive the mascot.
+let hubStop: (() => void) | null = null;
+document.getElementById('hub-connect')?.addEventListener('click', () => {
+ const ctrl = el.controller;
+ const token = (document.getElementById('hub-token') as HTMLInputElement).value.trim();
+ const port = Number((document.getElementById('hub-port') as HTMLInputElement).value) || 8765;
+ if (!ctrl) {
+ write('! hub: mascot is not ready yet');
+ return;
+ }
+ if (!token) {
+ write('! hub: enter the CLAUDE_CHAN_TOKEN');
+ return;
+ }
+ hubStop?.();
+ try {
+ hubStop = connectHub(ctrl, { token, port, onStatus: (s) => write('* hub ' + s) });
+ } catch (e) {
+ write('! hub: ' + String(e));
+ }
+});
+document.getElementById('hub-disconnect')?.addEventListener('click', () => {
+ hubStop?.();
+ hubStop = null;
+ write('* hub disconnected');
 });
