@@ -146,6 +146,18 @@ describe('Live2DPuppet', () => {
  }
  });
 
+ it('reads expressions from motions.json when no map is given', async () => {
+ vi.stubGlobal('fetch', async () => ({ ok: true, json: async () => ({ expressions: { smile: 'f09' } }) }));
+ try {
+ const p = new Live2DPuppet({ model: 'http://x.test/model/c.model3.json' });
+ await p.init();
+ p.render(neutralPose(), 'smile');
+ expect(h.model!.expressions).toEqual(['f09']);
+ } finally {
+ vi.unstubAllGlobals();
+ }
+ });
+
  it('cleans up when destroyed while the model is still loading', async () => {
  let open!: () => void;
  h.gate = new Promise<void>((r) => { open = r; });
