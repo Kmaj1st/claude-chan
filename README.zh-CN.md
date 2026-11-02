@@ -156,6 +156,8 @@ Claude-chan 的设计目标是嵌入宿主应用，例如 HAPI 网页应用（�
 npm ci
 npm test            # 单元测试（vitest）
 npm run test:e2e    # 无头浏览器测试
+npm run test:loader # 构建 hotload/ 并运行热加载浏览器测试
+npm run check:loader # 检查 hotload/ 是否最新、是否超出体积预算
 npm run check:links # 检查文档中的相对链接和锚点
 npx tsc --noEmit
 ```

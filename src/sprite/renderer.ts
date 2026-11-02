@@ -14,6 +14,8 @@ export interface SpriteOptions {
  fetchJson?: (url: string) => Promise<unknown>;
  // Test hook: replaces image loading (resolves when the image is usable).
  loadImage?: (url: string) => Promise<HTMLImageElement>;
+ // Maps a pose file name to its URL (default: baseUrl + '/' + file). The inline hot-load build returns data: URIs.
+ resolveFile?: (file: string) => string;
 }
 
 const clamp = (v: number, lo: number, hi: number): number => Math.min(hi, Math.max(lo, v));
@@ -104,7 +106,7 @@ export class SpritePuppet implements Puppet {
  const def = this.set.poses[id];
  if (!def) return Promise.reject(new Error('claude-chan: unknown pose ' + id));
  const load = this.opts.loadImage ?? defaultLoadImage;
- const p = load(this.base + '/' + def.file).then((img) => {
+ const p = load(this.opts.resolveFile ? this.opts.resolveFile(def.file) : this.base + '/' + def.file).then((img) => {
  if (this.destroyed) return;
  const pl = placePose(def, this.set.ref);
  img.style.cssText =

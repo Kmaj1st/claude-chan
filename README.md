@@ -156,6 +156,8 @@ See [docs/INTEGRATION.md](docs/INTEGRATION.md) for packaging, a home slot next t
 npm ci
 npm test            # unit tests (vitest)
 npm run test:e2e    # headless browser tests
+npm run test:loader # builds hotload/ and runs the hot-load browser tests
+npm run check:loader # hotload/ is up to date and within its size budget
 npm run check:links # relative links and anchors in the docs
 npx tsc --noEmit
 ```

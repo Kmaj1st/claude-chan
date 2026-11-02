@@ -92,6 +92,12 @@ export interface ClaudeChanController {
 // pose set loads, else the procedural puppet.
 export type RendererName = 'auto' | 'sprite' | 'procedural' | 'live2d';
 
+export interface SpriteData {
+ poses: unknown;
+ motions: unknown;
+ images: Record<string, string>;
+}
+
 export interface MountOptions {
  renderer?: RendererName;
  // URL of a model folder/model3.json (Live2D renderer).
@@ -102,6 +108,9 @@ export interface MountOptions {
  expressions?: Partial<Record<Expression, string>>;
  // URL of a sprite pose folder (poses.json, motions.json and the webp files). Default: the assets/chars folder shipped with the package.
  sprites?: string;
+ // In-memory pose set instead of the sprites folder: parsed poses.json and motions.json plus file name -> image URL
+ // (http(s), blob: or data:). Used by the inline hot-load build (docs/HOT-LOAD.md), so no fetch() is needed.
+ spriteData?: SpriteData;
  // Home corner (default bottom-left), used when home is not set.
  position?: Position;
  // Home position in viewport px of the box's top-left corner, or a function returning it (re-read on resize and

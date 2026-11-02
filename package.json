@@ -44,6 +44,10 @@
  "check:links": "node scripts/check-links.mjs",
   "test:e2e": "node tests/e2e/run.mjs",
  "test:live2d": "node tests/e2e/live2d.mjs",
+ "build:loader": "node scripts/build-loader.mjs",
+ "check:loader": "node scripts/build-loader.mjs --check",
+ "serve:loader": "node scripts/serve-loader.mjs",
+ "test:loader": "node scripts/build-loader.mjs && node tests/e2e/loader.mjs",
  "check:model": "esbuild server/check-model.ts --bundle --platform=node --format=esm --target=node20 --packages=external --outfile=server/dist/check-model.js && node server/dist/check-model.js"
  },
  "devDependencies": {
