@@ -17,7 +17,7 @@ If the sprites folder is unreachable, auto falls back to the procedural puppet a
 ## Driving it from the agent
 
 - In the page: postMessage bridge (docs/API.md) or the controller returned by mount().
-- Iframe embedding: install the bridge with announce: true. The iframe then posts { type: 'claude-chan-ready' } to its parent, once per allowed origin, so the host knows when to send commands. Off by default.
+- Iframe embedding: install the bridge with announce: true. The iframe then posts { type: 'claude-chan-ready' } to its parent, once per allowed origin, so the host knows when to send commands. Off by default. Try it with npm run dev, then open /embed.html (host page) which loads /frame.html (see demo/).
 - From a Claude Code / HAPI session: MCP server, see docs/MCP.md.
 - Tool JSON schemas: claude-chan/schema/tools.
 
