@@ -37,3 +37,16 @@ describe('package.json entry fields', () => {
  expect(readFileSync(bin, 'utf8').startsWith('#!/usr/bin/env node')).toBe(true);
  });
 });
+
+describe('package.json metadata', () => {
+ const meta = JSON.parse(readFileSync('package.json', 'utf8')) as Record<string, unknown>;
+
+ it('is MIT, private, and points at the public repository', () => {
+ expect(meta.license).toBe('MIT');
+ expect(meta.private).toBe(true);
+ expect(meta.author).toBe('Kmaj1st');
+ expect(JSON.stringify(meta.repository)).toContain('github.com/Kmaj1st/claude-chan.git');
+ expect(String(meta.homepage)).toContain('github.com/Kmaj1st/claude-chan');
+ expect(readFileSync('LICENSE', 'utf8')).toContain('MIT License');
+ });
+});

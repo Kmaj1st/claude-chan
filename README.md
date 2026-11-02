@@ -1,121 +1,167 @@
-Claude-chan is an embeddable anime-style mascot. By default it shows real anime sprite poses (flat images, cross-faded; MIT-licensed art, see docs/LICENSES.md) and falls back to a procedural SVG puppet when the sprites are missing; a self-hosted Live2D model can be plugged in (see Real Live2D model below). AI tool calls can drive it to play preset motions. It works in any web UI. No framework is required.
+[中文](README.zh-CN.md)
 
-The renderer option (or renderer attribute) is auto, sprite, procedural or live2d. The sprites option points to a folder with poses.json and motions.json, so another pose set can be dropped in (docs/ART-PIPELINE.md). The default folder is found relative to the package file (assets/chars next to dist/). If your bundler inlines the package into another chunk, copy assets/chars to a public folder and set sprites to its URL; if the poses cannot be loaded, the procedural puppet is shown and a console warning is logged.
+# Claude-chan
 
-## 5-minute embed
+An embeddable anime-style mascot for web UIs, driven by AI tool calls. Claude-chan reacts to what an agent does: it waves, thinks, cheers, shows a speech bubble, and can be dragged anywhere on the page.
 
-### 1. Plain HTML (web component)
+> Claude-chan is a fan project. It is not affiliated with or endorsed by Anthropic. "Claude" is a trademark of Anthropic and is used here only descriptively.
 
-html
-<claude-chan position="bottom-left" size="220" dock="free"></claude-chan>
-<script type="module">
- import { defineClaudeChan } from 'claude-chan';
- defineClaudeChan();
-</script>
+<!-- SCREENSHOT: docs/images/hero.png — mascot on a page, 1200x700 -->
 
+## Features
 
-### 2. Vanilla API
+- Sprite renderer with 21 MIT-licensed anime poses, cross-faded; a procedural SVG puppet is the fallback when sprites are missing.
+- Optional Live2D renderer (Cubism 4) with a self-hosted Core.
+- Drag anywhere with mouse, touch or pen; keyboard movement; the spot is remembered per site. `dock` is `free` (default) or `fixed-default`.
+- Driven by tool calls: an MCP server, a local WebSocket hub, a postMessage bridge, or plain text markers such as `[motion:wave]`.
+- A console API, `window.claudeChan`, for the user (position, hide, show).
+- Hot-load onto any page with one line, a bookmarklet or a userscript, without touching the page's source.
+- No framework needed; works as a Web Component, a vanilla API, or inside React and Vue.
 
-js
+<!-- SCREENSHOT: docs/images/poses-grid.png — grid of the 21 poses, 1200x900 -->
+
+## Quick start
+
+### a) Embed in 3 lines
+
+```html
+<claude-chan position="bottom-left" size="220"></claude-chan>
+<script type="module">import { defineClaudeChan } from 'claude-chan'; defineClaudeChan();</script>
+```
+
+Or from JavaScript:
+
+```js
 import { ClaudeChan } from 'claude-chan';
-
-const cc = ClaudeChan.mount(document.body, {
- position: 'bottom-left',
- size: 220,
- dock: 'free',
-});
+const cc = ClaudeChan.mount(document.body, { position: 'bottom-left', size: 220 });
 await cc.ready;
 cc.act({ motion: 'wave', expression: 'smile', say: 'Hello!' });
-cc.setMood('happy');
-cc.on('motionend', (e) => console.log(e));
+```
 
+The package is not published to npm yet; build it with `npm run build` and import `dist/claude-chan.js`. Full options and framework notes: [docs/API.md](docs/API.md), [docs/INTEGRATION.md](docs/INTEGRATION.md).
 
-Controller: act, say, setMood, lookAt, stop, lipSync, getPosition, setPosition, resetPosition, setDock, relayout, on, destroy, ready.
+### b) Hot-load onto any page
 
-### Dragging and position
+Run the local loader server, then paste this into the browser console of any page:
 
-The mascot can be dragged anywhere on the screen with mouse, touch or pen (a short press is still a click), or moved with the arrow keys after focusing it (Shift for big steps, Home to go back). It stays inside the viewport, follows resizes, rotation and the phone keyboard, and remembers its spot per site as fractions of the window. resetPosition() or Home returns it home; a double-click does nothing special. There is no close button: the mascot is always visible on load. From the browser console, claudeChan.help() lists the commands (resetPosition, setPosition, getPosition, hide, show, toggle; see docs/API.md).
+```bash
+npm run serve:loader   # serves http://127.0.0.1:5179
+```
 
-Options: dock ('free' default, or 'fixed-default' to keep it at home), home ({ x, y } or a function, for a host's own slot), margin (8), snap (false; true or px to snap to edges on drop), resetOnDoubleClick (false; true opts in to double-click = back home), consoleApi (true = window.claudeChan), storageKey. Events: dragstart, move.
+```js
+document.head.append(Object.assign(document.createElement('script'),{src:'http://127.0.0.1:5179/hotload/loader.js'}))
+```
 
-js
-// Host app: keep your own slot as the home spot and let the user drag away.
-const slot = () => { const r = chatBar.getBoundingClientRect(); return { x: r.left + 8, y: r.top - 228 }; };
-const cc = ClaudeChan.mount(document.body, { home: slot, zIndex: 40 });
-new ResizeObserver(() => cc.relayout()).observe(chatBar);
-cc.setPosition({ fx: 1, fy: 1 }); // bottom-right corner
-cc.resetPosition(); // back to the slot
+Once this repository is public you can use the CDN instead: replace the `src` with `https://cdn.jsdelivr.net/gh/Kmaj1st/claude-chan@main/hotload/loader.js`. To remove a hot-loaded mascot, run `claudeChan.unload()`.
 
+<!-- SCREENSHOT: docs/images/hot-load.png — mascot hot-loaded on a third-party site, 1200x700 -->
 
-The same works remotely: claude_chan_set_position { x, y } (fractions) and claude_chan_reset_position over postMessage or the hub. Details: docs/API.md (Position and dragging).
+### c) Bookmarklet
 
-### 3. React
+Drag the bookmarklet from [docs/install.html](docs/install.html) to your bookmarks bar and click it on any page.
 
-jsx
-useEffect(() => {
- const cc = ClaudeChan.mount(ref.current ?? document.body, { position: 'bottom-left' });
- return () => cc.destroy();
-}, []);
+### d) Userscript
 
+Install `hotload/claude-chan.user.js` in Tampermonkey or Violentmonkey. For sites with a strict Content-Security-Policy use `hotload/claude-chan.inline.user.js`.
 
-### 4. Vue
+More in [docs/HOT-LOAD.md](docs/HOT-LOAD.md) (including CSP limits).
 
-Call ClaudeChan.mount in onMounted and destroy() in onBeforeUnmount. The same code works with the <claude-chan> element if you register it with app.config.compilerOptions.isCustomElement.
+## Dragging and positions
 
-### SSR (Next.js, Nuxt)
+Drag the mascot anywhere; a short press is still a click. Arrow keys move it after focusing it (Shift for big steps, Home goes back). It stays inside the viewport and remembers its spot as fractions of the window. There is no close button and double-click does nothing special; use the console commands below.
 
-Importing claude-chan is safe on the server. mount() throws on the server, so call it only in useEffect or onMounted. The <claude-chan> element registers in the browser only.
-
-## Motions and expressions
+<!-- SCREENSHOT: docs/images/drag.png — mascot being dragged (lifted and tilted), 800x600 -->
 
 Motions (stable names): idle, wave, nod, shake_head, think, happy, surprised, bow, cheer, sleepy, typing, tea_serve, pout, wink, point.
 
 Expressions: neutral, smile, sad, angry, blush, surprised.
 
-## Agent states
+Moods: neutral, happy, sad, angry, shy, sleepy, thinking. Agent states: idle, listening, thinking, working, waiting, speaking, success, error, sleeping (`applyState(cc, 'thinking')` or `el.setState('thinking')`).
 
-Report what the agent is doing and Claude-chan picks motion, expression and mood. States: idle, listening, thinking, working, waiting, speaking, success, error, sleeping.
+Speech bubbles use `textContent` only, never `innerHTML`, and are capped at 280 characters. Motion respects `prefers-reduced-motion`.
 
- import { applyState } from 'claude-chan';
- applyState(cc, 'thinking'); // vanilla controller
- el.setState('thinking'); // <claude-chan> element
+<!-- SCREENSHOT: docs/images/bubble.png — speech bubble, 600x400 -->
 
-Over MCP or postMessage use the claude_chan_set_state tool (docs/API.md).
+## API and commands
 
-## Real Live2D model
+Controller: `act`, `say`, `setMood`, `setState`, `lookAt`, `stop`, `lipSync`, `getPosition`, `setPosition`, `resetPosition`, `hide`, `show`, `toggle`, `setDock`, `relayout`, `on`, `destroy`, `ready`. Details: [docs/API.md](docs/API.md).
 
-Set model to a .model3.json URL and core-url to your self-hosted live2dcubismcore.min.js (the proprietary Core is not bundled, see docs/LICENSES.md). With renderer=auto a model that fails to load falls back to sprites.
+Console commands (type `claudeChan.help()` to list them):
 
- <claude-chan model="/model/claude.model3.json" core-url="/live2dcubismcore.min.js"></claude-chan>
+| Command | Effect |
+| --- | --- |
+| `claudeChan.help()` | list the commands |
+| `claudeChan.getPosition()` | `{ x, y, fx, fy, free, dock }` |
+| `claudeChan.setPosition(fx, fy)` | move to fractions 0..1 of the screen (numbers over 1 are px) |
+| `claudeChan.resetPosition()` | back to the home spot |
+| `claudeChan.hide()` / `hide({ persist: true })` | hide for this page load / also after reloads |
+| `claudeChan.show()` | show again and clear a persisted hide |
+| `claudeChan.toggle()` | hide or show for this page load |
+| `claudeChan.unload()` | remove a hot-loaded mascot (hot-load only) |
 
-The demo page accepts ?model=...&core=...&expressions=... for a quick try. Map preset expressions to the model's own ids with the expressions option, or on the element with expressions='{"smile":"f01"}' (JSON). Validate a model folder with npm run check:model -- <folder>; run the opt-in headless test with LIVE2D_MODEL_DIR and LIVE2D_CORE set, then npm run test:live2d.
-
-## Driving it from an AI
+Tools for agents: `claude_chan_act`, `claude_chan_say`, `claude_chan_set_mood`, `claude_chan_set_state`, `claude_chan_list_motions`, `claude_chan_set_position`, `claude_chan_reset_position`. There are deliberately no hide/show tools: only the user hides the mascot. JSON schemas are in `schema/`.
 
 | Way | Use when | Docs |
 | --- | --- | --- |
-| MCP server (stdio or streamable HTTP) with claude_chan_act, claude_chan_say, claude_chan_set_mood, claude_chan_set_state, claude_chan_list_motions, claude_chan_set_position, claude_chan_reset_position | Claude Code / HAPI sessions | docs/MCP.md |
-| JSON schema schema/claude_chan_act.json | Any tool-calling LLM API | schema/ |
-| postMessage bridge | Page inside an iframe | src/bridge.ts |
-| Text markers such as [motion:wave] in streamed text | Models without tool calls | src/markers.ts |
+| MCP server (stdio or streamable HTTP) | Claude Code and other MCP clients | [docs/MCP.md](docs/MCP.md) |
+| Local WebSocket hub (`connectHub`) | A local page receives the MCP calls | [docs/MCP.md](docs/MCP.md) |
+| postMessage bridge | A page inside an iframe, or a parent frame | [docs/API.md](docs/API.md) |
+| Text markers such as `[motion:wave]` | Models without tool calls | `src/markers.ts` |
+| JSON schema `schema/claude_chan_act.json` | Any tool-calling LLM API | `schema/` |
 
-Speech bubbles use textContent only, never innerHTML. Motion respects prefers-reduced-motion. Only the character receives pointer events.
+## MCP setup
 
-## Development
-
-
-npm install
-npx tsc --noEmit
-npx vitest run
+```bash
 npm run build:server
+CLAUDE_CHAN_TOKEN=change-me-to-a-long-random-token node server/dist/cli.js
+```
 
+Add it to your `.mcp.json` and connect the page with `connectHub(controller, { token })`. Full setup, HTTP mode and a system prompt snippet: [docs/MCP.md](docs/MCP.md).
 
-The demo page is in demo/ and has a button for every motion, expression, mood and agent state, a lip-sync picker (an audio file drives the mouth), and a tool-call console. A second page, demo/embed.html (http://127.0.0.1:5178/embed.html), embeds demo/frame.html in an iframe and drives it over the postMessage bridge, including the ready announce. Run it with npm run dev and open http://127.0.0.1:5178 (it serves assets/ at the site root). npm run build builds only the library (dist/), not the demo.
+## Security
 
-## More docs
+- The hub binds to `127.0.0.1`, requires a token (16+ characters), checks the `Origin` header (loopback by default), rate-limits and bounds message sizes. The token ends up in the page, so use the hub with local pages only.
+- The postMessage bridge accepts only an explicit origin allow-list (default: the page's own origin). `*` is never accepted.
+- Speech bubbles never render HTML.
+- Hot-loading runs a script on the page you load it into. It can be blocked by a page's Content-Security-Policy; see [docs/HOT-LOAD.md](docs/HOT-LOAD.md).
 
-- docs/API.md: stable API contract (options, attributes, events, tools)
-- docs/INTEGRATION.md: packaging and host-app integration (hapi-chan)
-- docs/CHARACTER.md: character sheet
-- docs/MCP.md: MCP setup and system prompt snippet
-- ROADMAP.md: status and next steps
+## Real Live2D model
+
+Set `model` to a `.model3.json` URL and `core-url` to your self-hosted `live2dcubismcore.min.js`. The proprietary Core is not bundled ([docs/LICENSES.md](docs/LICENSES.md)). With `renderer=auto` a model that fails to load falls back to sprites.
+
+```html
+<claude-chan model="/model/claude.model3.json" core-url="/live2dcubismcore.min.js"></claude-chan>
+```
+
+Validate a model folder with `npm run check:model -- <folder>`. Artist brief: [docs/ART-PIPELINE.md](docs/ART-PIPELINE.md).
+
+## Use inside another app
+
+Claude-chan is built to be embedded in host apps, for example inside the HAPI web app (a private host app).
+
+<!-- SCREENSHOT: docs/images/hapi-chan.png — mascot inside the HAPI web app, 1200x700 -->
+
+See [docs/INTEGRATION.md](docs/INTEGRATION.md) for packaging, a home slot next to your own UI, and SSR notes.
+
+## Credits and licence
+
+- Code: MIT, see [LICENSE](LICENSE).
+- Sprites in `assets/chars` are derived from [Chaosnap/Claude_Overdose](https://github.com/Chaosnap/Claude_Overdose) (MIT, copyright Yuki); see [assets/chars/NOTICE.md](assets/chars/NOTICE.md). The song "INTERNET OVERDOSE", the game NEEDY GIRL OVERDOSE and the "Claude" trademark are not covered and not included.
+- The Live2D Cubism Core is not bundled. No Live2D model is committed.
+- Everything else: [docs/LICENSES.md](docs/LICENSES.md).
+
+## Contributing
+
+```bash
+npm ci
+npm test            # unit tests (vitest)
+npm run test:e2e    # headless browser tests
+npm run check:links # relative links and anchors in the docs
+npx tsc --noEmit
+```
+
+One pull request per change. Run `npm run dev` for the demo page (http://127.0.0.1:5178): a button for every motion, expression, mood and state, lip-sync, and a tool-call console.
+
+## Status
+
+Early (0.1). The API is documented in [docs/API.md](docs/API.md); open items are in [docs/ROADMAP.md](docs/ROADMAP.md). All docs: [docs/README.md](docs/README.md).
