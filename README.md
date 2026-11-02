@@ -42,27 +42,23 @@ The package is not published to npm yet; build it with `npm run build` and impor
 
 ### b) Hot-load onto any page
 
-Run the local loader server, then paste this into the browser console of any page:
-
-```bash
-npm run serve:loader   # serves http://127.0.0.1:5179
-```
+The hot-load files are hosted on GitHub Pages. The installer at https://kmaj1st.github.io/claude-chan/docs/install.html (English / 中文) walks through every way with copy buttons, checks the base URL and has a "Try it on this page" button. Or paste this into the browser console of any page (F12; if Chrome or Edge refuses the paste, type `allow pasting` first):
 
 ```js
-document.head.append(Object.assign(document.createElement('script'),{src:'http://127.0.0.1:5179/hotload/loader.js'}))
+document.head.append(Object.assign(document.createElement('script'),{src:'https://kmaj1st.github.io/claude-chan/hotload/loader.js'}))
 ```
 
-Once this repository is public you can use the CDN instead: replace the `src` with `https://cdn.jsdelivr.net/gh/Kmaj1st/claude-chan@main/hotload/loader.js`. To remove a hot-loaded mascot, run `claudeChan.unload()`.
+To work offline or on a local change, run `npm run serve:loader` (serves http://127.0.0.1:5179) and use `http://127.0.0.1:5179/hotload/loader.js` instead. Once this repository is public, jsDelivr works too: `https://cdn.jsdelivr.net/gh/Kmaj1st/claude-chan@main/hotload/loader.js`. To remove a hot-loaded mascot, run `claudeChan.unload()`.
 
 <!-- SCREENSHOT: docs/images/hot-load.png — mascot hot-loaded on a third-party site, 1200x700 -->
 
 ### c) Bookmarklet
 
-Drag the bookmarklet from [docs/install.html](docs/install.html) to your bookmarks bar and click it on any page.
+Open the installer at https://kmaj1st.github.io/claude-chan/docs/install.html ([docs/install.html](docs/install.html) in this repository), drag the bookmarklet to your bookmarks bar and click it on any page.
 
 ### d) Userscript
 
-Install `hotload/claude-chan.user.js` in Tampermonkey or Violentmonkey. For sites with a strict Content-Security-Policy use `hotload/claude-chan.inline.user.js`.
+Install https://kmaj1st.github.io/claude-chan/hotload/claude-chan.user.js in Tampermonkey or Violentmonkey. For sites with a strict Content-Security-Policy use `hotload/claude-chan.inline.user.js`.
 
 More in [docs/HOT-LOAD.md](docs/HOT-LOAD.md) (including CSP limits).
 
