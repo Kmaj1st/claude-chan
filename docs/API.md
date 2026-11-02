@@ -17,6 +17,7 @@ New names may be added in minor versions; existing names are never renamed or re
  const cc = ClaudeChan.mount(document.body, {
  renderer: 'auto', // auto | sprite | procedural | live2d; auto = live2d if model is set, else sprites, else procedural
  sprites: undefined, // URL of a sprite pose folder (poses.json, motions.json, webp); default is the bundled assets/chars
+ spriteData: undefined, // in-memory pose set { poses, motions, images: { file: url } } instead of sprites (inline hot-load build, docs/HOT-LOAD.md)
  model: undefined, // model3.json URL (live2d renderer)
  expressions: undefined, // maps preset expression names to the model's own expression ids
  coreUrl: '/live2dcubismcore.min.js', // only with model
