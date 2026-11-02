@@ -93,7 +93,7 @@ npx vitest run
 npm run build:server
 
 
-The demo page is in demo/ and has a button for every motion, expression, mood and agent state, a lip-sync picker (an audio file drives the mouth), and a tool-call console. Run it with npm run dev and open http://127.0.0.1:5178 (it serves assets/ at the site root). npm run build builds only the library (dist/), not the demo.
+The demo page is in demo/ and has a button for every motion, expression, mood and agent state, a lip-sync picker (an audio file drives the mouth), and a tool-call console. A second page, demo/embed.html (http://127.0.0.1:5178/embed.html), embeds demo/frame.html in an iframe and drives it over the postMessage bridge, including the ready announce. Run it with npm run dev and open http://127.0.0.1:5178 (it serves assets/ at the site root). npm run build builds only the library (dist/), not the demo.
 
 ## More docs
 
