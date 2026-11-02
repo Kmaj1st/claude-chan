@@ -1,0 +1,3 @@
+# Generated hot-load files: byte-exact (npm run check:loader compares them), collapsed in GitHub diffs.
+hotload/** -text linguist-generated=true
+docs/install.html text eol=lf linguist-generated=true

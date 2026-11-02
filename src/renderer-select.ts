@@ -66,6 +66,19 @@ export function createPuppet(o: MountOptions, reducedMotion: boolean): Puppet {
  );
  }
  if (renderer === 'procedural') return new ProceduralPuppet();
+ const data = o.spriteData;
+ if (data) {
+ // In-memory pose set (inline hot-load build): no fetch, images come from the map. Falls back like a folder set.
+ const inline = new SpritePuppet({
+ baseUrl: 'inline:',
+ reducedMotion,
+ fetchJson: async (url) => (url.endsWith('/poses.json') ? data.poses : data.motions),
+ resolveFile: (file) => data.images[file] ?? 'data:,missing',
+ });
+ if (renderer === 'sprite') return inline;
+ return new FallbackPuppet(inline, () => new ProceduralPuppet(),
+ (cause) => console.warn('claude-chan: inline sprite poses not available, using the procedural puppet.', cause));
+ }
  const baseUrl = o.sprites ?? defaultSpriteBase();
  if (renderer === 'sprite') {
  if (!baseUrl) throw new Error('claude-chan: renderer "sprite" needs the sprites option (folder with poses.json).');
