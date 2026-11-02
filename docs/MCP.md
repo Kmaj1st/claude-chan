@@ -57,6 +57,8 @@ Start the server with CLAUDE_CHAN_HTTP_PORT=8766 CLAUDE_CHAN_TOKEN=change-me-to-
 - claude_chan_set_mood: set the idle mood.
 - claude_chan_set_state: report the agent state (idle, listening, thinking, working, waiting, speaking, success, error, sleeping); the mascot picks motion, expression and mood.
 - claude_chan_list_motions: list available motions.
+- claude_chan_set_position: move the mascot; x and y are fractions from 0 to 1 (0 = left/top, 1 = right/bottom). Only when the user asks; ignored when the page docks the mascot.
+- claude_chan_reset_position: put the mascot back at its home spot.
 
 ## System prompt snippet
 

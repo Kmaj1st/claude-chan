@@ -2,7 +2,7 @@ import { Engine } from './engine';
 import { createShell } from './host';
 import { createLevelReader, type LevelReader } from './lipsync';
 import { createPuppet } from './renderer-select';
-import type { ClaudeChanController, MountOptions, Puppet } from './types';
+import type { ClaudeChanController, Dock, MountOptions, Puppet } from './types';
 
 // Vanilla entry point: builds shell + puppet + engine and runs the frame loop.
 
@@ -24,12 +24,22 @@ export function mount(parent: HTMLElement, options: MountOptions = {}): ClaudeCh
  ...definedOnly(options),
  };
  const reduced = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+ // dock wins over the legacy draggable switch.
+ const dock: Dock = o.dock === 'free' || o.dock === 'fixed-default' ? o.dock : o.draggable === false ? 'fixed-default' : 'free';
+ // The shell exists before the engine; position events are forwarded once the engine is built.
+ let emitPos: Pick<Engine, 'emit'> | null = null;
  const shell = createShell(parent, {
  position: o.position,
  size: o.size,
- draggable: o.draggable,
+ dock,
+ home: o.home,
+ margin: o.margin,
+ snap: o.snap,
+ resetOnDoubleClick: o.resetOnDoubleClick,
  storageKey: o.storageKey,
  zIndex: o.zIndex,
+ onDragStart: (p) => emitPos?.emit('dragstart', p),
+ onMove: (p) => emitPos?.emit('move', p),
  });
  let puppet: Puppet;
  try {
@@ -44,6 +54,7 @@ export function mount(parent: HTMLElement, options: MountOptions = {}): ClaudeCh
  reducedMotion: reduced,
  onSay: (text, ms) => shell.setBubble(text, ms),
  });
+ emitPos = engine;
 
  let raf = 0;
  let alive = true;
@@ -94,6 +105,11 @@ export function mount(parent: HTMLElement, options: MountOptions = {}): ClaudeCh
  engine.setAudioLevel(() => r.read());
  },
  on: (name, fn) => engine.on(name, fn),
+ getPosition: () => shell.getPosition(),
+ setPosition: (t) => { if (alive) shell.setPosition(t); },
+ resetPosition: () => { if (alive) shell.resetPosition(); },
+ setDock: (d) => { if (alive) shell.setDock(d); },
+ relayout: () => { if (alive) shell.relayout(); },
  destroy() {
  if (!alive) return;
  alive = false;

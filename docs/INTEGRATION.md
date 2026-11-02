@@ -21,6 +21,18 @@ If the sprites folder is unreachable, auto falls back to the procedural puppet a
 - From a Claude Code / HAPI session: MCP server, see docs/MCP.md. A local page receives those calls by running connectHub(controller, { token }) (src/hubclient.ts); the demo page has a hub row for trying it.
 - Tool JSON schemas: claude-chan/schema/tools.
 
+## Home slot and free dragging
+
+hapi-chan keeps the mascot at the bottom-left of its chat bar. Pass that spot as the home option (a function, re-read on resize) and call relayout() when the bar moves; the user can still drag the mascot anywhere, and resetPosition() (or double-click, or Home) brings it back:
+
+ const cc = mount(document.body, { sprites: '/vendor/claude-chan/chars', home: () => { const r = bar.getBoundingClientRect(); return { x: r.left + 8, y: r.top - 228 }; }, zIndex: 40 });
+ new ResizeObserver(() => cc.relayout()).observe(bar);
+
+- Use dock: 'fixed-default' (or setDock) for a mode where the mascot must stay in the slot.
+- zIndex: pick a value above your content and below your modals; the default (2147483000) is above everything.
+- The remembered spot is per origin under storageKey; give each app its own key if several share an origin.
+- From the agent or a parent frame: claude_chan_set_position { x, y } (fractions 0..1) and claude_chan_reset_position (docs/API.md).
+
 ## Live2D
 
 Set model (a .model3.json URL) and coreUrl (self-hosted live2dcubismcore.min.js; the proprietary Core is not bundled, see docs/LICENSES.md). On the web component the attributes are model, core-url and expressions (JSON, e.g. {"smile":"f01"} maps preset expressions to model expression ids). They are read at mount, so change them by remounting. With renderer auto a failing model falls back to sprites; the element re-dispatches the load error as an event.

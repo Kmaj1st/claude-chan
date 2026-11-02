@@ -12,7 +12,9 @@ export type Command =
  | { tool: 'claude_chan_say'; text: string }
  | { tool: 'claude_chan_set_mood'; mood: Mood }
  | { tool: 'claude_chan_set_state'; state: AgentState }
- | { tool: 'claude_chan_list_motions' };
+ | { tool: 'claude_chan_list_motions' }
+ | { tool: 'claude_chan_set_position'; fx: number; fy: number }
+ | { tool: 'claude_chan_reset_position' };
 
 export type Parsed = { ok: true; command: Command } | { ok: false; error: string };
 
@@ -29,6 +31,11 @@ function oneOf<T extends string>(v: unknown, list: readonly T[], key: string): T
 function text(v: unknown, key: string): string {
  if (typeof v !== 'string' || v.length === 0) throw new Error(key + ' must be a non-empty string');
  if (v.length > MAX_SAY_LENGTH) throw new Error(key + ' exceeds ' + MAX_SAY_LENGTH + ' characters');
+ return v;
+}
+
+function fraction(v: unknown, key: string): number {
+ if (typeof v !== 'number' || !Number.isFinite(v) || v < 0 || v > 1) throw new Error(key + ' must be a number from 0 to 1');
  return v;
 }
 
@@ -70,6 +77,12 @@ export function parseCommand(tool: unknown, args: unknown): Parsed {
  case 'claude_chan_list_motions':
  noExtra(a, []);
  return { ok: true, command: { tool: 'claude_chan_list_motions' } };
+ case 'claude_chan_set_position':
+ noExtra(a, ['x', 'y']);
+ return { ok: true, command: { tool: 'claude_chan_set_position', fx: fraction(a.x, 'x'), fy: fraction(a.y, 'y') } };
+ case 'claude_chan_reset_position':
+ noExtra(a, []);
+ return { ok: true, command: { tool: 'claude_chan_reset_position' } };
  default:
  throw new Error('unknown tool: ' + String(tool).slice(0, 40));
  }

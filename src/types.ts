@@ -19,6 +19,20 @@ export const PRIORITY_RANK: Record<Priority, number> = { low: 0, normal: 1, high
 
 export type Position = 'bottom-left' | 'bottom-right' | 'top-left' | 'top-right';
 
+// 'free': the user can drag the mascot anywhere in the viewport (pointer, touch, pen, keyboard) and the spot is
+// remembered; 'fixed-default': it stays at its home position (position corner or home option).
+export const DOCKS = ['free', 'fixed-default'] as const;
+export type Dock = (typeof DOCKS)[number];
+
+// Where the mascot is. x, y: viewport px of the character box's top-left corner. fx, fy: the same spot as
+// fractions of the free space (0 = left/top edge, 1 = right/bottom edge). free: moved away from home.
+export interface PositionInfo { x: number; y: number; fx: number; fy: number; free: boolean; dock: Dock }
+// setPosition target: viewport px ({ x, y }) or fractions of the free space ({ fx, fy }).
+export type PositionTarget = { x: number; y: number } | { fx: number; fy: number };
+export type MoveSource = 'drag' | 'keyboard' | 'api' | 'reset';
+
+export interface Box { x: number; y: number }
+
 export interface ActRequest {
  motion?: Motion;
  expression?: Expression;
@@ -29,13 +43,17 @@ export interface ActRequest {
  priority?: Priority;
 }
 
-export type EventName = 'ready' | 'motionstart' | 'motionend' | 'error';
+export type EventName = 'ready' | 'motionstart' | 'motionend' | 'error' | 'dragstart' | 'move';
 export interface MotionEvent { motion: Motion; interrupted?: boolean }
 export interface EventMap {
  ready: undefined;
  motionstart: MotionEvent;
  motionend: MotionEvent;
  error: { message: string; cause?: unknown };
+ // The user picked the mascot up (drag passed the threshold).
+ dragstart: PositionInfo;
+ // The position changed by a drop, a keyboard step, setPosition or resetPosition (not by viewport re-clamps).
+ move: PositionInfo & { source: MoveSource };
 }
 export type Unsubscribe = () => void;
 
@@ -49,6 +67,16 @@ export interface ClaudeChanController {
  // Drives the mouth from an audio/video element or AnalyserNode; null returns to text-length lip-sync.
  lipSync(source: HTMLMediaElement | AnalyserNode | null): void;
  on<K extends EventName>(name: K, fn: (e: EventMap[K]) => void): Unsubscribe;
+ // Current position (see PositionInfo).
+ getPosition(): PositionInfo;
+ // Moves the mascot (clamped to the viewport) and persists it; ignored with dock 'fixed-default'.
+ setPosition(target: PositionTarget): void;
+ // Back to the home position; forgets the remembered spot.
+ resetPosition(): void;
+ // Switches between 'free' and 'fixed-default' at runtime.
+ setDock(dock: Dock): void;
+ // Re-reads the home position and viewport (call when the host moved the home slot, e.g. its chat bar grew).
+ relayout(): void;
  destroy(): void;
  readonly ready: Promise<void>;
 }
@@ -67,11 +95,24 @@ export interface MountOptions {
  expressions?: Partial<Record<Expression, string>>;
  // URL of a sprite pose folder (poses.json, motions.json and the webp files). Default: the assets/chars folder shipped with the package.
  sprites?: string;
+ // Home corner (default bottom-left), used when home is not set.
  position?: Position;
+ // Home position in viewport px of the box's top-left corner, or a function returning it (re-read on resize and
+ // relayout(); return null to fall back to the corner). Lets a host keep its own slot as the default spot.
+ home?: Box | (() => Box | null);
  // Character height in px (default 220).
  size?: number;
+ // Legacy switch: false is the same as dock 'fixed-default'. dock wins when both are given.
  draggable?: boolean;
- // localStorage key for the remembered position; false disables persistence.
+ // 'free' (default) or 'fixed-default'.
+ dock?: Dock;
+ // Minimum gap in px between the mascot and the viewport edges (default 8).
+ margin?: number;
+ // Edge snapping on drop: true = 24 px, a number = that many px, false (default) = off.
+ snap?: boolean | number;
+ // Double-click on the mascot returns it home (default true; only while it is free to move).
+ resetOnDoubleClick?: boolean;
+ // localStorage key for the remembered position (stored as fractions); false disables persistence.
  storageKey?: string | false;
  zIndex?: number;
  autoIdle?: boolean;
