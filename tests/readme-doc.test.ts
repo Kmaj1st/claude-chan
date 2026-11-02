@@ -34,7 +34,7 @@ describe('README.md matches the code', () => {
  });
 
  it('links only docs that exist', () => {
- for (const p of ['docs/CHARACTER.md', 'docs/MCP.md', 'docs/LICENSES.md', 'docs/ART-PIPELINE.md', 'ROADMAP.md']) {
+ for (const p of ['docs/CHARACTER.md', 'docs/MCP.md', 'docs/LICENSES.md', 'docs/ART-PIPELINE.md', 'docs/ROADMAP.md']) {
  expect(() => read('../' + p), p).not.toThrow();
  }
  });

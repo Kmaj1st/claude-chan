@@ -20,7 +20,7 @@ claude-chan/
  motions.json (maps preset names to the model)
 
 
-Cubism 4 format. Textures and art must be original and redistributable under a licence the project owner agrees to.
+Cubism 4 format. Textures and art must be original and redistributable under a licence the maintainers agree to.
 
 ## 2. PSD layers (one PSD, named layers, no merged groups)
 

@@ -1,4 +1,4 @@
-# Integrating Claude-chan into a host app (hapi-chan)
+# Integrating Claude-chan into a host app
 
 Contract: docs/API.md (stable under semver). This page covers packaging traps.
 
@@ -18,12 +18,12 @@ If the sprites folder is unreachable, auto falls back to the procedural puppet a
 
 - In the page: postMessage bridge (docs/API.md) or the controller returned by mount().
 - Iframe embedding: install the bridge with announce: true. The iframe then posts { type: 'claude-chan-ready' } to its parent, once per allowed origin, so the host knows when to send commands. Off by default. Try it with npm run dev, then open /embed.html (host page) which loads /frame.html (see demo/). frame.html also accepts the real-model deep link: /frame.html?model=<model3.json URL>&core=<self-hosted Core URL>&expressions={"smile":"f01"}; without model it uses the sprite/procedural renderers.
-- From a Claude Code / HAPI session: MCP server, see docs/MCP.md. A local page receives those calls by running connectHub(controller, { token }) (src/hubclient.ts); the demo page has a hub row for trying it.
+- From a Claude Code (or other MCP client) session: MCP server, see docs/MCP.md. A local page receives those calls by running connectHub(controller, { token }) (src/hubclient.ts); the demo page has a hub row for trying it.
 - Tool JSON schemas: claude-chan/schema/tools.
 
 ## Home slot and free dragging
 
-hapi-chan keeps the mascot at the bottom-left of its chat bar. Pass that spot as the home option (a function, re-read on resize) and call relayout() when the bar moves; the user can still drag the mascot anywhere, and resetPosition() (or Home, or claudeChan.resetPosition() in the console) brings it back:
+A host app with a chat bar can keep the mascot at the bottom-left of that bar (the private HAPI web app does this). Pass that spot as the home option (a function, re-read on resize) and call relayout() when the bar moves; the user can still drag the mascot anywhere, and resetPosition() (or Home, or claudeChan.resetPosition() in the console) brings it back:
 
  const cc = mount(document.body, { sprites: '/vendor/claude-chan/chars', home: () => { const r = bar.getBoundingClientRect(); return { x: r.left + 8, y: r.top - 228 }; }, zIndex: 40 });
  new ResizeObserver(() => cc.relayout()).observe(bar);
