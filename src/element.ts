@@ -111,6 +111,9 @@ export class ClaudeChanElement extends BaseElement {
  getPosition(): PositionInfo | null { return this.controller?.getPosition() ?? null; }
  setPosition(target: PositionTarget): void { this.controller?.setPosition(target); }
  resetPosition(): void { this.controller?.resetPosition(); }
+ hide(opts?: { persist?: boolean }): void { this.controller?.hide(opts); }
+ show(): void { this.controller?.show(); }
+ toggle(): boolean { return this.controller?.toggle() ?? false; }
  setDock(dock: Dock): void { this.controller?.setDock(dock); }
  relayout(): void { this.controller?.relayout(); }
 }

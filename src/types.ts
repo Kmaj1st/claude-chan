@@ -73,6 +73,13 @@ export interface ClaudeChanController {
  setPosition(target: PositionTarget): void;
  // Back to the home position; forgets the remembered spot.
  resetPosition(): void;
+ // Hides the mascot for this page load; { persist: true } also keeps it hidden after reloads (explicit only).
+ hide(opts?: { persist?: boolean }): void;
+ // Shows the mascot and clears a persisted hide.
+ show(): void;
+ // Flips hide/show (never persists); returns true when the mascot is now visible.
+ toggle(): boolean;
+ isHidden(): boolean;
  // Switches between 'free' and 'fixed-default' at runtime.
  setDock(dock: Dock): void;
  // Re-reads the home position and viewport (call when the host moved the home slot, e.g. its chat bar grew).
@@ -110,8 +117,11 @@ export interface MountOptions {
  margin?: number;
  // Edge snapping on drop: true = 24 px, a number = that many px, false (default) = off.
  snap?: boolean | number;
- // Double-click on the mascot returns it home (default true; only while it is free to move).
+ // Opt-in: double-click on a moved mascot returns it home (default false: a double-click is just two clicks).
  resetOnDoubleClick?: boolean;
+ // Global console API (window.claudeChan, see docs/API.md). true (default) = 'claudeChan', a string = that
+ // global name, false = none. The first mounted mascot owns the name; it is removed again on destroy().
+ consoleApi?: boolean | string;
  // localStorage key for the remembered position (stored as fractions); false disables persistence.
  storageKey?: string | false;
  zIndex?: number;

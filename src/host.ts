@@ -12,6 +12,7 @@ export function clampPosition(x: number, y: number, w: number, h: number, vw: nu
 }
 
 export const HOST_CSS =
+ ':host([hidden]){display:none!important}' +
  ':host{position:fixed;display:block;pointer-events:none;z-index:var(--claude-chan-z,2147483000);' +
  'left:var(--claude-chan-left,auto);right:var(--claude-chan-right,auto);' +
  'top:var(--claude-chan-top,auto);bottom:var(--claude-chan-bottom,auto)}' +
@@ -50,6 +51,9 @@ export interface Shell {
  resetPosition(): void;
  setDock(d: Dock): void;
  relayout(): void;
+ // Hides/shows the whole mascot (host element); persist stores the flag under '<storageKey>:hidden'.
+ setHidden(hidden: boolean, persist?: boolean): void;
+ isHidden(): boolean;
  destroy(): void;
 }
 
@@ -172,6 +176,24 @@ export function createShell(parent: HTMLElement, o: ShellOptions): Shell {
  }
  };
  syncDock();
+ // Explicit hide({ persist: true }) only (never set by any UI); show() always clears it.
+ const hiddenKey = o.storageKey === false ? null : o.storageKey + ':hidden';
+ const setHidden = (hidden: boolean, persist = false): void => {
+ host.hidden = hidden;
+ if (!hiddenKey) return;
+ try {
+ if (hidden && persist) localStorage.setItem(hiddenKey, '1');
+ else if (!hidden) localStorage.removeItem(hiddenKey);
+ } catch { void 0; }
+ };
+ if (hiddenKey) {
+ try {
+ if (localStorage.getItem(hiddenKey) === '1') {
+ host.hidden = true;
+ console.info('claude-chan: hidden by hide({ persist: true }); run claudeChan.show() to bring her back.');
+ }
+ } catch { void 0; }
+ }
  if (o.storageKey !== false) {
  try {
  const { vw, vh } = view();
@@ -234,8 +256,9 @@ export function createShell(parent: HTMLElement, o: ShellOptions): Shell {
  place();
  o.onMove?.({ ...info(), source: 'reset' });
  };
+ // Opt-in only (resetOnDoubleClick: true): by default a double-click is just two clicks and never moves the mascot.
  const dbl = (e: MouseEvent): void => {
- if (dock !== 'free' || o.resetOnDoubleClick === false || !free) return;
+ if (dock !== 'free' || o.resetOnDoubleClick !== true || !free) return;
  e.preventDefault();
  resetPosition();
  };
@@ -304,6 +327,8 @@ export function createShell(parent: HTMLElement, o: ShellOptions): Shell {
  place();
  },
  relayout,
+ setHidden,
+ isHidden: () => host.hidden === true,
  destroy() {
  clearTimeout(timer);
  endDrag();

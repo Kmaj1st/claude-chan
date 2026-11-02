@@ -245,7 +245,41 @@ try {
  const d1 = await rect(page);
  await page.mouse.click(d1.x + d1.w / 2, d1.y + d1.h / 2, { count: 2 });
  const d2 = await rect(page);
- check('double-click resets a moved mascot', Math.abs(d2.x - home.x) < 1 && Math.abs(d2.y - home.y) < 1, JSON.stringify([d1, d2]));
+ check('double-click leaves a moved mascot where it is', Math.abs(d2.x - d1.x) < 1 && Math.abs(d2.y - d1.y) < 1 && Math.abs(d2.x - home.x) > 50, JSON.stringify([d1, d2, home]));
+ const noClose = await page.evaluate(() => {
+ const sel = 'button, [role=button], [aria-label*=close i], [aria-label*=hide i], [aria-label*=dismiss i], [title*=close i], .close';
+ return [...document.querySelectorAll('claude-chan-host, claude-chan')].reduce((n, h) => n + h.querySelectorAll(sel).length + (h.shadowRoot ? h.shadowRoot.querySelectorAll(sel).length : 0), 0);
+ });
+ check('no close/hide/dismiss control on the mascot', noClose === 0, String(noClose));
+
+ // Console commands (window.claudeChan) replace the removed UI controls.
+ const con = await page.evaluate(() => {
+ const c = window.claudeChan;
+ if (!c) return null;
+ const host = document.querySelector('claude-chan-host');
+ const vis = () => getComputedStyle(host).display !== 'none';
+ const out = { help: Array.isArray(c.help()) && c.help().length > 5 };
+ out.set = c.setPosition(0.5, 0.25);
+ out.reset = c.resetPosition();
+ c.hide(); out.hiddenNow = !vis(); out.flagAfterHide = localStorage.getItem('claude-chan:position:hidden');
+ c.show(); out.shownAgain = vis();
+ out.toggleHide = c.toggle(); out.toggleShow = c.toggle();
+ c.hide({ persist: true }); out.persisted = localStorage.getItem('claude-chan:position:hidden');
+ return out;
+ });
+ check('console: help, setPosition, resetPosition, hide/show/toggle',
+ !!con && con.help && con.set.free && Math.abs(con.set.fx - 0.5) < 0.01 && !con.reset.free && Math.abs(con.reset.x - home.x) < 1 &&
+ con.hiddenNow && con.flagAfterHide === null && con.shownAgain && con.toggleHide === false && con.toggleShow === true && con.persisted === '1',
+ JSON.stringify(con));
+ await page.reload({ waitUntil: 'networkidle0' });
+ await page.waitForSelector('claude-chan-host');
+ const pers = await page.evaluate(() => {
+ const host = document.querySelector('claude-chan-host');
+ const before = getComputedStyle(host).display;
+ window.claudeChan.show();
+ return { before, after: getComputedStyle(host).display, flag: localStorage.getItem('claude-chan:position:hidden') };
+ });
+ check('console: hide({ persist: true }) survives a reload and show() recovers it', pers.before === 'none' && pers.after !== 'none' && pers.flag === null, JSON.stringify(pers));
 
  // Outside its own box the page stays clickable.
  const through = await page.evaluate(() => {
