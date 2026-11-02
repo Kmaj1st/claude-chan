@@ -18,7 +18,7 @@ If the sprites folder is unreachable, auto falls back to the procedural puppet a
 
 - In the page: postMessage bridge (docs/API.md) or the controller returned by mount().
 - Iframe embedding: install the bridge with announce: true. The iframe then posts { type: 'claude-chan-ready' } to its parent, once per allowed origin, so the host knows when to send commands. Off by default. Try it with npm run dev, then open /embed.html (host page) which loads /frame.html (see demo/). frame.html also accepts the real-model deep link: /frame.html?model=<model3.json URL>&core=<self-hosted Core URL>&expressions={"smile":"f01"}; without model it uses the sprite/procedural renderers.
-- From a Claude Code / HAPI session: MCP server, see docs/MCP.md.
+- From a Claude Code / HAPI session: MCP server, see docs/MCP.md. A local page receives those calls by running connectHub(controller, { token }) (src/hubclient.ts); the demo page has a hub row for trying it.
 - Tool JSON schemas: claude-chan/schema/tools.
 
 ## Live2D
