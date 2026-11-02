@@ -95,21 +95,23 @@ export class Live2DPuppet implements Puppet {
  await this.loadMotionMap();
  // render() may have run before the model loaded: apply the pending expression now.
  if (this.lastExpression) {
- const pending = this.opts.map?.expressions?.[this.lastExpression] ?? this.lastExpression;
+ const pending = (this.opts.map?.expressions ?? this.fileExpressions)?.[this.lastExpression] ?? this.lastExpression;
  this.callExpression(model, pending).catch(() => { /* unknown id */ });
  }
  }
 
  // Optional motions.json next to the model3.json (docs/ART-PIPELINE.md section 7). Without it no preset motions play.
  private motionMap: Record<string, { group: string; index: number }> | undefined;
+ private fileExpressions: Record<string, string> | undefined;
 
  private async loadMotionMap(): Promise<void> {
- if (this.opts.map?.motions || typeof fetch !== 'function') return;
+ if ((this.opts.map?.motions && this.opts.map?.expressions) || typeof fetch !== 'function') return;
  try {
  const res = await fetch(new URL('motions.json', new URL(this.opts.model, typeof window !== 'undefined' && window.location ? window.location.href : undefined)).href);
  if (!res.ok) return;
- const raw = (await res.json()) as { motions?: Record<string, { group: string; index: number }> };
+ const raw = (await res.json()) as { motions?: Record<string, { group: string; index: number }>; expressions?: Record<string, string> };
  if (raw && typeof raw.motions === 'object') this.motionMap = raw.motions;
+ if (raw && raw.expressions && typeof raw.expressions === 'object') this.fileExpressions = raw.expressions;
  } catch { return; }
  }
 
@@ -127,7 +129,7 @@ export class Live2DPuppet implements Puppet {
  this.pose = pose;
  if (expression !== this.lastExpression) {
  this.lastExpression = expression;
- const id = this.opts.map?.expressions?.[expression] ?? expression;
+ const id = (this.opts.map?.expressions ?? this.fileExpressions)?.[expression] ?? expression;
  if (this.model) this.callExpression(this.model, id).catch(() => { /* unknown expression id: keep current face */ });
  }
  }
