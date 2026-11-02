@@ -1,6 +1,6 @@
 # Public API contract
 
-Stable under semver. hapi-chan and other hosts may rely on everything below. Source of truth: src/types.ts, src/tools.ts.
+Stable under semver (the package is at 0.x, so breaking changes are still possible before 1.0 but will be listed in the release notes). Host apps may rely on everything below. Source of truth: src/types.ts, src/tools.ts.
 
 ## Names
 
@@ -67,7 +67,7 @@ mount() puts a small API on window.claudeChan (option consoleApi; the first moun
 - claudeChan.show() shows it and clears a persisted hide, so it can never stay hidden by accident
 - claudeChan.toggle() hides/shows for this page load (never persists)
 
-Without a persisted hide the mascot is always visible on load. A page that starts hidden because of hide({ persist: true }) logs a console.info hint that names claudeChan.show(). createConsoleApi(controller, name?) and installConsoleApi(controller, name?) are exported for hosts that wrap the controller (hapi-chan does). The agent tools deliberately have no hide/show: only the user can hide the mascot.
+Without a persisted hide the mascot is always visible on load. A page that starts hidden because of hide({ persist: true }) logs a console.info hint that names claudeChan.show(). createConsoleApi(controller, name?) and installConsoleApi(controller, name?) are exported for hosts that wrap the controller. The agent tools deliberately have no hide/show: only the user can hide the mascot.
 
 ## Tool-call surface
 
@@ -111,7 +111,7 @@ With dock 'free' (the default) the mascot can be picked up and put anywhere insi
 - It always stays fully inside the viewport, at least margin px from each edge. It is re-clamped on window resize, orientation change and visual-viewport changes (a phone keyboard shrinks the usable band; pinch zoom does not move it). Re-clamping never overwrites the remembered spot, so it returns there when the space comes back.
 - The spot is saved in localStorage under storageKey (per origin) as { v: 2, fx, fy }, fractions of the free space, so it survives other window sizes. The older { x, y } px format is still read. Storage errors are ignored. resetPosition() removes the key.
 - snap: true (or a px distance) pulls the mascot flush to an edge when it is dropped within 24 px (or that distance) of it. Off by default.
-- Home: the corner from position, 16 px in, or the home option. A host app with its own slot for the mascot passes home as a function (for hapi-chan: the spot next to its chat bar) and calls relayout() when that slot moves; the user can still drag the mascot away, and resetPosition() brings it back to the slot.
+- Home: the corner from position, 16 px in, or the home option. A host app with its own slot for the mascot passes home as a function (for example the spot next to a chat bar) and calls relayout() when that slot moves; the user can still drag the mascot away, and resetPosition() brings it back to the slot.
 - dock 'fixed-default' keeps the mascot at home: no drag, no keyboard focus, setPosition and claude_chan_set_position are ignored, and a remembered spot is kept but not used until dock is 'free' again.
 - Events: dragstart (payload: the position) when a drag starts, move (the position plus source: drag | keyboard | api | reset) after every committed change. Re-clamps on resize do not fire move.
 - Stacking: the host element is position: fixed with z-index var(--claude-chan-z, 2147483000). Hosts with modals pass zIndex (or set --claude-chan-z) below their modal layer and above their content. Only the character box takes pointer events; the rest of the screen stays clickable.

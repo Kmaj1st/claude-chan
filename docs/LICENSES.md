@@ -1,10 +1,12 @@
 # Licences
 
-This file records the licence position of everything claude-chan ships or loads. It is not legal advice. Check the linked official terms before you publish.
+This file records the licence position of everything claude-chan ships or loads. It is not legal advice. Check the linked official terms before you redistribute.
+
+Claude-chan is a fan project. It is not affiliated with or endorsed by Anthropic. "Claude" is a trademark of Anthropic and is used here only descriptively.
 
 ## claude-chan code
 
-Private project. No public licence has been chosen yet.
+MIT, Copyright (c) 2026 Kmaj1st and Claude-chan contributors. See the LICENSE file in the repository root.
 
 ## Character and art
 
@@ -51,7 +53,7 @@ What this means here:
 - The sprite images may be used, copied and modified under MIT, with the copyright and licence notice kept (done in assets/chars/NOTICE.md and this file).
 - The song, its lyrics, the game and the Claude trademark are not covered and are not included. The sprites are fan art, not endorsed by Anthropic.
 - The sprites are flat images, not a rigged model. A real Live2D model still needs layered parts from an artist (docs/ART-PIPELINE.md).
-- The owner confirmed in chat that using this repository is allowed. If the art is ever published, re-check the upstream repository for changes.
+- If you redistribute the art, re-check the upstream repository for changes.
 
 ## Live2D runtime
 
@@ -72,8 +74,8 @@ Points to verify on the official Live2D site before publishing an app that inclu
 
 Official sources: https://www.live2d.com/en/sdk/license/ and https://www.live2d.com/en/terms/live2d-proprietary-software-license-agreement/
 
-I could not check these pages in this session, so the table above reflects general knowledge and may be out of date.
+The table above is a summary; the official terms are authoritative.
 
 ## npm dependencies
 
-Run npm ls and check each package licence before a public release. Current direct dependencies are the MCP SDK, a WebSocket library, esbuild, vite, vitest, typescript, puppeteer-core (e2e only), pixi.js and pixi-live2d-display. All are expected to be permissive, but this has not been audited.
+Run `npm ls` and check each package licence before you redistribute a build. Direct dependencies are the MCP SDK, a WebSocket library, zod, esbuild, vite, vitest, typescript, puppeteer-core (e2e only), pixi.js and pixi-live2d-display. Each is published under its own licence; check the installed versions.

@@ -1,6 +1,6 @@
 import type { Expression, Mood, Motion } from './types';
 
-// Agent state -> character reaction. hapi-chan (or any host) reports what the agent is doing;
+// Agent state -> character reaction. A host app reports what the agent is doing;
 // the mascot picks the motion, expression and mood. Names are part of the stable contract.
 
 export const AGENT_STATES = [
