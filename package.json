@@ -6,10 +6,26 @@
  "type": "module",
  "license": "MIT",
  "author": "Kmaj1st",
- "repository": { "type": "git", "url": "git+https://github.com/Kmaj1st/claude-chan.git" },
+ "repository": {
+  "type": "git",
+  "url": "git+https://github.com/Kmaj1st/claude-chan.git"
+ },
  "homepage": "https://github.com/Kmaj1st/claude-chan#readme",
- "bugs": { "url": "https://github.com/Kmaj1st/claude-chan/issues" },
- "keywords": ["mascot", "live2d", "anime", "web-component", "mcp", "ai-agent", "claude", "sprite", "postmessage", "userscript"],
+ "bugs": {
+  "url": "https://github.com/Kmaj1st/claude-chan/issues"
+ },
+ "keywords": [
+  "mascot",
+  "live2d",
+  "anime",
+  "web-component",
+  "mcp",
+  "ai-agent",
+  "claude",
+  "sprite",
+  "postmessage",
+  "userscript"
+ ],
  "main": "./dist/claude-chan.js",
  "module": "./dist/claude-chan.js",
  "types": "./dist/index.d.ts",
@@ -19,15 +35,15 @@
    "import": "./dist/claude-chan.js"
   },
   "./schema": "./schema/claude_chan_act.json",
- "./schema/tools": "./schema/claude_chan_tools.json",
+  "./schema/tools": "./schema/claude_chan_tools.json",
   "./motions.json": "./src/model/motions.default.json"
  },
  "files": [
   "dist",
   "schema",
- "assets",
+  "assets",
   "server/dist",
- "src/model/motions.default.json",
+  "src/model/motions.default.json",
   "docs"
  ],
  "bin": {
@@ -36,23 +52,25 @@
  "scripts": {
   "dev": "vite",
   "build": "tsc --noEmit && vite build && npm run build:types && npm run build:server",
- "build:types": "tsc -p tsconfig.build.json",
+  "build:types": "tsc -p tsconfig.build.json",
   "build:server": "esbuild server/cli.ts --bundle --platform=node --format=esm --target=node20 --packages=external --outfile=server/dist/cli.js",
   "vendor": "node scripts/vendor.mjs",
- "typecheck": "tsc --noEmit",
+  "typecheck": "tsc --noEmit",
   "test": "vitest run",
- "check:links": "node scripts/check-links.mjs",
+  "check:links": "node scripts/check-links.mjs",
   "test:e2e": "node tests/e2e/run.mjs",
- "test:live2d": "node tests/e2e/live2d.mjs",
- "build:loader": "node scripts/build-loader.mjs",
- "check:loader": "node scripts/build-loader.mjs --check",
- "serve:loader": "node scripts/serve-loader.mjs",
- "test:loader": "node scripts/build-loader.mjs && node tests/e2e/loader.mjs",
- "check:model": "esbuild server/check-model.ts --bundle --platform=node --format=esm --target=node20 --packages=external --outfile=server/dist/check-model.js && node server/dist/check-model.js"
+  "test:live2d": "node tests/e2e/live2d.mjs",
+  "build:psd": "node scripts/build-psd.mjs",
+  "build:loader": "node scripts/build-loader.mjs",
+  "check:loader": "node scripts/build-loader.mjs --check",
+  "serve:loader": "node scripts/serve-loader.mjs",
+  "test:loader": "node scripts/build-loader.mjs && node tests/e2e/loader.mjs",
+  "check:model": "esbuild server/check-model.ts --bundle --platform=node --format=esm --target=node20 --packages=external --outfile=server/dist/check-model.js && node server/dist/check-model.js"
  },
  "devDependencies": {
   "@types/node": "^22.0.0",
   "@types/ws": "^8.18.2",
+  "ag-psd": "^34.1.0",
   "esbuild": "^0.28.2",
   "pixi-live2d-display": "0.4.0",
   "pixi.js": "6.5.10",
