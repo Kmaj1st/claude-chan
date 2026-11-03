@@ -116,3 +116,15 @@ Step-by-step menus, folder layout and the runtime side: [LIVE2D.md](LIVE2D.md).
 ## 10. Generated placeholder PSD
 
 `npm run build:psd` (scripts/build-psd.mjs) writes `art/claude-chan.psd` and `art/claude-chan.preview.png`: 51 named, trimmed layers in 9 groups that follow section 2 and the CHARACTER.md palette. The art is original and drawn from code, so it is a rigging placeholder, not final art. Import it in Cubism Editor (File > Open, the PSD), rig it, and replace the PSD with an artist's version later; keep the layer names. Alternate-state layers (`eyelid_closed_*`, `mouth_open`, `tongue`, `teeth`) are meant to be hidden or driven by parameters.
+
+## 11. Sprite-based PSD and generated model files (normal version)
+
+The default character is the normal sprite art (assets/chars, NOTICE.md), not the code-drawn puppet. Cubism Editor 5.3 cannot be scripted: the external API only reads state and sets parameter values (the MCP edit tools need 5.4 Alpha). So the rig is built by hand from generated inputs:
+
+1. `npm run build:psd:sprite` writes `art/claude-chan-sprite.psd`: `body_full` (the idle sprite at 2x) plus feathered overlays `eyelid_closed_L/R` and `mouth_open`, cut from the beam pose and placed on the idle face. Check `art/claude-chan-sprite.preview.png`. The hair, sleeves and hands are flat in the source; separate them in the Editor (or with an artist) if you want hair and arm movement.
+2. In Cubism Editor: File > Open the PSD, create one ArtMesh for `body_full` and one each for the overlays. Add a warp deformer over the head for ParamAngleX/Y/Z, one over the body for ParamBodyAngleX/Z and ParamBreath. Drive the `eyelid_closed_*` opacity with ParamEyeLOpen/ROpen (1 = 0% opaque, 0 = 100%) and `mouth_open` opacity with ParamMouthOpenY. ParamArmLA/RA and ParamHairSway are optional (the loader ignores missing IDs).
+3. File > Export For Runtime > moc3 into `assets/live2d/claude-chan/` (name `claude-chan`, with model3.json, cdi3.json and physics if added).
+4. `node scripts/build-model-files.mjs assets/live2d/claude-chan` writes the 15 `motions/*.motion3.json`, the 6 `expressions/*.exp3.json` and `motions.json`, and registers the groups and expressions in the model3.json (no Cubism Viewer step needed).
+5. `npm run check:model -- assets/live2d/claude-chan`, then `LIVE2D_MODEL_DIR=assets/live2d/claude-chan npm run test:live2d`.
+
+Without an argument, step 4 writes the same files to `art/model-files/` for review.

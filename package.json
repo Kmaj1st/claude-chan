@@ -61,6 +61,8 @@
   "test:e2e": "node tests/e2e/run.mjs",
   "test:live2d": "node tests/e2e/live2d.mjs",
   "build:psd": "node scripts/build-psd.mjs",
+  "build:psd:sprite": "node scripts/build-psd-sprite.mjs",
+  "build:model-files": "node scripts/build-model-files.mjs",
   "build:loader": "node scripts/build-loader.mjs",
   "check:loader": "node scripts/build-loader.mjs --check",
   "serve:loader": "node scripts/serve-loader.mjs",
