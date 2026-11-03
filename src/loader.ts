@@ -3,6 +3,7 @@ import { connectHub } from './hubclient';
 import { installPostMessageBridge } from './bridge';
 import type { ClaudeChanController, Dock, MountOptions, Position, SpriteData } from './types';
 import { INLINE_SPRITES } from './loader-assets';
+import { LIVE2D_RUNTIME_CDN } from './live2d';
 
 // Hot-load entry (docs/HOT-LOAD.md): one self-contained IIFE that puts the mascot on any page.
 // - Idempotent: a second run returns the running instance (window.__claudeChanLoader) and mounts nothing.
@@ -31,7 +32,17 @@ export interface LoaderConfig {
  dock?: Dock;
  size?: number;
  zIndex?: number;
+ // 'live2d' | 'sprites' | 'simplified' (also 'auto', 'sprite', 'procedural'). Default: sprites.
  renderer?: MountOptions['renderer'];
+ // Live2D (docs/LIVE2D.md): URL of the .model3.json; default <base>/assets/live2d/claude-chan/claude-chan.model3.json.
+ // Setting it alone (renderer unset) also selects Live2D. Runtime + model load only in that case.
+ model?: string;
+ // Cubism Core URL; default the official Live2D CDN.
+ coreUrl?: string;
+ // pixi.js 6 + pixi-live2d-display UMD URLs; default pinned jsDelivr URLs.
+ live2dRuntime?: MountOptions['live2dRuntime'];
+ // Cursor gaze + click/drag reactions; default on for Live2D only.
+ interactive?: boolean;
  storageKey?: string | false;
  consoleApi?: string | false;
  // Mount inside iframes too (default false: top frame only).
@@ -60,6 +71,9 @@ export function scriptUrl(): string | null {
  return m ? m[1]! : null;
 }
 
+const RENDERERS = ['auto', 'sprite', 'sprites', 'procedural', 'simplified', 'live2d'] as const;
+// Placeholder model path (relative to base) for renderer 'live2d' without a model URL; see docs/LIVE2D.md.
+export const DEFAULT_LIVE2D_MODEL = 'assets/live2d/claude-chan/claude-chan.model3.json';
 const POSITIONS: readonly Position[] = ['bottom-left', 'bottom-right', 'top-left', 'top-right'];
 const num = (v: string | undefined): number | undefined => {
  if (v === undefined || v === '') return undefined;
@@ -68,7 +82,7 @@ const num = (v: string | undefined): number | undefined => {
 };
 
 // data-* attributes on the loader's <script> tag (data-position, data-dock, data-size, data-z-index, data-sprites,
-// data-base, data-frames, data-renderer, data-simplified). window.claudeChanConfig wins over them.
+// data-base, data-frames, data-renderer, data-simplified, data-model, data-core-url). window.claudeChanConfig wins over them.
 export function configFromScript(el: Element | null): LoaderConfig {
  const d = (el as HTMLElement | null)?.dataset;
  if (!d) return {};
@@ -83,7 +97,9 @@ export function configFromScript(el: Element | null): LoaderConfig {
  if (d.base) c.base = d.base;
  if (d.simplified !== undefined) c.simplified = d.simplified !== 'false';
  if (d.frames !== undefined) c.frames = d.frames !== 'false';
- if (d.renderer === 'sprite' || d.renderer === 'procedural' || d.renderer === 'auto') c.renderer = d.renderer;
+ if (d.renderer && (RENDERERS as readonly string[]).includes(d.renderer)) c.renderer = d.renderer as LoaderConfig['renderer'];
+ if (d.model) c.model = d.model;
+ if (d.coreUrl) c.coreUrl = d.coreUrl;
  return c;
 }
 
@@ -123,6 +139,16 @@ export function load(cfgIn?: LoaderConfig, ctx: { script?: Element | null; url?:
  const inline: SpriteData | null = INLINE_SPRITES;
  const base = cfg.base ? cfg.base.replace(/\/?$/, '/') : baseFrom(ctx.url ?? null) ?? DEFAULT_BASE;
  const sprites = cfg.sprites ?? new URL('assets/chars/', base).href;
+ // Live2D only when asked for (renderer 'live2d' or a model URL); otherwise nothing Live2D is fetched.
+ const wantLive2D = cfg.simplified !== true && (cfg.renderer === 'live2d' || (!!cfg.model && (cfg.renderer ?? 'auto') === 'auto'));
+ const live2d: Partial<MountOptions> = wantLive2D
+ ? {
+ renderer: 'live2d',
+ model: new URL(cfg.model ?? DEFAULT_LIVE2D_MODEL, base).href,
+ coreUrl: cfg.coreUrl,
+ live2dRuntime: cfg.live2dRuntime ?? { ...LIVE2D_RUNTIME_CDN },
+ }
+ : {};
 
  // Isolation: page CSS can only reach the outer element, and its inline !important styles win over the page.
  const outer = document.createElement(TAG);
@@ -153,9 +179,11 @@ export function load(cfgIn?: LoaderConfig, ctx: { script?: Element | null; url?:
  size: cfg.size,
  zIndex: cfg.zIndex,
  renderer: cfg.simplified === true ? 'procedural' : cfg.renderer,
+ interactive: cfg.interactive,
  storageKey: cfg.storageKey,
  consoleApi: consoleName,
  ...(inline ? { spriteData: inline } : { sprites }),
+ ...live2d,
  });
  } catch (err) {
  outer.remove();

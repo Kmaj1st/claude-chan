@@ -11,7 +11,7 @@
 ## 功能
 
 - **完整版 = 精灵图（默认）：** 21 个 MIT 授权的动漫姿势和 15 个动作，淡入淡出切换。**简化版 = 代码绘制的替身**，只有在精灵图无法加载时才会出现，或在你主动要求时出现（热加载用 `simplified: true`，挂载时用 `renderer: 'procedural'`）。它的表情和姿势更少，没有真正的美术：没有手绘姿势（灵感、咯咯笑、欢呼、打字、讲解、离开等），没有精灵图淡入淡出，只是一个会倾斜、眨眼、动眉毛、嘴和手臂的简单人物。精灵图加载失败时控制台会警告 `claude-chan: sprites could not be loaded from <url>; showing the SIMPLIFIED code-drawn version`；`claudeChan.renderer`、`claudeChan.isSimplified` 和 `claudeChan.help()` 会告诉你当前是哪一种。
-- 可选的 Live2D 渲染器（Cubism 4），Core 需自行托管。
+- 可选的 Live2D 渲染器（支持 Cubism 4/5 模型），仅在选用时才加载；加载失败时回退到精灵图。
 - 鼠标、触摸、手写笔都能拖到任意位置，也可用键盘移动；位置按站点记忆。`dock` 为 `free`（默认）或 `fixed-default`。
 - 由工具调用驱动：MCP 服务器、本地 WebSocket 中枢、postMessage 桥，或纯文本标记，如 `[motion:wave]`。
 - 控制台 API `window.claudeChan`，供用户使用（位置、隐藏、显示）。
@@ -123,10 +123,10 @@ CLAUDE_CHAN_TOKEN=change-me-to-a-long-random-token node server/dist/cli.js
 
 ## 真正的 Live2D 模型
 
-把 `model` 设为 `.model3.json` 的 URL，把 `core-url` 设为你自行托管的 `live2dcubismcore.min.js`。专有的 Core 文件不随项目分发（见 [docs/LICENSES.md](docs/LICENSES.md)）。使用 `renderer=auto` 时，模型加载失败会退回精灵图。
+把 `renderer` 设为 `live2d`，把 `model` 设为 `.model3.json` 的 URL。Cubism Core 默认从 Live2D 官方 CDN 加载，也可以用 `core-url` 指向自行托管的副本；Core 永远不随项目分发（见 [docs/LICENSES.md](docs/LICENSES.md)）。pixi.js 和 pixi-live2d-display 只在使用 Live2D 时加载。任何部分加载失败都会退回精灵图。热加载：`claudeChanConfig = { renderer: 'live2d', model: '…' }`。Cubism Editor 导出步骤和文件夹结构见 [docs/LIVE2D.md](docs/LIVE2D.md)（英文）。
 
 ```html
-<claude-chan model="/model/claude.model3.json" core-url="/live2dcubismcore.min.js"></claude-chan>
+<claude-chan renderer="live2d" model="/live2d/claude-chan/claude-chan.model3.json"></claude-chan>
 ```
 
 用 `npm run check:model -- <folder>` 校验模型文件夹。画师需求文档：[docs/ART-PIPELINE.md](docs/ART-PIPELINE.md)。

@@ -6,7 +6,7 @@ import type { ActRequest, ClaudeChanController, Dock, MountOptions, Mood, Positi
 // <claude-chan model="" position="bottom-left" size="220" dock="free" snap="false"></claude-chan>
 // The element itself is display:contents; the fixed host lives under it.
 
-const RENDERERS: RendererName[] = ['auto', 'sprite', 'procedural', 'live2d'];
+const RENDERERS: RendererName[] = ['auto', 'sprite', 'sprites', 'procedural', 'simplified', 'live2d'];
 const rendererAttr = (v: string | null): RendererName | undefined => RENDERERS.find((r) => r === v);
 const storageKeyAttr = (v: string | null): string | false => (v === null ? 'claude-chan:position' : v === 'false' ? false : v);
 const marginAttr = (v: string | null): number | undefined => {
@@ -71,7 +71,7 @@ export class ClaudeChanElement extends BaseElement {
  }
  }
 
- // A failed mount (e.g. renderer="live2d" without a model) is reported as an 'error' event, not thrown.
+ // A failed mount is reported as an 'error' event, not thrown.
  private safeMount(options: MountOptions): ClaudeChanController | null {
  this.mountFailed = false;
  try {

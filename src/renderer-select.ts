@@ -57,17 +57,34 @@ export class FallbackPuppet implements Puppet {
  destroy(): void { this.destroyed = true; this.active.destroy(); this.element.replaceChildren(); }
 }
 
+// Maps the reported names ('sprites', 'simplified') onto the option names.
+export function normalizeRenderer(r: MountOptions['renderer']): 'auto' | 'sprite' | 'procedural' | 'live2d' {
+ if (r === 'sprites') return 'sprite';
+ if (r === 'simplified') return 'procedural';
+ return r === 'sprite' || r === 'procedural' || r === 'live2d' ? r : 'auto';
+}
+
+export const LIVE2D_FALLBACK_WARNING = 'claude-chan: Live2D model failed to load, showing the sprite version instead.';
+
 export function createPuppet(o: MountOptions, reducedMotion: boolean): Puppet {
- const renderer = o.renderer ?? 'auto';
+ const renderer = normalizeRenderer(o.renderer);
  if (renderer === 'live2d' || (renderer === 'auto' && o.model)) {
- if (!o.model) throw new Error('claude-chan: renderer "live2d" needs the model option.');
- const live = new Live2DPuppet({ model: o.model, coreUrl: o.coreUrl, map: o.expressions ? { expressions: o.expressions } : undefined });
- if (renderer === 'live2d') return live;
- // auto: a failing model (missing Cubism Core, bad URL) falls back to the sprite/procedural chain.
+ if (!o.model) {
+ // Never leave the page without a mascot: no model means the sprite chain.
+ console.warn('claude-chan: renderer "live2d" needs the model option (URL of a .model3.json); showing the sprite version.');
+ return createPuppet({ ...o, renderer: 'auto' }, reducedMotion);
+ }
+ const live = new Live2DPuppet({
+ model: o.model,
+ coreUrl: o.coreUrl,
+ runtime: o.live2dRuntime,
+ map: o.expressions ? { expressions: o.expressions } : undefined,
+ });
+ // A failing model or runtime (Cubism Core blocked, bad URL, no WebGL) falls back to the sprite/procedural chain.
  return new FallbackPuppet(
  live,
  () => createPuppet({ ...o, model: undefined, renderer: 'auto' }, reducedMotion),
- (cause) => console.warn('claude-chan: Live2D model failed to load, trying the sprite version next.', cause),
+ (cause) => console.warn(LIVE2D_FALLBACK_WARNING, cause),
  );
  }
  if (renderer === 'procedural') return new ProceduralPuppet();

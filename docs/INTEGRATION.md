@@ -37,7 +37,7 @@ A host app with a chat bar can keep the mascot at the bottom-left of that bar (t
 
 ## Live2D
 
-Set model (a .model3.json URL) and coreUrl (self-hosted live2dcubismcore.min.js; the proprietary Core is not bundled, see docs/LICENSES.md). On the web component the attributes are model, core-url and expressions (JSON, e.g. {"smile":"f01"} maps preset expressions to model expression ids). They are read at mount, so change them by remounting. With renderer auto a failing model falls back to sprites; the element re-dispatches the load error as an event.
+Set renderer 'live2d' and model (a .model3.json URL); full guide, folder layout and Editor export steps in docs/LIVE2D.md. coreUrl is optional (default: the official Live2D CDN; self-host for offline/CSP; the proprietary Core is never bundled, see docs/LICENSES.md). On the web component the attributes are model, core-url and expressions (JSON, e.g. {"smile":"f01"} maps preset expressions to model expression ids). They are read at mount, so change them by remounting. A failing model, Core or runtime (renderer live2d or auto) falls back to sprites with a console warning; renderer then reports sprites.
 
 ## Checklist
 

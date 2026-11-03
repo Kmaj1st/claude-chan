@@ -28,7 +28,7 @@ export const CONSOLE_COMMANDS: readonly string[] = [
  'claudeChan.hide({ persist: true }) stay hidden after reloads too (until show())',
  'claudeChan.show()                  show again (also clears a persisted hide)',
  'claudeChan.toggle()                hide/show for this page load; returns true when visible',
- 'claudeChan.renderer                "sprites" = full version, "simplified" = code-drawn stand-in (also claudeChan.isSimplified)',
+ 'claudeChan.renderer                "sprites" = full version, "live2d" = Cubism model, "simplified" = code-drawn stand-in (also claudeChan.isSimplified)',
 ];
 
 export function toTarget(x: number | PositionTarget, y?: number): PositionTarget | null {

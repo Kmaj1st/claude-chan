@@ -96,7 +96,8 @@ export interface ClaudeChanController {
 // What is actually on screen. 'sprites' is the full version; 'simplified' is the code-drawn stand-in (fewer
 // expressions and poses, no real art) that appears when the sprites cannot load or when it is requested.
 export type RendererKind = 'sprites' | 'simplified' | 'live2d';
-export type RendererName = 'auto' | 'sprite' | 'procedural' | 'live2d';
+// 'sprites' and 'simplified' are aliases of 'sprite' and 'procedural' (the names renderer reports).
+export type RendererName = 'auto' | 'sprite' | 'sprites' | 'procedural' | 'simplified' | 'live2d';
 
 export interface SpriteData {
  poses: unknown;
@@ -104,12 +105,20 @@ export interface SpriteData {
  images: Record<string, string>;
 }
 
+// Script URLs of pixi.js 6 (UMD) and pixi-live2d-display's cubism4 build (UMD).
+export interface Live2DRuntimeUrls { pixi: string; live2d: string }
+
 export interface MountOptions {
  renderer?: RendererName;
  // URL of a model folder/model3.json (Live2D renderer).
  model?: string;
- // URL of the self-hosted Cubism Core script (live2dcubismcore.min.js); only used with model.
+ // URL of the Cubism Core script (live2dcubismcore.min.js); default: the official Live2D CDN. Only used with Live2D.
  coreUrl?: string;
+ // Live2D only: load pixi.js and pixi-live2d-display as script tags from these URLs instead of import()
+ // (the hot-load build does this; default there: pinned jsDelivr URLs, see docs/LIVE2D.md).
+ live2dRuntime?: Live2DRuntimeUrls;
+ // Eyes/head follow the cursor and the character reacts to clicks and drags. Default: on for Live2D only.
+ interactive?: boolean;
  // Maps preset expression names to the model's own expression ids (Live2D renderer); unmapped names are used as-is.
  expressions?: Partial<Record<Expression, string>>;
  // URL of a sprite pose folder (poses.json, motions.json and the webp files). Default: the assets/chars folder shipped with the package.

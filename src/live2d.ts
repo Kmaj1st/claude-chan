@@ -1,23 +1,41 @@
-import { PARAMS, type Expression, type Motion, type Pose, type Puppet } from './types';
+import { PARAMS, type Expression, type Live2DRuntimeUrls, type Motion, type Pose, type Puppet } from './types';
 
-// Live2D Cubism 4 renderer (pixi-live2d-display). Loaded lazily by mount() only when a model URL is set.
-// The proprietary Cubism Core is NOT bundled: the host self-hosts live2dcubismcore.min.js (see docs/LICENSES.md).
+// Live2D Cubism 4/5 renderer (pixi-live2d-display 0.4.0 on pixi.js 6.5.10). Loaded lazily, only when the Live2D
+// renderer is chosen, so sprite/simplified users download nothing extra. See docs/LIVE2D.md.
+// The proprietary Cubism Core is NOT bundled: it loads at runtime from coreUrl (default: the official Live2D CDN).
+
+// Official Live2D CDN for the Cubism Core (Live2D Proprietary Software License; never commit this file).
+export const CUBISM_CORE_CDN = 'https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js';
+// Pinned UMD builds for script-tag loading (hot-load, which cannot use import()). Exact versions, keep in step
+// with package.json devDependencies.
+export const LIVE2D_RUNTIME_CDN = {
+ pixi: 'https://cdn.jsdelivr.net/npm/pixi.js@6.5.10/dist/browser/pixi.min.js',
+ live2d: 'https://cdn.jsdelivr.net/npm/pixi-live2d-display@0.4.0/dist/cubism4.min.js',
+} as const;
+
+export type { Live2DRuntimeUrls };
 
 export interface Live2DOptions {
  model: string;
- // URL of the self-hosted Cubism Core script.
+ // URL of the Cubism Core script; default CUBISM_CORE_CDN.
  coreUrl?: string;
+ // Load pixi.js + pixi-live2d-display as UMD script tags from these URLs instead of import() (hot-load build).
+ runtime?: Live2DRuntimeUrls;
  // Parsed motions.json; expressions map preset name -> model expression id.
  map?: { expressions?: Record<string, string>; motions?: Record<string, { group: string; index: number }> };
 }
 
-const DEFAULT_CORE = './live2dcubismcore.min.js';
+const DEFAULT_CORE = CUBISM_CORE_CDN;
 
 // One in-flight load per URL, so several puppets do not add duplicate script tags.
 const pendingScripts = new Map<string, Promise<void>>();
 
-export function loadScript(src: string): Promise<void> {
- if ((window as unknown as { Live2DCubismCore?: unknown }).Live2DCubismCore) return Promise.resolve();
+type W = Record<string, unknown> & { Live2DCubismCore?: unknown; PIXI?: { live2d?: unknown; VERSION?: string }; define?: unknown };
+
+// present(): true when the script's global already exists (default: the Cubism Core).
+export function loadScript(src: string, present: () => boolean = () => !!(window as unknown as W).Live2DCubismCore,
+ what = 'Cubism Core'): Promise<void> {
+ if (present()) return Promise.resolve();
  const existing = pendingScripts.get(src);
  if (existing) return existing;
  const p = new Promise<void>((resolve, reject) => {
@@ -26,7 +44,7 @@ export function loadScript(src: string): Promise<void> {
  s.onload = () => resolve();
  s.onerror = () => {
  s.remove();
- reject(new Error('Cannot load Cubism Core from ' + src));
+ reject(new Error('Cannot load ' + what + ' from ' + src));
  };
  document.head.appendChild(s);
  });
@@ -36,6 +54,47 @@ export function loadScript(src: string): Promise<void> {
  return p;
 }
 
+type Runtime = { PIXI: typeof import('pixi.js'); Live2DModel: typeof import('pixi-live2d-display/cubism4').Live2DModel };
+
+// UMD path: pixi.min.js sets window.PIXI, cubism4.min.js adds PIXI.live2d. A page AMD loader (RequireJS, Monaco)
+// would swallow both into define(), so window.define is hidden while they run.
+export async function loadRuntimeScripts(urls: Live2DRuntimeUrls): Promise<Runtime> {
+ const w = window as unknown as W;
+ const amd = w.define;
+ const hideAmd = typeof amd === 'function' && (amd as { amd?: unknown }).amd;
+ if (hideAmd) w.define = undefined;
+ try {
+ await loadScript(urls.pixi, () => typeof w.PIXI?.VERSION === 'string' && w.PIXI.VERSION.startsWith('6.'), 'pixi.js');
+ await loadScript(urls.live2d, () => !!w.PIXI?.live2d, 'pixi-live2d-display');
+ } finally {
+ if (hideAmd) w.define = amd;
+ }
+ const PIXI = w.PIXI as unknown as Runtime['PIXI'] & { live2d?: { Live2DModel?: Runtime['Live2DModel'] } };
+ const Live2DModel = PIXI?.live2d?.Live2DModel;
+ if (!Live2DModel) throw new Error('pixi-live2d-display did not register PIXI.live2d (wrong pixi.js version on the page?)');
+ return { PIXI, Live2DModel };
+}
+
+async function loadRuntimeModules(): Promise<Runtime> {
+ const PIXI = await import('pixi.js');
+ // pixi-live2d-display registers its ticker through the global PIXI.
+ (window as unknown as { PIXI: unknown }).PIXI = PIXI;
+ const { Live2DModel } = await import('pixi-live2d-display/cubism4');
+ return { PIXI, Live2DModel };
+}
+
+// Finds the model's own motion group for a preset name: exact, then case-insensitive, then the Cubism
+// sample convention ('Idle' for idle, 'TapBody' for wave/happy). null when the model has no such group.
+export function resolveGroup(groups: readonly string[], name: string): string | null {
+ if (groups.includes(name)) return name;
+ const lower = name.toLowerCase().replace(/_/g, '');
+ const hit = groups.find((g) => g.toLowerCase().replace(/[_\s]/g, '') === lower);
+ if (hit) return hit;
+ const conv: Record<string, string> = { idle: 'idle', wave: 'tapbody', happy: 'tapbody', cheer: 'tapbody' };
+ const c = conv[lower];
+ return c ? groups.find((g) => g.toLowerCase() === c) ?? null : null;
+}
+
 // Render at the device pixel ratio (capped at 2) so the model is crisp on HiDPI screens; CSS size stays 100%.
 export function deviceScale(): number {
  const r = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
@@ -43,6 +102,19 @@ export function deviceScale(): number {
 }
 
 type CoreModel = { setParameterValueById(id: string, v: number): void };
+
+export const LOAD_TIMEOUT_MS = 20000;
+
+export function withTimeout<T>(p: Promise<T>, ms: number, what: string): Promise<T> {
+ return new Promise<T>((resolve, reject) => {
+ const t = setTimeout(() => reject(new Error(what + ' did not load within ' + ms + ' ms')), ms);
+ p.then((v) => { clearTimeout(t); resolve(v); }, (e: unknown) => { clearTimeout(t); reject(e); });
+ });
+}
+
+// While an authored model motion plays, only these shared params are written each frame (gaze, blink, lip-sync),
+// so the motion's own head/body animation stays visible.
+const DURING_MOTION: ReadonlySet<string> = new Set(['ParamEyeLOpen', 'ParamEyeROpen', 'ParamEyeBallX', 'ParamEyeBallY', 'ParamMouthOpenY']);
 
 export class Live2DPuppet implements Puppet {
  readonly kind = 'live2d' as const;
@@ -58,10 +130,9 @@ export class Live2DPuppet implements Puppet {
  }
 
  async init(): Promise<void> {
+ // The Core must exist before pixi-live2d-display's cubism4 build runs.
  await loadScript(this.opts.coreUrl ?? DEFAULT_CORE);
- const PIXI = await import('pixi.js');
- (window as unknown as { PIXI: unknown }).PIXI = PIXI;
- const { Live2DModel } = await import('pixi-live2d-display/cubism4');
+ const { PIXI, Live2DModel } = this.opts.runtime ? await loadRuntimeScripts(this.opts.runtime) : await loadRuntimeModules();
  if (this.destroyed) return;
  const canvas = document.createElement('canvas');
  canvas.style.cssText = 'width:100%;height:100%;display:block';
@@ -71,7 +142,8 @@ export class Live2DPuppet implements Puppet {
  this.app = new PIXI.Application({ view: canvas, width: w, height: h, backgroundAlpha: 0, autoStart: true, resolution: deviceScale() });
  let model: Awaited<ReturnType<typeof Live2DModel.from>>;
  try {
- model = await Live2DModel.from(this.opts.model, { autoInteract: false });
+ // A stalled request (dead host, CORS preflight hanging) must still end in the sprite fallback.
+ model = await withTimeout(Live2DModel.from(this.opts.model, { autoInteract: false }), LOAD_TIMEOUT_MS, 'Live2D model ' + this.opts.model);
  } catch (e) {
  // Do not leak the renderer and canvas when the model cannot be loaded.
  this.app?.destroy(true, { children: true });
@@ -117,13 +189,31 @@ export class Live2DPuppet implements Puppet {
  }
 
  // Plays the model motion that motions.json assigns to the preset; presets without an entry only get the procedural pose.
+ // Without a motions.json entry, a model group named like the preset (any case, see resolveGroup) is used.
  setMotion(motion: Motion | null): void {
- if (!motion || !this.model) return;
- const ent = (this.opts.map?.motions ?? this.motionMap)?.[motion];
- if (!ent) return;
+ if (!motion) { this.authoredMotion = false; return; }
+ if (!this.model) return;
+ const mapped = (this.opts.map?.motions ?? this.motionMap)?.[motion];
+ const group = mapped?.group ?? resolveGroup(this.modelGroups(), motion);
+ if (!group) { this.authoredMotion = false; return; }
  try {
- Promise.resolve(this.model.motion(ent.group, ent.index)).catch(() => undefined);
- } catch { return; }
+ // Priority 3 = FORCE: a preset interrupts the model's own idle motion.
+ const r = this.model.motion(group, mapped?.index ?? 0, 3 as never);
+ this.authoredMotion = true;
+ // Debug/e2e hook: the model group last started (also handy in devtools).
+ this.element.dataset.l2dMotion = group;
+ Promise.resolve(r).then((ok) => { if (ok === false) this.authoredMotion = false; }, () => { this.authoredMotion = false; });
+ } catch { this.authoredMotion = false; }
+ }
+
+ private authoredMotion = false;
+
+ get playingAuthoredMotion(): boolean { return this.authoredMotion; }
+
+ private modelGroups(): string[] {
+ const defs = (this.model?.internalModel as unknown as { motionManager?: { definitions?: Record<string, unknown> } } | undefined)
+ ?.motionManager?.definitions;
+ return defs && typeof defs === 'object' ? Object.keys(defs) : [];
  }
 
  render(pose: Pose, expression: Expression): void {
@@ -138,7 +228,10 @@ export class Live2DPuppet implements Puppet {
  // A synchronous throw from expression() becomes a rejection, so callers keep the current face.
  private callExpression(model: NonNullable<Live2DPuppet['model']>, id: string): Promise<unknown> {
  try {
- return Promise.resolve(model.expression(id));
+ return Promise.resolve(model.expression(id)).then((ok) => {
+ if (ok !== false) this.element.dataset.l2dExpression = id;
+ return ok;
+ });
  } catch (e) {
  return Promise.reject(e);
  }
@@ -147,7 +240,10 @@ export class Live2DPuppet implements Puppet {
  private apply(): void {
  const core = this.model?.internalModel.coreModel as unknown as CoreModel | undefined;
  if (!core || !this.pose) return;
- for (const id of PARAMS) core.setParameterValueById(id, this.pose[id]);
+ for (const id of PARAMS) {
+ if (this.authoredMotion && !DURING_MOTION.has(id)) continue;
+ core.setParameterValueById(id, this.pose[id]);
+ }
  }
 
  destroy(): void {

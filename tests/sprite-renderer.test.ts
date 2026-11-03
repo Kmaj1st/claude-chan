@@ -154,9 +154,18 @@ describe('renderer selection', () => {
  vi.stubGlobal('document', fakeDocument);
  expect(createPuppet({ renderer: 'sprite', sprites: '/chars' }, false)).toBeInstanceOf(SpritePuppet);
  expect(createPuppet({ renderer: 'procedural' }, false).constructor.name).toBe('ProceduralPuppet');
- expect(() => createPuppet({ renderer: 'live2d' }, false)).toThrow(/model/);
+ expect(createPuppet({ renderer: 'sprites', sprites: '/chars' }, false)).toBeInstanceOf(SpritePuppet);
+ expect(createPuppet({ renderer: 'simplified' }, false).constructor.name).toBe('ProceduralPuppet');
+ // live2d without a model never throws: it warns and shows the sprite chain.
+ const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+ expect(createPuppet({ renderer: 'live2d', sprites: '/chars' }, false).constructor.name).toBe('FallbackPuppet');
+ expect(warn.mock.calls.some((c) => String(c[0]).includes('needs the model option'))).toBe(true);
+ warn.mockRestore();
  expect(createPuppet({ model: '/m/model3.json' }, false).constructor.name).toBe('FallbackPuppet');
- expect(createPuppet({ model: '/m/model3.json', renderer: 'live2d' }, false).constructor.name).toBe('Live2DPuppet');
+ // Explicit live2d still falls back to sprites when the model or runtime fails.
+ const l2d = createPuppet({ model: '/m/model3.json', renderer: 'live2d' }, false) as unknown as { kind: string };
+ expect(l2d.constructor.name).toBe('FallbackPuppet');
+ expect(l2d.kind).toBe('live2d');
  });
 
  it('FallbackPuppet forwards setMotion and destroy to the active puppet, before and after a swap', async () => {
