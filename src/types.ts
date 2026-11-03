@@ -58,6 +58,9 @@ export interface EventMap {
 export type Unsubscribe = () => void;
 
 export interface ClaudeChanController {
+ // Renderer actually showing right now (changes to 'simplified' if the sprites fail to load).
+ readonly renderer: RendererKind;
+ readonly isSimplified: boolean;
  act(req: ActRequest): void;
  say(text: string): void;
  setMood(mood: Mood): void;
@@ -90,6 +93,9 @@ export interface ClaudeChanController {
 
 // Which renderer draws the character. 'auto' = Live2D when model is set, else sprites when the
 // pose set loads, else the procedural puppet.
+// What is actually on screen. 'sprites' is the full version; 'simplified' is the code-drawn stand-in (fewer
+// expressions and poses, no real art) that appears when the sprites cannot load or when it is requested.
+export type RendererKind = 'sprites' | 'simplified' | 'live2d';
 export type RendererName = 'auto' | 'sprite' | 'procedural' | 'live2d';
 
 export interface SpriteData {
@@ -158,6 +164,8 @@ export function neutralPose(): Pose {
 // Renderer driven by the motion engine. Procedural puppet and Live2D both implement it.
 export interface Puppet {
  readonly element: HTMLElement;
+ // Which renderer is actually showing: 'sprites' = full version, 'simplified' = code-drawn stand-in.
+ readonly kind?: RendererKind;
  init(): Promise<void>;
  // nowMs is the engine clock (same value as tick(nowMs)).
  render(pose: Pose, expression: Expression, nowMs?: number): void;

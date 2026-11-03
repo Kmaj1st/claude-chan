@@ -10,7 +10,7 @@ An embeddable anime-style mascot for web UIs, driven by AI tool calls. Claude-ch
 
 ## Features
 
-- Sprite renderer with 21 MIT-licensed anime poses, cross-faded; a procedural SVG puppet is the fallback when sprites are missing.
+- **Full version = sprites (default):** 21 MIT-licensed anime poses and 15 motions, cross-faded. **Simplified version = a code-drawn stand-in** that appears only if the sprites cannot be loaded, or when you ask for it (`simplified: true` in the hot-load loader, `renderer: 'procedural'` when mounting). It has fewer expressions/poses and no real art: no hand-drawn poses (idea, giggle, cheer, typing, explain, away, ...), no sprite cross-fades, only a plain figure that tilts, blinks and moves brows, mouth and arms. The console warns `claude-chan: sprites could not be loaded from <url>; showing the SIMPLIFIED code-drawn version`, and `claudeChan.renderer` / `claudeChan.isSimplified` / `claudeChan.help()` tell which one is showing.
 - Optional Live2D renderer (Cubism 4) with a self-hosted Core.
 - Drag anywhere with mouse, touch or pen; keyboard movement; the spot is remembered per site. `dock` is `free` (default) or `fixed-default`.
 - Driven by tool calls: an MCP server, a local WebSocket hub, a postMessage bridge, or plain text markers such as `[motion:wave]`.

@@ -4,6 +4,8 @@ The `hotload/` folder holds ready-built, self-contained scripts. A page needs no
 change to its own code: one script tag (or a bookmark, or a userscript) adds the mascot, and `claudeChan.unload()`
 takes her off again.
 
+**Full version = sprites (default).** Every file below loads the real sprite art (21 poses, 15 motions). **Simplified version = a code-drawn stand-in** that appears only if the sprites cannot be loaded, or when you ask for it with `simplified: true`; it has fewer expressions/poses and no real art. The plain loader and the userscript fetch the sprites from the base URL (default: GitHub Pages root, also used when the loader cannot tell where it came from); the inline build embeds all 21 poses and the full motion map (nothing is missing compared with `assets/chars`). Neither hot-load build contains Live2D. If the sprites fail, the console shows `claude-chan: sprites could not be loaded from <url>; showing the SIMPLIFIED code-drawn version`, and `claudeChan.renderer` is `simplified` (`claudeChan.isSimplified` true; `claudeChan.help()` prints it).
+
 | File | What it is | Size |
 |---|---|---|
 | `hotload/loader.js` | The loader (IIFE). Loads the sprites from `<BASE>/assets/chars/`. | ~50 KB |
@@ -78,7 +80,8 @@ window.claudeChanConfig = {
   dock: 'free',             // free (drag anywhere, default) | fixed-default
   size: 180,                // character height in px (default 220)
   zIndex: 2147483000,       // stacking order of the overlay
-  renderer: 'auto',         // auto | sprite | procedural (Live2D is not part of the hot-load bundle)
+  simplified: false,        // true = deliberately show the SIMPLIFIED code-drawn stand-in (default false: full sprite version)
+  renderer: 'auto',         // auto | sprite | procedural (procedural = the simplified version; Live2D is not part of the hot-load bundle)
   sprites: 'https://example.com/my-poses/', // another pose set (poses.json + motions.json + images)
   base: 'http://127.0.0.1:5179/',           // repository root; default: derived from the loader's own URL
   storageKey: 'claude-chan:position',       // false = do not remember the dragged spot
@@ -90,11 +93,11 @@ window.claudeChanConfig = {
 ```
 
 The attribute names are `data-position`, `data-dock`, `data-size`, `data-z-index`, `data-renderer`,
-`data-sprites`, `data-base` and `data-frames`. Never put the hub token in a URL or a shared bookmarklet.
+`data-sprites`, `data-base`, `data-frames` and `data-simplified`. Never put the hub token in a URL or a shared bookmarklet.
 
 ## Console API
 
-The hot-loaded mascot has the normal console commands (see [API.md](API.md)), plus two more:
+The hot-loaded mascot has the console commands (see [API.md](API.md)), plus two more:
 
 | Command | Effect |
 |---|---|
@@ -118,8 +121,8 @@ The full controller (`act`, `say`, `setMood`, `lookAt`, `on`, …) is at `window
 - **iframes:** the loader only mounts in the top frame, unless you set `frames: true`.
 - **Existing mascot:** if `window.claudeChan` already exists (for example, a page that embeds Claude-chan itself),
   the loader skips loading and logs a warning.
-- **Sprites fail to load** (404, blocked images, offline): she falls back to the built-in drawn (SVG) puppet, and
-  the page sees no errors.
+- **Sprites fail to load** (404, blocked images, offline): she falls back to the SIMPLIFIED code-drawn (SVG) version
+  (fewer poses, no real art), warns in the console and sets `claudeChan.isSimplified`; the page sees no errors.
 
 ## Sites that block it: Content-Security-Policy and mixed content
 
@@ -133,7 +136,7 @@ Content Security Policy directive: "script-src 'self'".
 
 The bookmarklet shows an alert in that case. Related limits:
 
-- `img-src` without your base blocks the sprite images. She then shows the drawn puppet instead.
+- `img-src` without your base blocks the sprite images. She then shows the SIMPLIFIED code-drawn version instead.
 - `connect-src` blocks the local MCP hub WebSocket (`ws://127.0.0.1:8765`).
 - Mixed content: an `https://` page cannot load `http://` scripts from any host other than localhost or 127.0.0.1.
   Use GitHub Pages or jsDelivr (https), or the local server on 127.0.0.1.

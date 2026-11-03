@@ -10,9 +10,12 @@ import { INLINE_SPRITES } from './loader-assets';
 //   !important styles host-page CSS cannot override, shown in the top layer (popover) where the browser supports it;
 //   SPA route changes that rebuild <body> leave it alone.
 // - Top frame only unless frames: true.
-// - window.claudeChan is the normal console API plus unload() and version.
+// - Full version (sprites) by default; the SIMPLIFIED code-drawn stand-in only if the sprites cannot load or simplified:true.
+// - window.claudeChan is the console API plus unload() and version.
 
 export const LOADER_VERSION = '0.1.0';
+// Used when the loader cannot tell where it was loaded from (e.g. pasted code): sprites still come from here.
+export const DEFAULT_BASE = 'https://kmaj1st.github.io/claude-chan/';
 const GLOBAL = '__claudeChanLoader';
 const TAG = 'claude-chan-loader';
 
@@ -21,6 +24,9 @@ export interface LoaderConfig {
  base?: string;
  // Sprite folder URL (poses.json + images); default <base>/assets/chars/. Ignored by the inline build.
  sprites?: string;
+ // true = deliberately show the SIMPLIFIED code-drawn stand-in instead of the full sprite version (default false).
+ // Without it the simplified version only appears when the sprites cannot be loaded.
+ simplified?: boolean;
  position?: Position;
  dock?: Dock;
  size?: number;
@@ -62,7 +68,7 @@ const num = (v: string | undefined): number | undefined => {
 };
 
 // data-* attributes on the loader's <script> tag (data-position, data-dock, data-size, data-z-index, data-sprites,
-// data-base, data-frames, data-renderer). window.claudeChanConfig wins over them.
+// data-base, data-frames, data-renderer, data-simplified). window.claudeChanConfig wins over them.
 export function configFromScript(el: Element | null): LoaderConfig {
  const d = (el as HTMLElement | null)?.dataset;
  if (!d) return {};
@@ -75,6 +81,7 @@ export function configFromScript(el: Element | null): LoaderConfig {
  if (z !== undefined) c.zIndex = z;
  if (d.sprites) c.sprites = d.sprites;
  if (d.base) c.base = d.base;
+ if (d.simplified !== undefined) c.simplified = d.simplified !== 'false';
  if (d.frames !== undefined) c.frames = d.frames !== 'false';
  if (d.renderer === 'sprite' || d.renderer === 'procedural' || d.renderer === 'auto') c.renderer = d.renderer;
  return c;
@@ -114,8 +121,8 @@ export function load(cfgIn?: LoaderConfig, ctx: { script?: Element | null; url?:
  }
 
  const inline: SpriteData | null = INLINE_SPRITES;
- const base = cfg.base ? cfg.base.replace(/\/?$/, '/') : baseFrom(ctx.url ?? null);
- const sprites = cfg.sprites ?? (base ? new URL('assets/chars/', base).href : undefined);
+ const base = cfg.base ? cfg.base.replace(/\/?$/, '/') : baseFrom(ctx.url ?? null) ?? DEFAULT_BASE;
+ const sprites = cfg.sprites ?? new URL('assets/chars/', base).href;
 
  // Isolation: page CSS can only reach the outer element, and its inline !important styles win over the page.
  const outer = document.createElement(TAG);
@@ -145,10 +152,10 @@ export function load(cfgIn?: LoaderConfig, ctx: { script?: Element | null; url?:
  dock: cfg.dock,
  size: cfg.size,
  zIndex: cfg.zIndex,
- renderer: cfg.renderer,
+ renderer: cfg.simplified === true ? 'procedural' : cfg.renderer,
  storageKey: cfg.storageKey,
  consoleApi: consoleName,
- ...(inline ? { spriteData: inline } : sprites ? { sprites } : { renderer: 'procedural' as const }),
+ ...(inline ? { spriteData: inline } : { sprites }),
  });
  } catch (err) {
  outer.remove();

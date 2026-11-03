@@ -4,6 +4,9 @@ import type { ClaudeChanController, PositionInfo, PositionTarget } from './types
 // close button): the mascot is always visible on load unless someone explicitly ran hide({ persist: true }).
 
 export interface ConsoleApi {
+ // 'sprites' (full version), 'simplified' (code-drawn stand-in) or 'live2d'.
+ readonly renderer: ClaudeChanController['renderer'];
+ readonly isSimplified: boolean;
  help(): string[];
  getPosition(): PositionInfo;
  // Two numbers 0..1 = fractions of the free space (like claude_chan_set_position); larger numbers = viewport px.
@@ -25,6 +28,7 @@ export const CONSOLE_COMMANDS: readonly string[] = [
  'claudeChan.hide({ persist: true }) stay hidden after reloads too (until show())',
  'claudeChan.show()                  show again (also clears a persisted hide)',
  'claudeChan.toggle()                hide/show for this page load; returns true when visible',
+ 'claudeChan.renderer                "sprites" = full version, "simplified" = code-drawn stand-in (also claudeChan.isSimplified)',
 ];
 
 export function toTarget(x: number | PositionTarget, y?: number): PositionTarget | null {
@@ -36,8 +40,11 @@ export function toTarget(x: number | PositionTarget, y?: number): PositionTarget
 export function createConsoleApi(ctrl: ClaudeChanController, name = 'claudeChan'): ConsoleApi {
  const lines = CONSOLE_COMMANDS.map((l) => l.replace(/^claudeChan\./, name + '.'));
  return {
+ get renderer() { return ctrl.renderer; },
+ get isSimplified() { return ctrl.isSimplified; },
  help() {
- console.log('Claude-chan console commands:\n  ' + lines.join('\n  '));
+ const state = 'Renderer: ' + (ctrl.isSimplified ? 'SIMPLIFIED (code-drawn stand-in, fewer poses; the sprites could not be loaded or simplified:true was set)' : ctrl.renderer === 'live2d' ? 'Live2D' : 'sprites (full version)');
+ console.log('Claude-chan console commands:\n  ' + lines.join('\n  ') + '\n' + state);
  return [...lines];
  },
  getPosition: () => ctrl.getPosition(),

@@ -13,9 +13,11 @@ New names may be added in minor versions; existing names are never renamed or re
 
 ## Mounting
 
+Full version = sprites. Simplified version = a code-drawn stand-in (fewer poses, no real art) shown only when the sprites cannot load or `renderer: 'procedural'` is set. `ctrl.renderer` is `'sprites'`, `'simplified'` or `'live2d'`; `ctrl.isSimplified` is a boolean; both are also on `window.claudeChan`, and `claudeChan.help()` prints them.
+
  import { ClaudeChan } from 'claude-chan';
  const cc = ClaudeChan.mount(document.body, {
- renderer: 'auto', // auto | sprite | procedural | live2d; auto = live2d if model is set, else sprites, else procedural
+ renderer: 'auto', // auto | sprite | procedural | live2d; auto = live2d if model is set, else sprites (full version), else the SIMPLIFIED code-drawn puppet (only when the sprites cannot load)
  sprites: undefined, // URL of a sprite pose folder (poses.json, motions.json, webp); default is the bundled assets/chars
  spriteData: undefined, // in-memory pose set { poses, motions, images: { file: url } } instead of sprites (inline hot-load build, docs/HOT-LOAD.md)
  model: undefined, // model3.json URL (live2d renderer)

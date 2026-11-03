@@ -53,6 +53,7 @@ export function sheetTransform(pose: Pose, reduced: boolean): string {
 }
 
 export class SpritePuppet implements Puppet {
+ readonly kind = 'sprites' as const;
  readonly element: HTMLElement;
  private sheet: HTMLElement;
  private base: string;

@@ -45,6 +45,7 @@ export function deviceScale(): number {
 type CoreModel = { setParameterValueById(id: string, v: number): void };
 
 export class Live2DPuppet implements Puppet {
+ readonly kind = 'live2d' as const;
  readonly element = document.createElement('div');
  private app: import('pixi.js').Application | null = null;
  private pose: Pose | null = null;

@@ -114,27 +114,45 @@ const waitMascot = (p) => p.waitForFunction(() => {
  return stage && (stage.querySelector('img') || stage.querySelector('svg'));
 }, { timeout: 8000 }).then(() => true, () => false);
 
+// Renderer kind, flag and help() text of the running mascot.
+const rendererInfo = (p) => p.evaluate(async () => {
+ await window.__claudeChanLoader.controller.ready;
+ const lines = [];
+ const log = console.log;
+ console.log = (...a) => lines.push(a.join(' '));
+ try { window.claudeChan.help(); } finally { console.log = log; }
+ return { renderer: window.claudeChan.renderer, isSimplified: window.claudeChan.isSimplified, help: lines.join(' ') };
+});
+
 async function newPage(path) {
  const p = await browser.newPage();
  await p.setViewport({ width: 1000, height: 700 });
  const errors = [];
  const cspErrors = [];
+ const warns = [];
+ const requests = [];
+ p.on('request', (rq) => requests.push(rq.url()));
+ p.on('console', (m) => { if (m.type() === 'warn') warns.push(m.text()); });
  p.on('pageerror', (e) => errors.push(String(e)));
  p.on('console', (m) => { if (/Content Security Policy/i.test(m.text())) cspErrors.push(m.text()); });
  await p.goto(SITE + path, { waitUntil: 'load' });
- return { p, errors, cspErrors };
+ return { p, errors, cspErrors, warns, requests };
 }
 
 try {
  // 1. Plain page: console one-liner, sprites from the loader's own origin.
  {
- const { p, errors } = await newPage('/plain');
+ const { p, errors, warns, requests } = await newPage('/plain');
  check('plain: script loads', (await inject(p)) === 'load');
  check('plain: mascot appears', await waitMascot(p));
  await settle(p);
  const s = await state(p);
  check('plain: one mascot, bottom-left', s.count === 1 && s.hosts === 0 && s.rect && s.rect.x < 100 && s.rect.y + s.rect.h > s.vh - 100, JSON.stringify(s));
  check('plain: sprites loaded from the loader origin', s.imgsLoaded > 0 && s.imgSrc.startsWith(BASE + 'assets/chars/'), JSON.stringify(s));
+ const ri = await rendererInfo(p);
+ check('plain: DEFAULT is the full sprite version (renderer sprites, not simplified)', ri.renderer === 'sprites' && ri.isSimplified === false && /sprites \(full version\)/.test(ri.help) && s.svg === 0, JSON.stringify({ ri, svg: s.svg }));
+ check('plain: poses.json and idle.webp were fetched', requests.some((u) => u === BASE + 'assets/chars/poses.json') && requests.some((u) => u === BASE + 'assets/chars/idle.webp'), JSON.stringify(requests.filter((u) => u.includes('assets'))));
+ check('plain: no SIMPLIFIED warning', !warns.some((w) => /SIMPLIFIED/.test(w)), JSON.stringify(warns));
  check('plain: window.claudeChan with unload() and version', s.api === 'object' && s.unload === 'function' && s.version === '0.1.0', JSON.stringify(s));
 
  // Drag works in the top layer, and the page under the empty part of the layer still gets clicks.
@@ -296,17 +314,63 @@ try {
  await settle(p);
  const s = await state(p);
  check('CSP: embedded data: sprites shown', s.imgsLoaded > 0 && s.imgSrc.startsWith('data:image/webp'), JSON.stringify(s));
+ check('CSP: inline build is the full sprite version', (await rendererInfo(p)).renderer === 'sprites');
  check('CSP: no page errors', errors.length === 0, errors.join(' | '));
  await p.close();
  }
  {
- const { p, errors } = await newPage('/csp-strict');
+ const { p, errors, warns } = await newPage('/csp-strict');
  await p.evaluate(INLINE);
- check('CSP without data: images: falls back to the drawn puppet', await waitMascot(p));
+ check('CSP without data: images: falls back to the SIMPLIFIED drawn version', await waitMascot(p));
  await settle(p, 1200);
  const s = await state(p);
- check('CSP without data: images: procedural puppet, one mascot', s.count === 1 && s.svg > 0, JSON.stringify(s));
+ check('CSP without data: images: simplified version, one mascot', s.count === 1 && s.svg > 0, JSON.stringify(s));
+ const rr = await rendererInfo(p);
+ check('CSP without data: images: renderer flag = simplified', rr.renderer === 'simplified' && rr.isSimplified === true && /SIMPLIFIED/.test(rr.help), JSON.stringify(rr));
+ check('CSP without data: images: SIMPLIFIED console warning', warns.some((w) => /sprites could not be loaded from .*; showing the SIMPLIFIED code-drawn version/.test(w)), JSON.stringify(warns));
  check('CSP without data: images: no page errors', errors.length === 0, errors.join(' | '));
+ await p.close();
+ }
+
+ // 9b. Simplified version: blocked sprite URL, simplified:true (config and data attribute), loader without any base.
+ {
+ const { p, warns } = await newPage('/plain');
+ await p.evaluate((b) => { window.claudeChanConfig = { sprites: b + 'nope/' }; }, BASE);
+ await inject(p);
+ check('blocked sprites: mascot appears', await waitMascot(p));
+ const ri = await rendererInfo(p);
+ const s = await state(p);
+ check('blocked sprites: simplified renderer + flag + help line', ri.renderer === 'simplified' && ri.isSimplified === true && /Renderer: SIMPLIFIED/.test(ri.help) && s.svg > 0 && s.imgs === 0, JSON.stringify({ ri, s }));
+ check('blocked sprites: console warning names the URL', warns.some((w) => w.includes('sprites could not be loaded from ' + BASE + 'nope') && w.includes('showing the SIMPLIFIED code-drawn version')), JSON.stringify(warns));
+ await p.close();
+ }
+ {
+ const { p, requests } = await newPage('/plain');
+ await p.evaluate(() => { window.claudeChanConfig = { simplified: true }; });
+ await inject(p);
+ await waitMascot(p);
+ const ri = await rendererInfo(p);
+ check('simplified:true: simplified renderer, no sprite fetch', ri.renderer === 'simplified' && ri.isSimplified === true && !requests.some((u) => u.includes('poses.json')), JSON.stringify({ ri, req: requests.filter((u) => u.includes('assets')) }));
+ await p.close();
+ const { p: p2 } = await newPage('/plain');
+ await inject(p2, { 'data-simplified': 'true' });
+ await waitMascot(p2);
+ check('data-simplified="true": simplified renderer', (await rendererInfo(p2)).renderer === 'simplified');
+ await p2.close();
+ const { p: p3 } = await newPage('/plain');
+ await inject(p3, { 'data-simplified': 'false' });
+ await waitMascot(p3);
+ check('data-simplified="false": full sprite version', (await rendererInfo(p3)).renderer === 'sprites');
+ await p3.close();
+ }
+ {
+ // Pasted code with no known origin: sprites are still requested (from the GitHub Pages default base).
+ const LOADER = readFileSync(new URL('../../hotload/loader.js', import.meta.url), 'utf8');
+ const { p, requests } = await newPage('/plain');
+ await p.evaluate(LOADER);
+ await waitMascot(p);
+ await settle(p, 1500);
+ check('no base known: sprites requested from the Pages default, not silently simplified', requests.some((u) => u.startsWith('https://kmaj1st.github.io/claude-chan/assets/chars/')), JSON.stringify(requests));
  await p.close();
  }
 
@@ -321,6 +385,7 @@ try {
  await settle(p);
  const s = await state(p);
  check('userscript: sprites from configured base', s.imgsLoaded > 0 && s.imgSrc.startsWith(BASE), JSON.stringify(s));
+ check('userscript: full sprite version', (await rendererInfo(p)).renderer === 'sprites');
  check('userscript: no page errors', errors.length === 0, errors.join(' | '));
  await p.close();
  }
@@ -352,6 +417,8 @@ try {
  check('install page: status line OK for the base', ok);
  await p.click('#try');
  check('install page: Try it mounts the mascot', await waitMascot(p));
+ const rtext = await p.waitForFunction(() => /Renderer:/.test(document.getElementById('renderer').textContent) && document.getElementById('renderer').textContent, { timeout: 8000 }).then((h) => h.jsonValue(), () => '');
+ check('install page: status shows Renderer: sprites (full)', /Renderer: sprites \(full\)/.test(rtext), rtext);
  check('install page: window.claudeChan exists', await p.evaluate(() => typeof window.claudeChan?.unload === 'function'));
  await p.evaluate(() => { document.getElementById('base').value = 'http://127.0.0.1:1/nope/'; document.getElementById('base').dispatchEvent(new Event('input')); });
  check('install page: wrong base shows FAILED', await p.waitForFunction(() => /\bbad\b/.test(document.getElementById('status').className), { timeout: 8000 }).then(() => true, () => false));

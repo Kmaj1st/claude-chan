@@ -12,7 +12,7 @@ Contract: docs/API.md (stable under semver). This page covers packaging traps.
 
  Web component: <claude-chan sprites="/vendor/claude-chan/chars"></claude-chan>
 
-If the sprites folder is unreachable, auto falls back to the procedural puppet and logs a console warning; nothing throws.
+If the sprites folder is unreachable, auto falls back to the SIMPLIFIED code-drawn puppet (fewer poses, no real art) and logs `claude-chan: sprites could not be loaded from <url>; showing the SIMPLIFIED code-drawn version`; nothing throws. `ctrl.renderer` / `ctrl.isSimplified` tell which one is showing.
 
 ## Driving it from the agent
 
