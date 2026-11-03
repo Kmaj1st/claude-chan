@@ -112,3 +112,7 @@ Step-by-step menus, folder layout and the runtime side: [LIVE2D.md](LIVE2D.md).
 - Art is original, or the licence allows redistribution in this repo.
 - No traced or copied reference art.
 - The Live2D runtime terms are noted in LICENSES.md.
+
+## 10. Generated placeholder PSD
+
+`npm run build:psd` (scripts/build-psd.mjs) writes `art/claude-chan.psd` and `art/claude-chan.preview.png`: 51 named, trimmed layers in 9 groups that follow section 2 and the CHARACTER.md palette. The art is original and drawn from code, so it is a rigging placeholder, not final art. Import it in Cubism Editor (File > Open, the PSD), rig it, and replace the PSD with an artist's version later; keep the layer names. Alternate-state layers (`eyelid_closed_*`, `mouth_open`, `tongue`, `teeth`) are meant to be hidden or driven by parameters.
