@@ -7,3 +7,7 @@ coverage/
 playwright-report/
 test-results/
 .env
+# Live2D (docs/LIVE2D.md): models are not committed by default; the proprietary Cubism Core never is.
+assets/live2d/*
+!assets/live2d/README.md
+live2dcubismcore*.js

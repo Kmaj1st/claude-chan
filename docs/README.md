@@ -8,6 +8,7 @@
 | [install.html](install.html) | Install page with the bookmarklet |
 | [MCP.md](MCP.md) | MCP server and WebSocket hub setup, tools, system prompt snippet, security |
 | [CHARACTER.md](CHARACTER.md) | Character sheet: look, palette, personality, mood mapping |
+| [LIVE2D.md](LIVE2D.md) | Live2D (Cubism) renderer: turning it on, folder layout, Cubism Editor export steps, licensing, tests |
 | [ART-PIPELINE.md](ART-PIPELINE.md) | Brief for an artist delivering a real Live2D model |
 | [ART-REQUESTS.md](ART-REQUESTS.md) | Prompts for generating missing sprite poses |
 | [LICENSES.md](LICENSES.md) | Licence position of code, art and the Live2D runtime; trademark disclaimer |

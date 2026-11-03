@@ -58,7 +58,7 @@ vi.mock('pixi-live2d-display/cubism4', () => ({
 
 function fakeEl(): Record<string, unknown> {
  const el: Record<string, unknown> = {
- style: {}, clientWidth: 0, clientHeight: 0,
+ style: {}, dataset: {}, clientWidth: 0, clientHeight: 0,
  appendChild: () => {}, remove: () => {}, replaceChildren: () => {},
  };
  return el;
@@ -125,6 +125,24 @@ describe('Live2DPuppet', () => {
  p.setMotion('nod');
  p.setMotion(null);
  expect(hh.motions).toEqual([['wave', 2]]);
+ });
+
+ it('while an authored motion plays, writes only gaze, blink and mouth so the motion shows', async () => {
+ const hh = h as unknown as { motions: Array<[string, number]> };
+ hh.motions = [];
+ const p = new Live2DPuppet({ model: '/m.model3.json', map: { motions: { bow: { group: 'bow', index: 0 } } } });
+ await p.init();
+ p.render(neutralPose(), 'neutral');
+ p.setMotion('bow');
+ expect(p.playingAuthoredMotion).toBe(true);
+ h.model!.handlers['beforeModelUpdate']!();
+ const ids = new Set(h.model!.set.map(([id]) => id));
+ expect(ids.has('ParamMouthOpenY')).toBe(true);
+ expect(ids.has('ParamAngleX')).toBe(false);
+ h.model!.set.length = 0;
+ p.setMotion(null);
+ h.model!.handlers['beforeModelUpdate']!();
+ expect(h.model!.set.some(([id]) => id === 'ParamAngleX')).toBe(true);
  });
 
  it('reads motions.json next to the model when no map is given', async () => {

@@ -12,11 +12,12 @@ describe('hot-load loader helpers', () => {
  });
 
  it('reads valid data-* attributes and drops invalid ones', () => {
- const el = { dataset: { position: 'top-right', dock: 'fixed-default', size: '160', zIndex: '9', sprites: 'https://x/s/', frames: '', renderer: 'live2d' } };
+ const el = { dataset: { position: 'top-right', dock: 'fixed-default', size: '160', zIndex: '9', sprites: 'https://x/s/', frames: '', renderer: 'live2d', model: 'm/a.model3.json', coreUrl: '/core.js' } };
  expect(configFromScript(el as unknown as Element)).toEqual({
  position: 'top-right', dock: 'fixed-default', size: 160, zIndex: 9, sprites: 'https://x/s/', frames: true,
+ renderer: 'live2d', model: 'm/a.model3.json', coreUrl: '/core.js',
  });
- const bad = { dataset: { position: 'middle', dock: 'x', size: 'big', frames: 'false' } };
+ const bad = { dataset: { position: 'middle', dock: 'x', size: 'big', frames: 'false', renderer: 'webgl' } };
  expect(configFromScript(bad as unknown as Element)).toEqual({ frames: false });
  expect(configFromScript(null)).toEqual({});
  });

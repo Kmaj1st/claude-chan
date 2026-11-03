@@ -11,7 +11,7 @@ An embeddable anime-style mascot for web UIs, driven by AI tool calls. Claude-ch
 ## Features
 
 - **Full version = sprites (default):** 21 MIT-licensed anime poses and 15 motions, cross-faded. **Simplified version = a code-drawn stand-in** that appears only if the sprites cannot be loaded, or when you ask for it (`simplified: true` in the hot-load loader, `renderer: 'procedural'` when mounting). It has fewer expressions/poses and no real art: no hand-drawn poses (idea, giggle, cheer, typing, explain, away, ...), no sprite cross-fades, only a plain figure that tilts, blinks and moves brows, mouth and arms. The console warns `claude-chan: sprites could not be loaded from <url>; showing the SIMPLIFIED code-drawn version`, and `claudeChan.renderer` / `claudeChan.isSimplified` / `claudeChan.help()` tell which one is showing.
-- Optional Live2D renderer (Cubism 4) with a self-hosted Core.
+- Optional Live2D renderer (Cubism 4/5 models) loaded only when chosen; falls back to sprites.
 - Drag anywhere with mouse, touch or pen; keyboard movement; the spot is remembered per site. `dock` is `free` (default) or `fixed-default`.
 - Driven by tool calls: an MCP server, a local WebSocket hub, a postMessage bridge, or plain text markers such as `[motion:wave]`.
 - A console API, `window.claudeChan`, for the user (position, hide, show).
@@ -123,10 +123,10 @@ Add it to your `.mcp.json` and connect the page with `connectHub(controller, { t
 
 ## Real Live2D model
 
-Set `model` to a `.model3.json` URL and `core-url` to your self-hosted `live2dcubismcore.min.js`. The proprietary Core is not bundled ([docs/LICENSES.md](docs/LICENSES.md)). With `renderer=auto` a model that fails to load falls back to sprites.
+Set `renderer` to `live2d` and `model` to a `.model3.json` URL. The Cubism Core loads from the official Live2D CDN unless you set `core-url` to a self-hosted copy; it is never bundled ([docs/LICENSES.md](docs/LICENSES.md)). pixi.js and pixi-live2d-display load only for Live2D. If anything fails to load she falls back to sprites. Hot-load: `claudeChanConfig = { renderer: 'live2d', model: '…' }`. Export steps from Cubism Editor and the folder layout: [docs/LIVE2D.md](docs/LIVE2D.md).
 
 ```html
-<claude-chan model="/model/claude.model3.json" core-url="/live2dcubismcore.min.js"></claude-chan>
+<claude-chan renderer="live2d" model="/live2d/claude-chan/claude-chan.model3.json"></claude-chan>
 ```
 
 Validate a model folder with `npm run check:model -- <folder>`. Artist brief: [docs/ART-PIPELINE.md](docs/ART-PIPELINE.md).

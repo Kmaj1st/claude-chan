@@ -57,14 +57,14 @@ What this means here:
 
 ## Live2D runtime
 
-The Live2D renderer (src/live2d.ts) is loaded lazily, only when a model URL is set. It needs two parts:
+The Live2D renderer (src/live2d.ts, docs/LIVE2D.md) is loaded lazily, only when renderer live2d or a model URL is set. It needs two parts:
 
 | Part | Licence | Note |
 | --- | --- | --- |
-| Cubism Core (live2dcubismcore.min.js) | Live2D Proprietary Software License Agreement | Download from live2d.com. Do not edit it. Self-host the file, no runtime CDN. |
-| pixi-live2d-display 0.4.0 (with pixi.js 6.5.10) | MIT (verify the licence file of the installed version) | Imported dynamically by src/live2d.ts, so the procedural puppet bundle stays small. |
+| Cubism Core (live2dcubismcore.min.js) | Live2D Proprietary Software License Agreement | Never committed or bundled. Default: loaded at runtime from the official Live2D CDN (https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js); set coreUrl to a self-hosted copy for offline use, strict CSP or to keep visitors from contacting Live2D's server. Do not edit it. |
+| pixi-live2d-display 0.4.0 (with pixi.js 6.5.10) | MIT; its bundled Cubism 4 Framework is under the Live2D Open Software License | Pinned to exact versions. npm build: import()ed into lazy chunks. Hot-load: UMD files from jsDelivr at those exact versions, only for renderer live2d. |
 
-The host page supplies the Core file through the coreUrl option (default ./live2dcubismcore.min.js). The loader never fetches it from a CDN.
+The host page can supply its own Core file through the coreUrl option (data-core-url / core-url). Without it the official CDN is used. `.gitignore` blocks `live2dcubismcore*.js` and `assets/live2d/*` (models are not committed by default; the owner's own model may be committed later by an explicit decision).
 
 Points to verify on the official Live2D site before publishing an app that includes the runtime:
 

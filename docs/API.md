@@ -17,12 +17,14 @@ Full version = sprites. Simplified version = a code-drawn stand-in (fewer poses,
 
  import { ClaudeChan } from 'claude-chan';
  const cc = ClaudeChan.mount(document.body, {
- renderer: 'auto', // auto | sprite | procedural | live2d; auto = live2d if model is set, else sprites (full version), else the SIMPLIFIED code-drawn puppet (only when the sprites cannot load)
+ renderer: 'auto', // auto | live2d | sprites | simplified (sprite / procedural are the same as sprites / simplified); auto = live2d if model is set, else sprites (full version), else the SIMPLIFIED code-drawn puppet (only when the sprites cannot load). live2d falls back to sprites when the model or runtime fails (docs/LIVE2D.md)
  sprites: undefined, // URL of a sprite pose folder (poses.json, motions.json, webp); default is the bundled assets/chars
  spriteData: undefined, // in-memory pose set { poses, motions, images: { file: url } } instead of sprites (inline hot-load build, docs/HOT-LOAD.md)
  model: undefined, // model3.json URL (live2d renderer)
  expressions: undefined, // maps preset expression names to the model's own expression ids
- coreUrl: '/live2dcubismcore.min.js', // only with model
+ coreUrl: undefined, // Cubism Core URL; default the official Live2D CDN (https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js)
+ live2dRuntime: undefined, // { pixi, live2d } UMD script URLs instead of import() (the hot-load build uses pinned jsDelivr URLs)
+ interactive: undefined, // eyes/head follow the cursor, click = wave, drag = surprised; default on for live2d only
  position: 'bottom-left', // home corner: bottom-left | bottom-right | top-left | top-right
  home: undefined, // home spot { x, y } in viewport px (box top-left) or () => ({ x, y }) | null; overrides the corner
  size: 220, // character height in px
@@ -37,7 +39,7 @@ Full version = sprites. Simplified version = a code-drawn stand-in (fewer poses,
  autoIdle: true,
  });
 
-Web component: <claude-chan renderer="auto" sprites="/chars" model="" core-url="/live2dcubismcore.min.js" expressions='{"smile":"f01"}' position="bottom-left" size="220" dock="free" snap="false" margin="8" storage-key="claude-chan:position"></claude-chan> (draggable="false" still works as dock="fixed-default"; snap is "true", "false" or a px number; storage-key="false" disables position persistence; expressions is a JSON object that maps preset expression names to the model's own ids, and invalid JSON is ignored). The element forwards act, say, setMood, setState, lookAt, stop, lipSync, getPosition, setPosition, resetPosition, hide, show, toggle, setDock and relayout to its controller (el.say('hi')); they do nothing while it is disconnected. ready, motionstart, motionend, error, dragstart and move are re-dispatched as CustomEvents.
+Web component: <claude-chan renderer="auto" sprites="/chars" model="" core-url="" expressions='{"smile":"f01"}' position="bottom-left" size="220" dock="free" snap="false" margin="8" storage-key="claude-chan:position"></claude-chan> (draggable="false" still works as dock="fixed-default"; snap is "true", "false" or a px number; storage-key="false" disables position persistence; expressions is a JSON object that maps preset expression names to the model's own ids, and invalid JSON is ignored). The element forwards act, say, setMood, setState, lookAt, stop, lipSync, getPosition, setPosition, resetPosition, hide, show, toggle, setDock and relayout to its controller (el.say('hi')); they do nothing while it is disconnected. ready, motionstart, motionend, error, dragstart and move are re-dispatched as CustomEvents.
 
 ## Controller
 

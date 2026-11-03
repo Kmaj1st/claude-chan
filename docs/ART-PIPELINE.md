@@ -89,14 +89,17 @@ Maps our preset names to Live2D motion groups and expressions. The artist fills 
 Runtime behaviour (src/live2d.ts):
 
 - The loader fetches motions.json from the folder of the model3.json URL. A parsed map passed in code (map) takes precedence. A missing or invalid file is ignored.
-- When the engine starts a preset motion, the loader plays motions[preset] with model.motion(group, index). Presets without an entry only get the procedural pose. An unknown group is ignored.
+- When the engine starts a preset motion, the loader plays motions[preset] with model.motion(group, index). Presets without an entry use a model group with the same name (any case, `_` ignored), then the Cubism sample names (Idle, TapBody); otherwise only the procedural pose. An unknown group is ignored.
 - expressions[preset] maps a preset expression to a model expression id.
-- The shared procedural pose is applied before each model update, so it wins over built-in idle motions.
+- The shared procedural pose is applied before each model update, so it wins over built-in idle motions. While a preset's model motion plays, only gaze, blink and mouth are written, so the authored motion shows.
 - The params key in the default file is reserved and ignored by the loader; do not rely on it.
 
 The exact schema is defined by the loader and must be kept in sync with this file.
 
 ## 8. Export steps (Cubism Editor)
+
+Step-by-step menus, folder layout and the runtime side: [LIVE2D.md](LIVE2D.md).
+
 
 1. Build the model from the PSD, then set up the parameters and deformers.
 2. Add physics and the model settings (File > Export Runtime Files).

@@ -4,7 +4,7 @@ The `hotload/` folder holds ready-built, self-contained scripts. A page needs no
 change to its own code: one script tag (or a bookmark, or a userscript) adds the mascot, and `claudeChan.unload()`
 takes her off again.
 
-**Full version = sprites (default).** Every file below loads the real sprite art (21 poses, 15 motions). **Simplified version = a code-drawn stand-in** that appears only if the sprites cannot be loaded, or when you ask for it with `simplified: true`; it has fewer expressions/poses and no real art. The plain loader and the userscript fetch the sprites from the base URL (default: GitHub Pages root, also used when the loader cannot tell where it came from); the inline build embeds all 21 poses and the full motion map (nothing is missing compared with `assets/chars`). Neither hot-load build contains Live2D. If the sprites fail, the console shows `claude-chan: sprites could not be loaded from <url>; showing the SIMPLIFIED code-drawn version`, and `claudeChan.renderer` is `simplified` (`claudeChan.isSimplified` true; `claudeChan.help()` prints it).
+**Full version = sprites (default).** Every file below loads the real sprite art (21 poses, 15 motions). **Simplified version = a code-drawn stand-in** that appears only if the sprites cannot be loaded, or when you ask for it with `simplified: true`; it has fewer expressions/poses and no real art. The plain loader and the userscript fetch the sprites from the base URL (default: GitHub Pages root, also used when the loader cannot tell where it came from); the inline build embeds all 21 poses and the full motion map (nothing is missing compared with `assets/chars`). Neither hot-load build contains Live2D; with `renderer: 'live2d'` (or `data-renderer="live2d"`) they load the Cubism Core, pixi.js and pixi-live2d-display by script tag at that moment, plus the model from `model` (default `<base>/assets/live2d/claude-chan/claude-chan.model3.json`), and fall back to sprites if any of it fails ([LIVE2D.md](LIVE2D.md)). Sprite users load none of it. If the sprites fail, the console shows `claude-chan: sprites could not be loaded from <url>; showing the SIMPLIFIED code-drawn version`, and `claudeChan.renderer` is `simplified` (`claudeChan.isSimplified` true; `claudeChan.help()` prints it).
 
 | File | What it is | Size |
 |---|---|---|
@@ -81,7 +81,11 @@ window.claudeChanConfig = {
   size: 180,                // character height in px (default 220)
   zIndex: 2147483000,       // stacking order of the overlay
   simplified: false,        // true = deliberately show the SIMPLIFIED code-drawn stand-in (default false: full sprite version)
-  renderer: 'auto',         // auto | sprite | procedural (procedural = the simplified version; Live2D is not part of the hot-load bundle)
+  renderer: 'auto',         // auto (= sprites) | sprites | simplified | live2d (sprite / procedural = old names); live2d loads its runtime lazily, see LIVE2D.md
+  model: undefined,         // live2d: .model3.json URL (default <base>/assets/live2d/claude-chan/claude-chan.model3.json)
+  coreUrl: undefined,       // live2d: Cubism Core URL (default: official Live2D CDN)
+  live2dRuntime: undefined, // live2d: { pixi, live2d } UMD URLs (default: pinned jsDelivr pixi.js@6.5.10, pixi-live2d-display@0.4.0)
+  interactive: undefined,   // cursor gaze + click/drag reactions (default: on for live2d only)
   sprites: 'https://example.com/my-poses/', // another pose set (poses.json + motions.json + images)
   base: 'http://127.0.0.1:5179/',           // repository root; default: derived from the loader's own URL
   storageKey: 'claude-chan:position',       // false = do not remember the dragged spot
@@ -93,7 +97,7 @@ window.claudeChanConfig = {
 ```
 
 The attribute names are `data-position`, `data-dock`, `data-size`, `data-z-index`, `data-renderer`,
-`data-sprites`, `data-base`, `data-frames` and `data-simplified`. Never put the hub token in a URL or a shared bookmarklet.
+`data-sprites`, `data-base`, `data-frames`, `data-simplified`, `data-model` and `data-core-url`. Never put the hub token in a URL or a shared bookmarklet.
 
 ## Console API
 

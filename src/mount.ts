@@ -3,6 +3,7 @@ import { createShell } from './host';
 import { installConsoleApi } from './console';
 import { createLevelReader, type LevelReader } from './lipsync';
 import { createPuppet } from './renderer-select';
+import { installInteraction } from './interact';
 import type { ClaudeChanController, Dock, MountOptions, Puppet } from './types';
 
 // Vanilla entry point: builds shell + puppet + engine and runs the frame loop.
@@ -60,6 +61,7 @@ export function mount(parent: HTMLElement, options: MountOptions = {}): ClaudeCh
  let raf = 0;
  let alive = true;
  let reader: LevelReader | null = null;
+ let uninteract: (() => void) | null = null;
  const loop = (t: number): void => {
  if (!alive) return;
  engine.tick(t);
@@ -70,6 +72,11 @@ export function mount(parent: HTMLElement, options: MountOptions = {}): ClaudeCh
  () => {
  if (!alive) return;
  raf = requestAnimationFrame(loop);
+ // Decided after init: a Live2D model that fell back to sprites keeps the sprite behaviour.
+ const interactive = o.interactive ?? puppet.kind === 'live2d';
+ if (interactive && typeof shell.stage?.addEventListener === 'function' && typeof window !== 'undefined') {
+ uninteract = installInteraction(shell.stage, engine, (fn) => engine.on('dragstart', fn));
+ }
  engine.emit('ready', undefined);
  },
  (cause: unknown) => {
@@ -121,6 +128,7 @@ export function mount(parent: HTMLElement, options: MountOptions = {}): ClaudeCh
  if (!alive) return;
  alive = false;
  uninstall();
+ uninteract?.();
  reader?.dispose();
  cancelAnimationFrame(raf);
  puppet.destroy();
