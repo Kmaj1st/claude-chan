@@ -1,0 +1,101 @@
+{
+ "Version": 3,
+ "Meta": {
+  "Duration": 1.8,
+  "Fps": 30,
+  "Loop": false,
+  "AreBeziersRestricted": true,
+  "CurveCount": 5,
+  "TotalSegmentCount": 15,
+  "TotalPointCount": 20,
+  "UserDataCount": 0,
+  "TotalUserDataSize": 0
+ },
+ "Curves": [
+  {
+   "Target": "Parameter",
+   "Id": "ParamBrowLY",
+   "Segments": [
+    0,
+    0,
+    0,
+    0.12,
+    1,
+    0,
+    1.4,
+    1,
+    0,
+    1.8,
+    0
+   ]
+  },
+  {
+   "Target": "Parameter",
+   "Id": "ParamBrowRY",
+   "Segments": [
+    0,
+    0,
+    0,
+    0.12,
+    1,
+    0,
+    1.4,
+    1,
+    0,
+    1.8,
+    0
+   ]
+  },
+  {
+   "Target": "Parameter",
+   "Id": "ParamMouthOpenY",
+   "Segments": [
+    0,
+    0,
+    0,
+    0.15,
+    1,
+    0,
+    1.4,
+    0.8,
+    0,
+    1.8,
+    0
+   ]
+  },
+  {
+   "Target": "Parameter",
+   "Id": "ParamAngleY",
+   "Segments": [
+    0,
+    0,
+    0,
+    0.15,
+    10,
+    0,
+    1.4,
+    8,
+    0,
+    1.8,
+    0
+   ]
+  },
+  {
+   "Target": "Parameter",
+   "Id": "ParamBodyAngleZ",
+   "Segments": [
+    0,
+    0,
+    0,
+    0.15,
+    -5,
+    0,
+    1.4,
+    -4,
+    0,
+    1.8,
+    0
+   ]
+  }
+ ]
+}
