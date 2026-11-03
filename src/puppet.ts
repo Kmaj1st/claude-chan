@@ -16,6 +16,7 @@ const move = (x: number, y: number): string => 'translate(' + f(x) + ' ' + f(y) 
 const turn = (deg: number, cx = 0, cy = 0): string => 'rotate(' + f(deg) + ' ' + cx + ' ' + cy + ')';
 
 export class ProceduralPuppet implements Puppet {
+ readonly kind = 'simplified' as const;
  readonly element: HTMLElement;
  private parts: Record<string, SVGElement> = {};
 

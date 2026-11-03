@@ -1,10 +1,10 @@
 import { Live2DPuppet } from './live2d';
 import { ProceduralPuppet } from './puppet';
 import { SpritePuppet } from './sprite';
-import type { Expression, MountOptions, Motion, Pose, Puppet } from './types';
+import type { Expression, RendererKind, MountOptions, Motion, Pose, Puppet } from './types';
 
 // Chooses the renderer for mount(). auto = Live2D when a model is set, else sprites when the
-// pose set loads, else the procedural puppet.
+// pose set loads, else the SIMPLIFIED code-drawn puppet (warns in the console; see Puppet.kind).
 
 // Folder of the sprite poses shipped with the package (assets/chars next to dist/).
 export function defaultSpriteBase(): string | null {
@@ -15,6 +15,9 @@ export function defaultSpriteBase(): string | null {
  return null;
  }
 }
+
+export const SIMPLIFIED_WARNING = (where: string): string =>
+ 'claude-chan: sprites could not be loaded from ' + where + '; showing the SIMPLIFIED code-drawn version';
 
 // Shows the primary puppet; when its init() fails, swaps to a fallback puppet in the same box.
 export class FallbackPuppet implements Puppet {
@@ -29,6 +32,8 @@ export class FallbackPuppet implements Puppet {
  this.active = primary;
  this.element.appendChild(primary.element);
  }
+
+ get kind(): RendererKind { return this.active.kind ?? 'sprites'; }
 
  get fellBack(): boolean { return this.usedFallback; }
 
@@ -62,7 +67,7 @@ export function createPuppet(o: MountOptions, reducedMotion: boolean): Puppet {
  return new FallbackPuppet(
  live,
  () => createPuppet({ ...o, model: undefined, renderer: 'auto' }, reducedMotion),
- (cause) => console.warn('claude-chan: Live2D model failed to load, using the fallback renderer.', cause),
+ (cause) => console.warn('claude-chan: Live2D model failed to load, trying the sprite version next.', cause),
  );
  }
  if (renderer === 'procedural') return new ProceduralPuppet();
@@ -77,17 +82,20 @@ export function createPuppet(o: MountOptions, reducedMotion: boolean): Puppet {
  });
  if (renderer === 'sprite') return inline;
  return new FallbackPuppet(inline, () => new ProceduralPuppet(),
- (cause) => console.warn('claude-chan: inline sprite poses not available, using the procedural puppet.', cause));
+ (cause) => console.warn(SIMPLIFIED_WARNING('the embedded sprite set'), cause));
  }
  const baseUrl = o.sprites ?? defaultSpriteBase();
  if (renderer === 'sprite') {
  if (!baseUrl) throw new Error('claude-chan: renderer "sprite" needs the sprites option (folder with poses.json).');
  return new SpritePuppet({ baseUrl, reducedMotion });
  }
- if (!baseUrl) return new ProceduralPuppet();
+ if (!baseUrl) {
+ console.warn('claude-chan: no sprites folder known (set the sprites option); showing the SIMPLIFIED code-drawn version');
+ return new ProceduralPuppet();
+ }
  return new FallbackPuppet(
  new SpritePuppet({ baseUrl, reducedMotion }),
  () => new ProceduralPuppet(),
- (cause) => console.warn('claude-chan: sprite poses not available, using the procedural puppet.', cause),
+ (cause) => console.warn(SIMPLIFIED_WARNING(baseUrl), cause),
  );
 }

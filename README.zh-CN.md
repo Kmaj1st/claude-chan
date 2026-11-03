@@ -10,7 +10,7 @@
 
 ## 功能
 
-- 精灵图渲染器，内置 21 个 MIT 授权的动漫姿势，淡入淡出切换；缺少精灵图时自动退回程序化 SVG 小人。
+- **完整版 = 精灵图（默认）：** 21 个 MIT 授权的动漫姿势和 15 个动作，淡入淡出切换。**简化版 = 代码绘制的替身**，只有在精灵图无法加载时才会出现，或在你主动要求时出现（热加载用 `simplified: true`，挂载时用 `renderer: 'procedural'`）。它的表情和姿势更少，没有真正的美术：没有手绘姿势（灵感、咯咯笑、欢呼、打字、讲解、离开等），没有精灵图淡入淡出，只是一个会倾斜、眨眼、动眉毛、嘴和手臂的简单人物。精灵图加载失败时控制台会警告 `claude-chan: sprites could not be loaded from <url>; showing the SIMPLIFIED code-drawn version`；`claudeChan.renderer`、`claudeChan.isSimplified` 和 `claudeChan.help()` 会告诉你当前是哪一种。
 - 可选的 Live2D 渲染器（Cubism 4），Core 需自行托管。
 - 鼠标、触摸、手写笔都能拖到任意位置，也可用键盘移动；位置按站点记忆。`dock` 为 `free`（默认）或 `fixed-default`。
 - 由工具调用驱动：MCP 服务器、本地 WebSocket 中枢、postMessage 桥，或纯文本标记，如 `[motion:wave]`。

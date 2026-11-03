@@ -79,6 +79,8 @@ export function mount(parent: HTMLElement, options: MountOptions = {}): ClaudeCh
 
  const ctrl: ClaudeChanController = {
  ready,
+ get renderer() { return puppet.kind ?? 'sprites'; },
+ get isSimplified() { return puppet.kind === 'simplified'; },
  act: (req) => engine.act(req),
  say: (text) => engine.say(text),
  setMood: (mood) => engine.setMood(mood),
