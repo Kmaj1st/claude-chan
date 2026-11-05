@@ -10,4 +10,7 @@ test-results/
 # Live2D (docs/LIVE2D.md): models are not committed by default; the proprietary Cubism Core never is.
 assets/live2d/*
 !assets/live2d/README.md
+# The claude-chan model is committed (built from the MIT sprites, assets/chars/NOTICE.md); the Editor project is not.
+!assets/live2d/claude-chan/
+assets/live2d/claude-chan/*.cmo3
 live2dcubismcore*.js

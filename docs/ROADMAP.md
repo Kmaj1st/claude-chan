@@ -3,7 +3,7 @@
 Current open items. What already works is described in the other docs (see [README.md](README.md)); git holds the history.
 
 ## Open
-1. Deepen the claude-chan Cubism model in `assets/live2d/claude-chan/`: it has eyelid and mouth rigging, motions, expressions and passes `npm run check:model` and `npm run test:live2d`, but no deformers (head turn, body sway, breathing) or physics yet ([ART-PIPELINE.md](ART-PIPELINE.md) section 11). Then decide whether the model is committed to the public repo and whether `live2d` becomes the default renderer.
+1. Deepen the claude-chan Cubism model in `assets/live2d/claude-chan/`: it has eyelid and mouth rigging, motions, expressions and passes `npm run check:model` and `npm run test:live2d`, but no deformers (head turn, body sway, breathing) or physics yet ([ART-PIPELINE.md](ART-PIPELINE.md) section 11). The model is committed; decide whether `live2d` becomes the default renderer.
 2. Replace the sprite-cut overlays with a real layered model from an artist ([ART-PIPELINE.md](ART-PIPELINE.md) sections 2 to 7).
 3. More sprite poses via [ART-REQUESTS.md](ART-REQUESTS.md) (an angry bust and a real bow are missing).
 4. A small browser extension that runs `hotload/claude-chan.inline.js` on chosen sites (the CSP-proof route; see [HOT-LOAD.md](HOT-LOAD.md)).
