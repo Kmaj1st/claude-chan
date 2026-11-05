@@ -66,6 +66,8 @@ All paths inside `model3.json` are relative to it, so the folder can be hosted a
 
 ## Export from Cubism Editor (owner steps)
 
+A first model (eyes and mouth rigged, from the normal sprite art) was built this way; the exact recipe, including the texture atlas and the moc3 version, is in [ART-PIPELINE.md](ART-PIPELINE.md) section 11. `node scripts/build-model-files.mjs <folder>` writes the motions and expressions and registers them in the model3.json, so step 5 below can be skipped.
+
 Cubism Editor 5.3 is installed at `E:\Program Files\Live2D Cubism 5.3\`. Menu names below are from Editor 5.x; they can differ slightly between versions.
 
 1. Open the claude-chan model project (`.cmo3`) in the **Modeling** workspace. Check the parameter IDs: use the standard ones listed above (the Editor's default template already does).
