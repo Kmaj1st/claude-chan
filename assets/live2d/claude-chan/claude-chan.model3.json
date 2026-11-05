@@ -1,0 +1,143 @@
+{
+  "Version": 3,
+  "FileReferences": {
+    "Moc": "claude-chan.moc3",
+    "Textures": [
+      "claude-chan.2048/texture_00.png"
+    ],
+    "DisplayInfo": "claude-chan.cdi3.json",
+    "Motions": {
+      "idle": [
+        {
+          "File": "motions/idle.motion3.json",
+          "FadeInTime": 0.3,
+          "FadeOutTime": 0.3
+        }
+      ],
+      "wave": [
+        {
+          "File": "motions/wave.motion3.json",
+          "FadeInTime": 0.3,
+          "FadeOutTime": 0.3
+        }
+      ],
+      "nod": [
+        {
+          "File": "motions/nod.motion3.json",
+          "FadeInTime": 0.3,
+          "FadeOutTime": 0.3
+        }
+      ],
+      "shake_head": [
+        {
+          "File": "motions/shake_head.motion3.json",
+          "FadeInTime": 0.3,
+          "FadeOutTime": 0.3
+        }
+      ],
+      "think": [
+        {
+          "File": "motions/think.motion3.json",
+          "FadeInTime": 0.3,
+          "FadeOutTime": 0.3
+        }
+      ],
+      "happy": [
+        {
+          "File": "motions/happy.motion3.json",
+          "FadeInTime": 0.3,
+          "FadeOutTime": 0.3
+        }
+      ],
+      "surprised": [
+        {
+          "File": "motions/surprised.motion3.json",
+          "FadeInTime": 0.3,
+          "FadeOutTime": 0.3
+        }
+      ],
+      "bow": [
+        {
+          "File": "motions/bow.motion3.json",
+          "FadeInTime": 0.3,
+          "FadeOutTime": 0.3
+        }
+      ],
+      "cheer": [
+        {
+          "File": "motions/cheer.motion3.json",
+          "FadeInTime": 0.3,
+          "FadeOutTime": 0.3
+        }
+      ],
+      "sleepy": [
+        {
+          "File": "motions/sleepy.motion3.json",
+          "FadeInTime": 0.3,
+          "FadeOutTime": 0.3
+        }
+      ],
+      "typing": [
+        {
+          "File": "motions/typing.motion3.json",
+          "FadeInTime": 0.3,
+          "FadeOutTime": 0.3
+        }
+      ],
+      "tea_serve": [
+        {
+          "File": "motions/tea_serve.motion3.json",
+          "FadeInTime": 0.3,
+          "FadeOutTime": 0.3
+        }
+      ],
+      "pout": [
+        {
+          "File": "motions/pout.motion3.json",
+          "FadeInTime": 0.3,
+          "FadeOutTime": 0.3
+        }
+      ],
+      "wink": [
+        {
+          "File": "motions/wink.motion3.json",
+          "FadeInTime": 0.3,
+          "FadeOutTime": 0.3
+        }
+      ],
+      "point": [
+        {
+          "File": "motions/point.motion3.json",
+          "FadeInTime": 0.3,
+          "FadeOutTime": 0.3
+        }
+      ]
+    },
+    "Expressions": [
+      {
+        "Name": "neutral",
+        "File": "expressions/neutral.exp3.json"
+      },
+      {
+        "Name": "smile",
+        "File": "expressions/smile.exp3.json"
+      },
+      {
+        "Name": "sad",
+        "File": "expressions/sad.exp3.json"
+      },
+      {
+        "Name": "angry",
+        "File": "expressions/angry.exp3.json"
+      },
+      {
+        "Name": "blush",
+        "File": "expressions/blush.exp3.json"
+      },
+      {
+        "Name": "surprised",
+        "File": "expressions/surprised.exp3.json"
+      }
+    ]
+  }
+}
