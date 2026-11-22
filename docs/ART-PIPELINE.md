@@ -93,6 +93,7 @@ Runtime behaviour (src/live2d.ts):
 - expressions[preset] maps a preset expression to a model expression id.
 - The shared procedural pose is applied before each model update, so it wins over built-in idle motions. While a preset's model motion plays, only gaze, blink and mouth are written, so the authored motion shows.
 - The params key in the default file is reserved and ignored by the loader; do not rely on it.
+- `"wholeBody": true` is for a model whose moc has no body deformers (section 11): the renderer then moves the whole model about its feet from ParamAngleX/Y/Z, ParamBodyAngleX/Z and ParamBreath (breathing, sway, nod and bow dip), with the same coefficients as the sprite renderer, and draws it 8% smaller so the sway is not clipped. The values come from the playing model motion, else from the shared procedural pose. `scripts/build-model-files.mjs` sets the flag; the default file does not. Remove it when the moc has real deformers on those parameters, or the motion is applied twice.
 
 The exact schema is defined by the loader and must be kept in sync with this file.
 
@@ -119,7 +120,7 @@ Step-by-step menus, folder layout and the runtime side: [LIVE2D.md](LIVE2D.md).
 
 ## 11. Sprite-based model (normal version): built, how to redo it
 
-The default character is the normal sprite art (assets/chars, NOTICE.md), not the code-drawn puppet of section 10. Cubism Editor 5.3 cannot be scripted: the external API only reads state and sets parameter values, and the MCP edit tools need 5.4 Alpha (expired). So the rig is made in the Editor from generated inputs. A first model has been built and exported this way to `assets/live2d/claude-chan/` (gitignored, see LIVE2D.md Licensing). Status: `npm run check:model` passes (warnings: no physics3.json; cdi3.json lacks ParamArmLA/ParamArmRA/ParamHairSway) and `npm run test:live2d` passes against it. **Only the eyes and mouth are rigged**: there are no deformers, so head turn, body sway, breathing, hair and arms do nothing yet (the motions then only animate eyes, mouth and cheek).
+The default character is the normal sprite art (assets/chars, NOTICE.md), not the code-drawn puppet of section 10. Cubism Editor 5.3 cannot be scripted: the external API only reads state and sets parameter values, and the MCP edit tools need 5.4 Alpha (expired). So the rig is made in the Editor from generated inputs. A first model has been built and exported this way to `assets/live2d/claude-chan/` (committed; the Editor project `.cmo3` stays gitignored, see LIVE2D.md Licensing). Status: `npm run check:model` passes (warnings: no physics3.json; cdi3.json lacks ParamArmLA/ParamArmRA/ParamHairSway) and `npm run test:live2d` passes against it. **Only the eyes and mouth are rigged**: there are no deformers, so in the moc itself head turn, body sway, breathing, hair and arms do nothing yet; the renderer's whole-body stand-in (section 7) covers breathing and sway as one piece (the motions then only animate eyes, mouth and cheek).
 
 Redo it, or extend it:
 
@@ -127,7 +128,7 @@ Redo it, or extend it:
 2. Editor: File > Open the PSD, choose *Create new model from PSD file*. Every layer becomes an ArtMesh. Rig the overlays with opacity keyforms (select the mesh, select the parameter in the Parameter palette, click *Add 2 points*, then set the Inspector Opacity at the key that must be invisible):
    - `eyelid_closed_L` on ParamEyeLOpen and `eyelid_closed_R` on ParamEyeROpen: opacity 0 at 1 (eye open), 100 at 0 (closed).
    - `mouth_open` on ParamMouthOpenY: opacity 0 at 0, 100 at 1.
-   - Next steps if wanted: a warp deformer over the head for ParamAngleX/Y/Z, one over the body for ParamBodyAngleX/Z and ParamBreath, physics for the hair. The loader ignores missing parameter IDs.
+   - Not rigged yet: a warp deformer over the head for ParamAngleX/Y/Z, one over the body for ParamBodyAngleX/Z and ParamBreath, physics for the hair. Until then `motions.json` carries `"wholeBody": true` (section 7), so the body still breathes and sways as one piece; drop the flag in `scripts/build-model-files.mjs` in the same change that adds the deformers. The loader ignores missing parameter IDs.
 3. Save the project as `assets/live2d/claude-chan/claude-chan.cmo3`. Modeling > Texture Atlas > Edit Texture Atlas: a 2048 x 2048 texture (the model is 1072 x 1246 px), OK.
 4. File > Export For Runtime > Export as moc3 file (Ctrl+Alt+S): version *For SDK 4.0 / Cubism4.0* (the Cubism 4 framework in the loader), keep userdata and cdi3 on, save as `claude-chan.moc3` in the same folder.
 5. `node scripts/build-model-files.mjs assets/live2d/claude-chan` writes the 15 `motions/*.motion3.json`, the 6 `expressions/*.exp3.json` and `motions.json`, and registers the groups and expressions in model3.json (no Cubism Viewer step). Without an argument it writes the same files to `art/model-files/` for review.

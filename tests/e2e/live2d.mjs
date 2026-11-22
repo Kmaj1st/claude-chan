@@ -173,6 +173,27 @@ try {
  await sleep(300);
  const afterClick = await page.evaluate(() => [...window.__l2d.started]);
  check('A click reaction plays (wave)', afterClick.filter((m) => m === 'wave').length >= 2, JSON.stringify(afterClick));
+
+ // Whole-body stand-in (motions.json "wholeBody": true, for a moc without body deformers): the model must keep moving
+ // while idle (breathing) and sway when a motion animates the body parameters.
+ let wholeBody = false;
+ try { wholeBody = JSON.parse(readFileSync(join(modelDir, 'motions.json'), 'utf8')).wholeBody === true; } catch { /* no motions.json */ }
+ if (wholeBody) {
+ const sampleBody = async (ms) => {
+ const seen = new Set();
+ for (const end = Date.now() + ms; Date.now() < end; await sleep(100)) {
+ seen.add(await page.evaluate(() => [...document.querySelectorAll('claude-chan-host')].pop().shadowRoot.querySelector('[data-l2d-body]')?.dataset.l2dBody ?? null));
+ }
+ return [...seen].filter((v) => v && v !== 'on').map((v) => v.split(' ').map(Number));
+ };
+ await page.evaluate(() => window.__l2d.c.stop());
+ await sleep(600);
+ const idle = await sampleBody(1800);
+ check('A whole-body stand-in breathes while idle', new Set(idle.map((v) => v[3])).size >= 3 && idle.every((v) => v[3] >= 1 && v[3] <= 1.02), JSON.stringify(idle.slice(0, 6)));
+ await page.evaluate(() => window.__l2d.c.act({ motion: 'happy', priority: 'high' }));
+ const happy = await sampleBody(2000);
+ check('A whole-body stand-in sways during a body motion (happy)', happy.some((v) => Math.abs(v[0]) > 0.3) && happy.every((v) => Math.abs(v[0]) <= 8), JSON.stringify(happy.slice(0, 6)));
+ } else console.log('SKIP whole-body stand-in (motions.json has no "wholeBody": true)');
  check('A no page errors', log.errors.length === 0, log.errors.join(' | '));
  check('A no fallback warning', !log.warns.some((w) => w.includes('failed to load')), log.warns.join(' | '));
  await page.evaluate(() => window.__l2d.c.destroy());

@@ -79,6 +79,7 @@ export function createPuppet(o: MountOptions, reducedMotion: boolean): Puppet {
  coreUrl: o.coreUrl,
  runtime: o.live2dRuntime,
  map: o.expressions ? { expressions: o.expressions } : undefined,
+ reducedMotion,
  });
  // A failing model or runtime (Cubism Core blocked, bad URL, no WebGL) falls back to the sprite/procedural chain.
  return new FallbackPuppet(

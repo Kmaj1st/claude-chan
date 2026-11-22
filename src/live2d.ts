@@ -22,7 +22,9 @@ export interface Live2DOptions {
  // Load pixi.js + pixi-live2d-display as UMD script tags from these URLs instead of import() (hot-load build).
  runtime?: Live2DRuntimeUrls;
  // Parsed motions.json; expressions map preset name -> model expression id.
- map?: { expressions?: Record<string, string>; motions?: Record<string, { group: string; index: number }> };
+ map?: { expressions?: Record<string, string>; motions?: Record<string, { group: string; index: number }>; wholeBody?: boolean };
+ // prefers-reduced-motion: the whole-body stand-in (see wholeBodyTransform) moves at 30% and does not breathe.
+ reducedMotion?: boolean;
 }
 
 const DEFAULT_CORE = CUBISM_CORE_CDN;
@@ -101,7 +103,29 @@ export function deviceScale(): number {
  return typeof r === 'number' && r >= 1 ? Math.min(r, 2) : 1;
 }
 
-type CoreModel = { setParameterValueById(id: string, v: number): void };
+type CoreModel = { setParameterValueById(id: string, v: number): void; getParameterValueById?(id: string): number };
+
+// Whole-body stand-in for a model whose moc has no body deformers (the sprite-based model, docs/ART-PIPELINE.md
+// section 11): its motions animate ParamAngle*, ParamBodyAngle* and ParamBreath, but nothing is bound to them, so the
+// canvas stays still. With "wholeBody": true in motions.json the renderer moves the model as one piece from those same
+// parameters, with the coefficients of the sprite renderer (sprite/renderer.ts sheetTransform), so Live2D never looks
+// stiffer than the sprites. Remove the flag once the moc has real deformers, or the motion is applied twice.
+export const WHOLE_BODY_PARAMS = ['ParamAngleX', 'ParamAngleY', 'ParamAngleZ', 'ParamBodyAngleX', 'ParamBodyAngleZ', 'ParamBreath'] as const;
+// The model is drawn this much smaller so the sway (up to 8 degrees about the feet) stays inside the canvas.
+export const WHOLE_BODY_FIT = 0.92;
+export type WholeBodyTransform = { rotation: number; dx: number; dy: number; scale: number };
+
+/** rotation in degrees about the feet, dx/dy as fractions of the character box, scale as a factor. */
+export function wholeBodyTransform(v: Record<(typeof WHOLE_BODY_PARAMS)[number], number>, reduced: boolean): WholeBodyTransform {
+ const k = reduced ? 0.3 : 1;
+ const n = (x: number): number => (Number.isFinite(x) ? x : 0);
+ return {
+  rotation: Math.max(-8, Math.min(8, n(v.ParamAngleZ) * 0.25 + n(v.ParamBodyAngleZ) * 0.4)) * k,
+  dx: (n(v.ParamAngleX) * 0.12 + n(v.ParamBodyAngleX) * 0.15) * k / 100,
+  dy: (-n(v.ParamBreath) * 0.5 - n(v.ParamAngleY) * 0.18) * k / 100,
+  scale: 1 + (reduced ? 0 : n(v.ParamBreath) * 0.012),
+ };
+}
 
 export const LOAD_TIMEOUT_MS = 20000;
 
@@ -158,6 +182,8 @@ export class Live2DPuppet implements Puppet {
  }
  // A model that reports no size (not laid out yet) would give an infinite scale: keep 1.
  const fit = model.width > 0 && model.height > 0 ? Math.min(w / model.width, h / model.height) : 1;
+ // Unscaled model size, for the whole-body stand-in (pivot at the feet).
+ this.layout = { w, h, fit, lw: model.width, lh: model.height };
  model.scale.set(fit);
  model.x = (w - model.width) / 2;
  model.y = h - model.height;
@@ -166,6 +192,7 @@ export class Live2DPuppet implements Puppet {
  model.internalModel.on('beforeModelUpdate', () => this.apply());
  this.model = model;
  await this.loadMotionMap();
+ if (this.opts.map?.wholeBody ?? this.fileWholeBody) this.enableWholeBody();
  // render() may have run before the model loaded: apply the pending expression now.
  if (this.lastExpression) {
  const pending = (this.opts.map?.expressions ?? this.fileExpressions)?.[this.lastExpression] ?? this.lastExpression;
@@ -176,13 +203,47 @@ export class Live2DPuppet implements Puppet {
  // Optional motions.json next to the model3.json (docs/ART-PIPELINE.md section 7). Without it no preset motions play.
  private motionMap: Record<string, { group: string; index: number }> | undefined;
  private fileExpressions: Record<string, string> | undefined;
+ private fileWholeBody = false;
+ private layout: { w: number; h: number; fit: number; lw: number; lh: number } | null = null;
+ private wholeBody = false;
+ private bodyFrame = 0;
+
+ // Stand the model on a pivot at its feet (bottom centre), slightly smaller, so it can sway without being clipped.
+ private enableWholeBody(): void {
+ const m = this.model;
+ const l = this.layout;
+ if (!m || !l || !(l.lw > 0) || !(l.lh > 0)) return;
+ m.pivot.set(l.lw / 2, l.lh);
+ m.scale.set(l.fit * WHOLE_BODY_FIT);
+ m.position.set(l.w / 2, l.h);
+ this.wholeBody = true;
+ this.element.dataset.l2dBody = 'on';
+ }
+
+ private applyWholeBody(core: CoreModel): void {
+ const m = this.model;
+ const l = this.layout;
+ const pose = this.pose;
+ if (!m || !l || !pose) return;
+ // An authored model motion writes the parameters itself; otherwise they are the shared procedural pose.
+ const read = (id: (typeof WHOLE_BODY_PARAMS)[number]): number =>
+  (this.authoredMotion && typeof core.getParameterValueById === 'function' ? core.getParameterValueById(id) : pose[id]);
+ const values = Object.fromEntries(WHOLE_BODY_PARAMS.map((id) => [id, read(id)])) as Record<(typeof WHOLE_BODY_PARAMS)[number], number>;
+ const t = wholeBodyTransform(values, this.opts.reducedMotion === true);
+ m.rotation = t.rotation * Math.PI / 180;
+ m.scale.set(l.fit * WHOLE_BODY_FIT * t.scale);
+ m.position.set(l.w / 2 + t.dx * l.w, l.h + t.dy * l.h);
+ // Debug/e2e hook, refreshed a few times per second (not every frame, to keep DOM writes cheap).
+ if (this.bodyFrame++ % 12 === 0) this.element.dataset.l2dBody = t.rotation.toFixed(2) + ' ' + t.dx.toFixed(4) + ' ' + t.dy.toFixed(4) + ' ' + t.scale.toFixed(4);
+ }
 
  private async loadMotionMap(): Promise<void> {
  if ((this.opts.map?.motions && this.opts.map?.expressions) || typeof fetch !== 'function') return;
  try {
  const res = await fetch(new URL('motions.json', new URL(this.opts.model, typeof window !== 'undefined' && window.location ? window.location.href : undefined)).href);
  if (!res.ok) return;
- const raw = (await res.json()) as { motions?: Record<string, { group: string; index: number }>; expressions?: Record<string, string> };
+ const raw = (await res.json()) as { motions?: Record<string, { group: string; index: number }>; expressions?: Record<string, string>; wholeBody?: unknown };
+ if (raw && raw.wholeBody === true) this.fileWholeBody = true;
  if (raw && typeof raw.motions === 'object') this.motionMap = raw.motions;
  if (raw && raw.expressions && typeof raw.expressions === 'object') this.fileExpressions = raw.expressions;
  } catch { return; }
@@ -244,6 +305,7 @@ export class Live2DPuppet implements Puppet {
  if (this.authoredMotion && !DURING_MOTION.has(id)) continue;
  core.setParameterValueById(id, this.pose[id]);
  }
+ if (this.wholeBody) this.applyWholeBody(core);
  }
 
  destroy(): void {

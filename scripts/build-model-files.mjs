@@ -2,7 +2,7 @@
 // Usage: node scripts/build-model-files.mjs [modelFolder]
 // Without an argument it writes art/model-files/. With the exported model folder it writes into it and
 // registers the motion groups and expressions in the *.model3.json (so Cubism Viewer is not needed).
-import { mkdirSync, writeFileSync, readdirSync, readFileSync, copyFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -52,7 +52,12 @@ const write = (rel, obj) => { const f = join(target, rel); mkdirSync(dirname(f),
 
 for (const [name, m] of Object.entries(motions)) write(`motions/${name}.motion3.json`, motion3(m));
 for (const [name, list] of Object.entries(expressions)) write(`expressions/${name}.exp3.json`, exp3(list));
-copyFileSync(join(root, 'src/model/motions.default.json'), join(target, 'motions.json'));
+// This model has no body deformers (docs/ART-PIPELINE.md section 11): "wholeBody" lets the renderer move it as one piece
+// from the body and head parameters. Drop the flag when the moc gets real deformers.
+const defaults = readFileSync(join(root, 'src/model/motions.default.json'), 'utf8');
+const flagged = defaults.replace('"params": {},', '"params": {}, "wholeBody": true,');
+if (flagged === defaults || JSON.parse(flagged).wholeBody !== true) throw new Error('could not add wholeBody to src/model/motions.default.json');
+writeFileSync(join(target, 'motions.json'), flagged);
 
 if (process.argv[2]) {
   const mf = readdirSync(target).find(f => f.endsWith('.model3.json'));
