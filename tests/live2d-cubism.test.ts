@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { CUBISM_CORE_CDN, LIVE2D_RUNTIME_CDN, loadRuntimeScripts, resolveGroup, withTimeout } from '../src/live2d';
+import { CUBISM_CORE_CDN, LIVE2D_RUNTIME_CDN, loadRuntimeScripts, resolveGroup, wholeBodyTransform, withTimeout } from '../src/live2d';
+import { sheetTransform } from '../src/sprite/renderer';
+import { neutralPose } from '../src/types';
 import { CLICK_REACTION, DRAG_REACTION, gazeFrom, installInteraction } from '../src/interact';
 import { normalizeRenderer } from '../src/renderer-select';
 import pkg from '../package.json';
@@ -110,5 +112,24 @@ describe('interaction (gaze follow, click and drag reactions)', () => {
  expect(winL.pointermove).toBeUndefined();
  expect(stageL.click).toBeUndefined();
  expect(dragFn).toBeNull();
+ });
+});
+
+// Contract: a Live2D model without body deformers moves exactly like the sprite sheet for the same pose
+// (minus the sprite-only gaze parallax and hair sway), so switching the renderer never makes the mascot stiffer.
+describe('whole-body stand-in', () => {
+ it('matches the sprite renderer for body and head parameters, also with reduced motion', () => {
+ const pose = { ...neutralPose(), ParamAngleX: 8, ParamAngleY: -6, ParamAngleZ: 12, ParamBodyAngleX: 5, ParamBodyAngleZ: -4, ParamBreath: 0.7 };
+ for (const reduced of [false, true]) {
+ const t = wholeBodyTransform(pose, reduced);
+ expect('translate(' + (t.dx * 100).toFixed(2) + '%,' + (t.dy * 100).toFixed(2) + '%) rotate(' + t.rotation.toFixed(2) + 'deg) scale(' + t.scale.toFixed(4) + ')')
+ .toBe(sheetTransform(pose, reduced));
+ }
+ });
+
+ it('clamps the sway and ignores missing parameters', () => {
+ expect(wholeBodyTransform({ ParamAngleX: 0, ParamAngleY: 0, ParamAngleZ: 30, ParamBodyAngleX: 0, ParamBodyAngleZ: 10, ParamBreath: 0 }, false).rotation).toBe(8);
+ const still = wholeBodyTransform({ ParamAngleX: NaN, ParamAngleY: NaN, ParamAngleZ: NaN, ParamBodyAngleX: NaN, ParamBodyAngleZ: NaN, ParamBreath: NaN }, false);
+ expect([still.rotation, still.dx, still.dy, still.scale].map(Math.abs)).toEqual([0, 0, 0, 1]);
  });
 });

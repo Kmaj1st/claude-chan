@@ -1,6 +1,6 @@
 {
  "version": 1,
- "params": {},
+ "params": {}, "wholeBody": true,
  "expressions": {
  "neutral": "neutral",
  "smile": "smile",
